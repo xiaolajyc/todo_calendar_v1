@@ -348,7 +348,7 @@ body{
 </style></head><body><div class="app"><header class="head"><div class="headtop"><h1 id="heading">Todo</h1><div id="headActions"></div></div><div id="subtabs" class="tabs"></div></header><main id="main" class="content"></main><button id="fab" class="fab">+</button><div id="bulk" class="bulk hidden"></div><nav class="nav"><button data-page="todo" class="active">📋<br>Todo</button><button data-page="calendar">📅<br>日历</button><button data-page="settings">⚙️<br>设置</button></nav></div>
 <script>
 const $=s=>document.querySelector(s), DB='todoCalendarV1';
-let tasks=JSON.parse(localStorage.getItem(DB)||'[]'), page='todo', todoTab='today', calMode='week', calDate=new Date(), selected=new Set(), selectMode=false, clipboard=[], weekZoom=100, calScroll={left:0,top:0};
+let tasks=JSON.parse(localStorage.getItem(DB)||'[]'), page='todo', todoTab='today', calMode='week', calDate=new Date(), selected=new Set(), selectMode=false, clipboard=[], weekZoom=100,calendarCenterToday=true;
 const save=()=>localStorage.setItem(DB,JSON.stringify(tasks));
 const id=()=>crypto.randomUUID?.()||Date.now()+Math.random()+'';
 function workDate(d=new Date()){let x=new Date(d);if(x.getHours()<6||(x.getHours()===6&&x.getMinutes()<30))x.setDate(x.getDate()-1);return fmt(x)}
@@ -370,8 +370,8 @@ function changeWeekZoom(dir){
   const newRowH=64*weekZoom/100;
 
   const wrap=document.querySelector('.timeline-wrap');
-  const oldLeft=wrap?wrap.scrollLeft:calScroll.left;
-  const oldTop=wrap?wrap.scrollTop:calScroll.top;
+  const oldLeft=wrap?wrap.scrollLeft:0;
+  const oldTop=wrap?wrap.scrollTop:0;
 
   // Preserve the same clock time at the top of the viewport while changing
   // pixels-per-hour. The 52px calendar header is not part of the time axis.
@@ -387,7 +387,6 @@ function changeWeekZoom(dir){
     if(w){
       w.scrollLeft=oldLeft;
       w.scrollTop=newTop;
-      calScroll={left:oldLeft,top:newTop};
     }
   });
 }
@@ -421,16 +420,16 @@ function bulkDate(){let d=prompt('请输入日期（YYYY-MM-DD）',today());if(!
 function bulk(a){let arr=tasks.filter(t=>selected.has(t.id));if(a==='delete'&&!confirm(`删除 ${arr.length} 个事项？`))return;if(a==='copy'){clipboard=arr.map(x=>({...x,id:id(),completed:false,completedAt:null}));selectMode=false;selected.clear();save();render();return}if(a==='paste'){if(!clipboard.length)return;let target=today(),base=clipboard.find(x=>x.date)?.date;let copies=clipboard.map(x=>{let n={...x,id:id(),completed:false,completedAt:null};if(base&&x.date)n.date=addDays(x.date,Math.round((parseDate(target)-parseDate(base))/86400000));else n.date=target;return n});tasks.push(...copies);selectMode=false;selectMode=false;selected.clear();save();render();return}arr.forEach(t=>{if(a==='done'){t.completed=true;t.completedAt=new Date().toISOString()}if(a==='today')t.date=today();if(a==='tomorrow')t.date=addDays(today(),1);if(a==='important')t.important=!t.important;if(a==='urgent')t.urgent=!t.urgent});if(a==='delete')tasks=tasks.filter(t=>!selected.has(t.id));selectMode=false;selectMode=false;selected.clear();save();render()}
 
 function renderCalendar(){
+   
   const oldWrap=document.querySelector('.timeline-wrap');
-  const oldScrollLeft=oldWrap?oldWrap.scrollLeft:calScroll.left;
-  const oldScrollTop=oldWrap?oldWrap.scrollTop:calScroll.top;
-  calScroll={left:oldScrollLeft,top:oldScrollTop};
-  $('#subtabs').innerHTML=`<button class="tabsbtn" onclick="shiftCal(-1)">‹</button><button onclick="calDate=new Date();render()">今天</button><button onclick="shiftCal(1)">›</button>${['day:日','week:周','month:月'].map(x=>{let[a,b]=x.split(':');return `<button class="${calMode===a?'active':''}" onclick="calMode='${a}';selectMode=false;selected.clear();render()">${b}</button>`}).join('')}${calMode==='week'?`<span class="zoomctl"><button onclick="changeWeekZoom(-1)" aria-label="缩小">−</button><b id="zoomLabel">100%</b><button onclick="changeWeekZoom(1)" aria-label="放大">＋</button></span>`:''}`;
+  const oldScrollLeft=oldWrap?oldWrap.scrollLeft:0;
+  const oldScrollTop=oldWrap?oldWrap.scrollTop:0;
+  $('#subtabs').innerHTML=`<button class="tabsbtn" onclick="shiftCal(-1)">‹</button><button onclick="calDate=new Date();calendarCenterToday=true;render()">今天</button><button onclick="shiftCal(1)">›</button>${['day:日','week:周','month:月'].map(x=>{let[a,b]=x.split(':');return `<button class="${calMode===a?'active':''}" onclick="calMode='${a}';calendarCenterToday=(a==='week');selectMode=false;selected.clear();render()">${b}</button>`}).join('')}${calMode==='week'?`<span class="zoomctl"><button onclick="changeWeekZoom(-1)" aria-label="缩小">−</button><b id="zoomLabel">100%</b><button onclick="changeWeekZoom(1)" aria-label="放大">＋</button></span>`:''}`;
   $('#headActions').innerHTML='';
   if(calMode==='month') renderMonth(); else renderTimeline();
    if(calMode==='week'){const z=$('#zoomLabel');if(z)z.textContent=weekZoom+'%';}
   renderBulk();
-  requestAnimationFrame(()=>{const w=document.querySelector('.timeline-wrap');if(w){w.scrollLeft=calScroll.left;w.scrollTop=calScroll.top;}});
+  requestAnimationFrame(()=>{const w=document.querySelector('.timeline-wrap');if(w){w.scrollLeft=oldScrollLeft;w.scrollTop=oldScrollTop;}});
 }
 function shiftCal(n){let d=new Date(calDate);d.setDate(d.getDate()+n*(calMode==='week'?7:1));calDate=d;render()}
 function weekDates(){let base=new Date(calDate),day=(base.getDay()+6)%7;base.setDate(base.getDate()-day);return Array.from({length:7},(_,i)=>{let d=new Date(base);d.setDate(d.getDate()+i);return d})}
@@ -620,5 +619,5 @@ function removeTask(i){if(confirm('删除此事项？')){tasks=tasks.filter(t=>t
 function renderSettings(){$('#subtabs').innerHTML='';$('#headActions').innerHTML='';$('#main').innerHTML=`<div class="card"><b>每日开始时间</b><p>06:30（今天/逾期和每日刷新边界）</p></div><div class="card"><b>默认事件时长</b><p>60 分钟</p></div><div class="card"><button class="primary" onclick="exportData()">导出 JSON</button> <button class="danger" onclick="clipboard=[];render()">清空复制板</button> <label class="danger">导入 JSON<input type="file" accept="application/json" hidden onchange="importData(this)"></label></div><div class="card"><b>本地数据</b><p>${tasks.length} 个事项。当前数据保存在浏览器本地。</p></div>`}
 function exportData(){let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(tasks,null,2)],{type:'application/json'}));a.download='todo-calendar-backup.json';a.click()}
 function importData(el){let r=new FileReader();r.onload=()=>{try{let x=JSON.parse(r.result);if(!Array.isArray(x))throw 0;tasks=x;save();render()}catch{alert('文件格式错误')}};if(el.files[0])r.readAsText(el.files[0])}
-document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>{page=b.dataset.page;selectMode=false;selected.clear();render()});$('#fab').onclick=()=>newTask();render();
+document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>{page=b.dataset.page;if(page==='calendar'&&calMode==='week')calendarCenterToday=true;selectMode=false;selected.clear();render()});$('#fab').onclick=()=>newTask();render();
 </script></body></html>
