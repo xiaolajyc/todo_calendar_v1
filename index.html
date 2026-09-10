@@ -355,7 +355,47 @@ button:not(:disabled):active,.chip:active,.navbtn:active{transform:scale(.985);t
 .fab:active{transform:scale(.96)}
 .nav button,.tabs button{transition:color .22s var(--ease-standard),background .22s var(--ease-standard),transform .18s var(--ease-standard)}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
-</style></head><body><div class="app"><header class="head"><div class="headtop"><h1 id="heading">Todo</h1><div id="headActions"></div></div><div id="subtabs" class="tabs"></div></header><main id="main" class="content"></main><button id="fab" class="fab">+</button><div id="bulk" class="bulk hidden"></div><nav class="nav"><button data-page="todo" class="active">📋<br>Todo</button><button data-page="calendar">📅<br>日历</button><button data-page="settings">⚙️<br>设置</button></nav></div>
+</style>
+<style>
+/* V2.8 mobile week timeline zoom */
+@media (max-width: 700px){
+  .week-zoom-surface{
+    position:absolute;
+    inset:0;
+    z-index:30;
+    background:transparent;
+    touch-action:none !important;
+    -webkit-user-select:none !important;
+    user-select:none !important;
+    pointer-events:auto;
+  }
+  .week-zoom-hint{
+    position:fixed;
+    left:50%;
+    top:calc(env(safe-area-inset-top) + 70px);
+    transform:translate(-50%,-8px) scale(.96);
+    opacity:0;
+    pointer-events:none;
+    z-index:9999;
+    padding:7px 11px;
+    border-radius:999px;
+    background:rgba(20,28,40,.82);
+    color:#fff;
+    font-size:12px;
+    font-weight:600;
+    backdrop-filter:blur(10px);
+    -webkit-backdrop-filter:blur(10px);
+    transition:opacity .18s ease,transform .22s cubic-bezier(.22,1,.36,1);
+  }
+  .week-zoom-hint.show{
+    opacity:1;
+    transform:translate(-50%,0) scale(1);
+  }
+}
+</style>
+
+<script>window.weekColWidth=Number(localStorage.getItem('todoCalendarWeekWidth')||120);</script>
+</head><body><div class="app"><header class="head"><div class="headtop"><h1 id="heading">Todo</h1><div id="headActions"></div></div><div id="subtabs" class="tabs"></div></header><main id="main" class="content"></main><button id="fab" class="fab">+</button><div id="bulk" class="bulk hidden"></div><nav class="nav"><button data-page="todo" class="active">📋<br>Todo</button><button data-page="calendar">📅<br>日历</button><button data-page="settings">⚙️<br>设置</button></nav></div>
 <script>
 const $=s=>document.querySelector(s), DB='todoCalendarV1';
 let tasks=JSON.parse(localStorage.getItem(DB)||'[]'), page='todo', todoTab='today', calMode='week', calDate=new Date(), selected=new Set(), selectMode=false, clipboard=[]; let weekColWidth=Math.max(80,Math.min(220,Number(localStorage.getItem('todoCalendarWeekWidth')||120)));
@@ -634,69 +674,7 @@ function attachTimelineGestures(dates,startHour,rowH){
 }
 
 
-function attachWeekPinchZoom(){
-  const wrap=document.querySelector('.timeline-wrap'), grid=wrap?.querySelector('.week-grid');
-  if(!wrap||!grid)return;
-  let active=false, startDist=0, startWidth=weekColWidth, startScrollLeft=0, startCenterX=0;
-  const clamp=n=>Math.max(80,Math.min(260,Math.round(n)));
-  const dist=(a,b)=>Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY);
-  const center=(a,b)=>({x:(a.clientX+b.clientX)/2,y:(a.clientY+b.clientY)/2});
-  const zoomLabel=()=>{const el=$('#weekZoomLabel');if(!el)return;el.textContent=Math.round(weekColWidth/120*100)+'%';el.classList.add('show');clearTimeout(zoomLabel.t);zoomLabel.t=setTimeout(()=>el.classList.remove('show'),700)};
-  const apply=(scale,cx)=>{
-    const old=weekColWidth;
-    weekColWidth=clamp(startWidth*scale);
-    if(weekColWidth===old)return;
-    grid.style.setProperty('--week-col-width',weekColWidth+'px');
-    // Keep the content under the fingers instead of letting the browser jump the scroll position.
-    const ratio=weekColWidth/startWidth;
-    const localX=cx-wrap.getBoundingClientRect().left+wrap.scrollLeft;
-    wrap.scrollLeft=Math.max(0,localX*ratio-(cx-wrap.getBoundingClientRect().left));
-    zoomLabel();
-  };
-
-  // iOS Safari/Chrome reliable path: native Touch Events. Pointer Events alone can be
-  // consumed by the scroll container before the second finger is delivered.
-  wrap.addEventListener('touchstart',e=>{
-    if(e.touches.length!==2)return;
-    const a=e.touches[0],b=e.touches[1];
-    active=true;startDist=Math.max(1,dist(a,b));startWidth=weekColWidth;startScrollLeft=wrap.scrollLeft;startCenterX=(a.clientX+b.clientX)/2;
-    e.preventDefault();
-  },{passive:false});
-  wrap.addEventListener('touchmove',e=>{
-    if(!active||e.touches.length<2)return;
-    const a=e.touches[0],b=e.touches[1],d=dist(a,b),c=center(a,b);
-    e.preventDefault();
-    apply(d/startDist,c.x);
-  },{passive:false});
-  const touchEnd=e=>{
-    if(active && e.touches.length<2){active=false;localStorage.setItem('todoCalendarWeekWidth',String(weekColWidth));}
-  };
-  wrap.addEventListener('touchend',touchEnd,{passive:false});
-  wrap.addEventListener('touchcancel',touchEnd,{passive:false});
-
-  // Pointer fallback for browsers that do not dispatch Touch Events.
-  const pts=new Map();
-  wrap.addEventListener('pointerdown',e=>{
-    if(e.pointerType!=='touch')return;
-    pts.set(e.pointerId,{x:e.clientX,y:e.clientY});
-    if(pts.size===2){const v=[...pts.values()];active=true;startDist=Math.max(1,Math.hypot(v[0].x-v[1].x,v[0].y-v[1].y));startWidth=weekColWidth;}
-  },{passive:false});
-  wrap.addEventListener('pointermove',e=>{
-    if(e.pointerType!=='touch'||!pts.has(e.pointerId)||!active)return;
-    pts.set(e.pointerId,{x:e.clientX,y:e.clientY});
-    if(pts.size<2)return;
-    const v=[...pts.values()].slice(0,2),d=Math.hypot(v[0].x-v[1].x,v[0].y-v[1].y),cx=(v[0].x+v[1].x)/2;
-    e.preventDefault();apply(d/startDist,cx);
-  },{passive:false});
-  const pe=e=>{if(e.pointerType!=='touch')return;pts.delete(e.pointerId);if(pts.size<2&&active){active=false;localStorage.setItem('todoCalendarWeekWidth',String(weekColWidth));}};
-  wrap.addEventListener('pointerup',pe,{passive:false});wrap.addEventListener('pointercancel',pe,{passive:false});
-
-  // Desktop Safari/iPad fallback.
-  let gs=weekColWidth;
-  wrap.addEventListener('gesturestart',e=>{gs=weekColWidth;e.preventDefault();},{passive:false});
-  wrap.addEventListener('gesturechange',e=>{e.preventDefault();weekColWidth=clamp(gs*e.scale);grid.style.setProperty('--week-col-width',weekColWidth+'px');zoomLabel();},{passive:false});
-  wrap.addEventListener('gestureend',()=>localStorage.setItem('todoCalendarWeekWidth',String(weekColWidth)),{passive:true});
-}
+function attachWeekPinchZoom(){ return; }
 function toggleCalendarSelect(i){selectMode=true;selected.has(i)?selected.delete(i):selected.add(i);renderCalendar()}
 function drawCreating(col,c,startHour,rowH){let old=col.querySelector('.creating');if(old)old.remove();let el=document.createElement('div');el.className='creating';let top=(c.start-startHour*60)/60*rowH,h=(c.end-c.start)/60*rowH;el.style.top=top+'px';el.style.height=Math.max(24,h)+'px';el.textContent=timeStr(c.start)+'–'+timeStr(c.end);col.appendChild(el)}
 
@@ -736,4 +714,135 @@ function renderSettings(){$('#subtabs').innerHTML='';$('#headActions').innerHTML
 function exportData(){let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(tasks,null,2)],{type:'application/json'}));a.download='todo-calendar-backup.json';a.click()}
 function importData(el){let r=new FileReader();r.onload=()=>{try{let x=JSON.parse(r.result);if(!Array.isArray(x))throw 0;tasks=x;save();render()}catch{alert('文件格式错误')}};if(el.files[0])r.readAsText(el.files[0])}
 document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>{page=b.dataset.page;selectMode=false;selected.clear();render()});$('#fab').onclick=()=>newTask();render();
-</script></body></html>
+</script>
+<script>
+/* V2.8: iPhone-safe two-finger week timeline zoom.
+   The overlay captures only two-finger gestures and temporarily prevents
+   horizontal scrolling. One-finger scrolling/tapping remains untouched. */
+(function(){
+  let zoomSurface = null;
+  let zoomHint = null;
+  let active = false, startDist = 0, startWidth = 120, startScrollLeft = 0;
+  let startMidX = 0, raf = 0;
+
+  function timeline(){
+    return document.querySelector('.timeline-wrap');
+  }
+  function weekGrid(){
+    return document.querySelector('.week-grid');
+  }
+  function clamp(v,a,b){ return Math.max(a,Math.min(b,v)); }
+
+  function makeSurface(){
+    const wrap = timeline();
+    if(!wrap || !document.querySelector('.week-grid')) return;
+    if(zoomSurface && zoomSurface.isConnected) return;
+
+    const cs = getComputedStyle(wrap);
+    if(cs.position === 'static') wrap.style.position='relative';
+
+    zoomSurface = document.createElement('div');
+    zoomSurface.className='week-zoom-surface';
+    wrap.appendChild(zoomSurface);
+
+    zoomHint = document.createElement('div');
+    zoomHint.className='week-zoom-hint';
+    zoomHint.textContent='双指缩放时间轴';
+    document.body.appendChild(zoomHint);
+
+    zoomSurface.addEventListener('touchstart', onStart, {passive:false});
+    zoomSurface.addEventListener('touchmove', onMove, {passive:false});
+    zoomSurface.addEventListener('touchend', onEnd, {passive:false});
+    zoomSurface.addEventListener('touchcancel', onEnd, {passive:false});
+  }
+
+  function onStart(e){
+    if(e.touches.length !== 2) return;
+    e.preventDefault();
+    const wrap=timeline();
+    if(!wrap) return;
+    const a=e.touches[0], b=e.touches[1];
+    startDist=Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY);
+    if(startDist<10) return;
+    startWidth = Number(window.weekColWidth || localStorage.getItem('todoCalendarWeekWidth') || 120);
+    startWidth = clamp(startWidth,80,260);
+    startScrollLeft=wrap.scrollLeft;
+    startMidX=(a.clientX+b.clientX)/2;
+    active=true;
+    wrap.dataset.zooming='1';
+    wrap.style.overflowX='hidden';
+    if(zoomHint) zoomHint.classList.add('show');
+  }
+
+  function onMove(e){
+    if(!active || e.touches.length!==2) return;
+    e.preventDefault();
+    e.stopPropagation();
+
+    const a=e.touches[0], b=e.touches[1];
+    const dist=Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY);
+    if(dist<10) return;
+
+    const factor=dist/startDist;
+    const newWidth=clamp(startWidth*factor,80,260);
+    window.weekColWidth=Math.round(newWidth);
+    localStorage.setItem('todoCalendarWeekWidth',String(window.weekColWidth));
+
+    const grid=weekGrid(), wrap=timeline();
+    if(!grid || !wrap) return;
+
+    grid.style.setProperty('--week-col-width',window.weekColWidth+'px');
+
+    /* Keep the point under the fingers approximately stationary. */
+    const oldWidth = startWidth;
+    const contentX = startScrollLeft + startMidX;
+    const ratio = window.weekColWidth / oldWidth;
+    const newScroll = contentX * ratio - startMidX;
+
+    if(!raf){
+      raf=requestAnimationFrame(()=>{
+        wrap.scrollLeft=Math.max(0,newScroll);
+        raf=0;
+      });
+    }
+    if(zoomHint) zoomHint.textContent='时间轴 '+window.weekColWidth+' px/天';
+  }
+
+  function onEnd(e){
+    if(!active) return;
+    if(e.cancelable) e.preventDefault();
+    active=false;
+    const wrap=timeline();
+    if(wrap){
+      delete wrap.dataset.zooming;
+      wrap.style.overflowX='';
+    }
+    if(zoomHint){
+      setTimeout(()=>zoomHint.classList.remove('show'),180);
+    }
+  }
+
+  function install(){
+    if(typeof window.renderCalendar==='function'){
+      // no-op; surface is installed after each calendar render below
+    }
+    makeSurface();
+  }
+
+  /* Reinstall after calendar view changes/re-renders. */
+  const oldRender = window.renderCalendar;
+  if(typeof oldRender==='function'){
+    window.renderCalendar=function(){
+      const r=oldRender.apply(this,arguments);
+      setTimeout(makeSurface,0);
+      return r;
+    };
+  }
+
+  document.addEventListener('click',()=>setTimeout(makeSurface,0),true);
+  window.addEventListener('load',()=>setTimeout(makeSurface,100));
+  setTimeout(makeSurface,300);
+})();
+</script>
+
+</body></html>
