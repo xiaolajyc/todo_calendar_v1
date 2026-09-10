@@ -348,7 +348,7 @@ body{
 </style></head><body><div class="app"><header class="head"><div class="headtop"><h1 id="heading">Todo</h1><div id="headActions"></div></div><div id="subtabs" class="tabs"></div></header><main id="main" class="content"></main><button id="fab" class="fab">+</button><div id="bulk" class="bulk hidden"></div><nav class="nav"><button data-page="todo" class="active">📋<br>Todo</button><button data-page="calendar">📅<br>日历</button><button data-page="settings">⚙️<br>设置</button></nav></div>
 <script>
 const $=s=>document.querySelector(s), DB='todoCalendarV1';
-let tasks=JSON.parse(localStorage.getItem(DB)||'[]'), page='todo', todoTab='today', calMode='week', calDate=new Date(), selected=new Set(), selectMode=false, clipboard=[], weekZoom=100, calScroll={left:0,top:0};
+let tasks=JSON.parse(localStorage.getItem(DB)||'[]'), page='todo', todoTab='today', calMode='week', calDate=new Date(), selected=new Set(), selectMode=false, clipboard=[], weekZoom=100, calScroll={left:0,top:0}, weekCenterRequested=false;
 const save=()=>localStorage.setItem(DB,JSON.stringify(tasks));
 const id=()=>crypto.randomUUID?.()||Date.now()+Math.random()+'';
 function workDate(d=new Date()){let x=new Date(d);if(x.getHours()<6||(x.getHours()===6&&x.getMinutes()<30))x.setDate(x.getDate()-1);return fmt(x)}
@@ -425,12 +425,17 @@ function centerWeekToday(){
   if(calMode!=='week'||!w)return;
   const c=w.querySelector('.daycol[data-date="'+today()+'"]');
   if(!c)return;
-  const wr=w.getBoundingClientRect(),cr=c.getBoundingClientRect();
-  w.scrollLeft=Math.max(0,w.scrollLeft+(cr.left+cr.width/2)-(wr.left+wr.width/2));
+  // Horizontal: center today's column using scroll-content coordinates.
+  const left=c.offsetLeft + c.offsetWidth/2 - w.clientWidth/2;
+  w.scrollLeft=Math.max(0,Math.min(left,w.scrollWidth-w.clientWidth));
+  // Vertical: put 12:00 exactly at the visual center of the scroll viewport.
+  // The timeline header is part of the scroll content, so use its actual offset.
   const rowH=64*weekZoom/100;
-  const headerH=52;
-  const noonContentY=headerH+12*rowH;
-  w.scrollTop=Math.max(0,noonContentY-w.clientHeight/2);
+  const grid=c.closest('.week-grid');
+  const timeAxisTop=grid ? (grid.querySelector('.timecol')?.offsetTop||52) : 52;
+  const noonY=timeAxisTop + 12*rowH;
+  const top=noonY - w.clientHeight/2;
+  w.scrollTop=Math.max(0,Math.min(top,w.scrollHeight-w.clientHeight));
   calScroll={left:w.scrollLeft,top:w.scrollTop};
 }
 function rememberCalendarScroll(){
@@ -449,7 +454,8 @@ function renderCalendar(options={}){
   if(oldWrap) calScroll={left:oldWrap.scrollLeft,top:oldWrap.scrollTop};
   const oldScrollLeft=calScroll.left||0;
   const oldScrollTop=calScroll.top||0;
-  const centerToday=!!options.centerToday||(!oldWrap&&calMode==='week');
+  const centerToday=!!options.centerToday||weekCenterRequested;
+  weekCenterRequested=false;
   $('#subtabs').innerHTML=`<button class="tabsbtn" onclick="shiftCal(-1)">‹</button><button onclick="goToday()">今天</button><button onclick="shiftCal(1)">›</button>${['day:日','week:周','month:月'].map(x=>{let[a,b]=x.split(':');return `<button type="button" class="${calMode===a?'active':''}" data-calmode="${a}">${b}</button>`}).join('')}${calMode==='week'?`<span class="zoomctl"><button onclick="changeWeekZoom(-1)" aria-label="缩小">−</button><b id="zoomLabel">${weekZoom}%</b><button onclick="changeWeekZoom(1)" aria-label="放大">＋</button></span>`:''}`;
   $('#headActions').innerHTML='';
   if(calMode==='month')renderMonth(); else renderTimeline();
@@ -464,7 +470,7 @@ function renderCalendar(options={}){
     w.onscroll=()=>{calScroll={left:w.scrollLeft,top:w.scrollTop};};
   });
 }
-function goToday(){calDate=new Date();selectMode=false;selected.clear();renderCalendar({centerToday:calMode==='week'});}
+function goToday(){calDate=new Date();selectMode=false;selected.clear();if(calMode==='week')weekCenterRequested=true;render();}
 function bindCalendarModeButtons(){
   document.querySelectorAll('#subtabs [data-calmode]').forEach(btn=>{
     btn.addEventListener('click',()=>{
