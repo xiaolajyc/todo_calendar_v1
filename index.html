@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"><meta name="theme-color" content="#ffffff"><title>Todo Calendar V2.4</title>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"><meta name="theme-color" content="#ffffff"><title>Todo Calendar V2.5</title>
 <style>
 :root{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#171717;background:#f5f5f7;--line:#e7e7eb;--muted:#777;--accent:#111}*{box-sizing:border-box}body{margin:0;background:#f5f5f7;overscroll-behavior:none}.app{max-width:1100px;margin:auto;min-height:100vh;background:#fff;padding-bottom:76px}.head{position:sticky;top:0;background:rgba(255,255,255,.96);backdrop-filter:blur(12px);padding:12px 14px;border-bottom:1px solid var(--line);z-index:30}.headtop{display:flex;align-items:center;justify-content:space-between;gap:8px}.head h1{margin:0;font-size:21px}.tabs,.seg{display:flex;gap:6px;margin-top:10px;overflow:auto}.tabs button,.seg button,.chip{border:0;border-radius:10px;padding:8px 11px;background:#eee;white-space:nowrap}.active{background:#111!important;color:#fff}.content{padding:12px}.group{margin:18px 0}.group h3{font-size:14px;margin:0 0 6px}.task{display:flex;align-items:center;gap:10px;padding:13px 7px;border-bottom:1px solid #eee;touch-action:pan-y}.check{width:23px;height:23px;border:2px solid #aaa;border-radius:50%;flex:none}.done .check{background:#111}.done .title{text-decoration:line-through;opacity:.45}.taskmain{flex:1;min-width:0}.title{font-weight:600}.meta{font-size:12px;color:#777;margin-top:3px}.badge{font-size:12px}.fab{position:fixed;right:18px;bottom:88px;width:56px;height:56px;border-radius:50%;border:0;background:#111;color:#fff;font-size:30px;z-index:20;box-shadow:0 5px 20px #0002}.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(1100px,100%);height:70px;background:#fff;border-top:1px solid #ddd;display:flex;z-index:40;padding-bottom:env(safe-area-inset-bottom)}.nav button{flex:1;border:0;background:white;font-size:13px}.nav .active{color:#111;background:#eee!important}.card{background:#f5f5f7;border-radius:16px;padding:14px;margin-bottom:12px}.row{display:flex;gap:10px;align-items:center}.row>*{flex:1}.field{margin:12px 0}.field label{display:block;font-size:12px;color:#666;margin-bottom:5px}.field input,.field textarea,.field select{width:100%;padding:12px;border:1px solid #ddd;border-radius:12px;background:#fff}.primary,.danger{border:0;border-radius:12px;padding:12px 16px}.primary{background:#111;color:#fff}.danger{background:#eee}.hidden{display:none!important}.empty{text-align:center;color:#888;padding:35px 10px}
 /* Google Calendar-like week/day timeline */
@@ -339,7 +339,7 @@ body{
 .zoomctl{display:inline-flex;align-items:center;gap:3px;margin-left:auto;padding:3px;background:#eef3f9;border:1px solid #dfe7f0;border-radius:12px;flex:none}
 .zoomctl button{width:34px!important;height:34px!important;min-height:34px!important;padding:0!important;border:0!important;border-radius:9px!important;background:#fff!important;color:#24354c!important;font-size:20px!important;line-height:1!important}
 .zoomctl b{min-width:45px;text-align:center;font-size:12px;color:#53647a}
-.event-ghost{border-style:dashed!important;box-shadow:none!important;filter:saturate(.8)}
+.event-ghost{border-style:dashed!important;box-shadow:0 0 0 2px rgba(22,119,255,.12),0 5px 14px rgba(30,60,100,.10)!important;filter:saturate(.8);display:block!important;visibility:visible!important;background:rgba(255,255,255,.72)!important;z-index:30!important}
 @media(max-width:799px){.zoomctl{margin-left:2px}.zoomctl b{min-width:40px}}
 </style></head><body><div class="app"><header class="head"><div class="headtop"><h1 id="heading">Todo</h1><div id="headActions"></div></div><div id="subtabs" class="tabs"></div></header><main id="main" class="content"></main><button id="fab" class="fab">+</button><div id="bulk" class="bulk hidden"></div><nav class="nav"><button data-page="todo" class="active">📋<br>Todo</button><button data-page="calendar">📅<br>日历</button><button data-page="settings">⚙️<br>设置</button></nav></div>
 <script>
@@ -497,28 +497,38 @@ function attachTimelineGestures(dates,startHour,rowH){
   document.querySelectorAll('.event').forEach(ev=>{
     let timer=null,press=null,ready=false,drag=null;
     const clearTimer=()=>{if(timer){clearTimeout(timer);timer=null}};
-    const removeGhost=()=>{document.querySelectorAll('.event-ghost').forEach(x=>x.remove())};
-    const reset=()=>{clearTimer();press=null;ready=false;drag=null;ev.classList.remove('dragging');ev.style.visibility='';removeGhost()};
+    const removeGhost=()=>{if(drag?.ghost){drag.ghost.remove();drag.ghost=null}};
+    const reset=()=>{clearTimer();removeGhost();press=null;ready=false;drag=null;ev.classList.remove('dragging');ev.style.visibility='';};
     const startDrag=(e,t)=>{
       const source=ev.closest('.daycol'); if(!source)return;
       const rect=ev.getBoundingClientRect();
       const origMin=timeMin(t.start);
       const duration=Math.max(15,(timeMin(t.end)||origMin+60)-origMin);
-      drag={t,source,duration,grabOffset:e.clientY-rect.top,pointerId:e.pointerId};
+      const ghost=document.createElement('div');
+      ghost.className='event-ghost priority-'+priority(t);
+      ghost.innerHTML='<b>'+esc(t.title)+'</b><div class="etime">'+(t.start+(t.end?'–'+t.end:''))+'</div>';
+      ghost.style.position='absolute';
+      ghost.style.left='3px';
+      ghost.style.right='3px';
+      ghost.style.height=Math.max(28,duration/60*rowH)+'px';
+      ghost.style.opacity='.34';
+      ghost.style.pointerEvents='none';
+      ghost.style.zIndex='30';
+      source.appendChild(ghost);
+      drag={t,source,duration,grabOffset:e.clientY-rect.top,pointerId:e.pointerId,ghost};
       ev.classList.add('dragging');
+      ev.style.visibility='hidden';
       try{ev.setPointerCapture(e.pointerId)}catch{}
     };
     const updateGhost=(target,nm)=>{
-      removeGhost();
-      const ghost=ev.cloneNode(true);
-      ghost.className=ev.className.replace(/\bdragging\b/g,'').trim()+' event-ghost';
-      ghost.style.position='absolute';ghost.style.left='3px';ghost.style.right='3px';
-      ghost.style.top=((nm-startHour*60)/60*rowH)+'px';
-      ghost.style.height=Math.max(28,drag.duration/60*rowH)+'px';
-      ghost.style.opacity='.28';ghost.style.pointerEvents='none';ghost.style.zIndex='20';
-      const label=ghost.querySelector('.etime');
+      if(!drag?.ghost)return;
+      if(drag.ghost.parentElement!==target)target.appendChild(drag.ghost);
+      drag.ghost.style.top=((nm-startHour*60)/60*rowH)+'px';
+      drag.ghost.style.height=Math.max(28,drag.duration/60*rowH)+'px';
+      const label=drag.ghost.querySelector('.etime');
       if(label)label.textContent=timeStr(nm)+'–'+timeStr(nm+drag.duration);
-      target.appendChild(ghost);
+      drag.ghost.dataset.previewDate=target.dataset.date;
+      drag.ghost.dataset.previewMin=String(nm);
     };
     ev.addEventListener('pointerdown',e=>{
       e.stopPropagation();
