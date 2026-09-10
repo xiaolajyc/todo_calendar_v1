@@ -357,45 +357,32 @@ button:not(:disabled):active,.chip:active,.navbtn:active{transform:scale(.985);t
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
 </style>
 <style>
-/* V2.8 mobile week timeline zoom */
-@media (max-width: 700px){
-  .week-zoom-surface{
-    position:absolute;
-    inset:0;
-    z-index:30;
-    background:transparent;
-    touch-action:none !important;
-    -webkit-user-select:none !important;
-    user-select:none !important;
-    pointer-events:auto;
+/* V2.9 — reliable week timeline zoom controls */
+.week-zoom-controls{
+  display:none;
+  align-items:center;
+  gap:6px;
+  margin-left:auto;
+}
+.week-zoom-controls button{
+  width:34px;height:30px;border:0;border-radius:9px;
+  background:var(--card,#fff);box-shadow:0 1px 5px rgba(0,0,0,.08);
+  font-size:18px;font-weight:600;line-height:1;
+}
+.week-zoom-controls .zoom-value{
+  min-width:54px;text-align:center;font-size:11px;font-weight:700;
+  color:#6b7280;
+}
+@media(max-width:700px){
+  .week-zoom-controls{display:flex}
+  .week-grid{
+    transform:none !important;
   }
-  .week-zoom-hint{
-    position:fixed;
-    left:50%;
-    top:calc(env(safe-area-inset-top) + 70px);
-    transform:translate(-50%,-8px) scale(.96);
-    opacity:0;
-    pointer-events:none;
-    z-index:9999;
-    padding:7px 11px;
-    border-radius:999px;
-    background:rgba(20,28,40,.82);
-    color:#fff;
-    font-size:12px;
-    font-weight:600;
-    backdrop-filter:blur(10px);
-    -webkit-backdrop-filter:blur(10px);
-    transition:opacity .18s ease,transform .22s cubic-bezier(.22,1,.36,1);
-  }
-  .week-zoom-hint.show{
-    opacity:1;
-    transform:translate(-50%,0) scale(1);
-  }
+  /* Keep the actual calendar columns at the chosen width. */
+  .week-grid .daycol{min-width:var(--week-col-width,120px)!important}
 }
 </style>
-
-<script>window.weekColWidth=Number(localStorage.getItem('todoCalendarWeekWidth')||120);</script>
-</head><body><div class="app"><header class="head"><div class="headtop"><h1 id="heading">Todo</h1><div id="headActions"></div></div><div id="subtabs" class="tabs"></div></header><main id="main" class="content"></main><button id="fab" class="fab">+</button><div id="bulk" class="bulk hidden"></div><nav class="nav"><button data-page="todo" class="active">📋<br>Todo</button><button data-page="calendar">📅<br>日历</button><button data-page="settings">⚙️<br>设置</button></nav></div>
+<script>window.weekColWidth=Number(localStorage.getItem('todoCalendarWeekWidth')||120);</script></head><body><div class="app"><header class="head"><div class="headtop"><h1 id="heading">Todo</h1><div id="headActions"></div></div><div id="subtabs" class="tabs"></div></header><main id="main" class="content"></main><button id="fab" class="fab">+</button><div id="bulk" class="bulk hidden"></div><nav class="nav"><button data-page="todo" class="active">📋<br>Todo</button><button data-page="calendar">📅<br>日历</button><button data-page="settings">⚙️<br>设置</button></nav></div>
 <script>
 const $=s=>document.querySelector(s), DB='todoCalendarV1';
 let tasks=JSON.parse(localStorage.getItem(DB)||'[]'), page='todo', todoTab='today', calMode='week', calDate=new Date(), selected=new Set(), selectMode=false, clipboard=[]; let weekColWidth=Math.max(80,Math.min(220,Number(localStorage.getItem('todoCalendarWeekWidth')||120)));
@@ -716,133 +703,79 @@ function importData(el){let r=new FileReader();r.onload=()=>{try{let x=JSON.pars
 document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>{page=b.dataset.page;selectMode=false;selected.clear();render()});$('#fab').onclick=()=>newTask();render();
 </script>
 <script>
-/* V2.8: iPhone-safe two-finger week timeline zoom.
-   The overlay captures only two-finger gestures and temporarily prevents
-   horizontal scrolling. One-finger scrolling/tapping remains untouched. */
+/* V2.9
+   iOS Safari does not reliably deliver two-finger pinch events when the
+   underlying element is an overflow scrolling surface. Instead of fighting
+   Safari's scroll recognizer, expose explicit +/− controls that change the
+   REAL CSS column width. This makes the time axis and event cards visibly
+   resize and is deterministic on every phone.
+*/
 (function(){
-  let zoomSurface = null;
-  let zoomHint = null;
-  let active = false, startDist = 0, startWidth = 120, startScrollLeft = 0;
-  let startMidX = 0, raf = 0;
+  const KEY='todoCalendarWeekWidth';
+  const MIN=80, MAX=260, STEP=20;
 
-  function timeline(){
-    return document.querySelector('.timeline-wrap');
+  function getW(){
+    return Math.max(MIN,Math.min(MAX,
+      Number(localStorage.getItem(KEY)||window.weekColWidth||120)));
   }
-  function weekGrid(){
-    return document.querySelector('.week-grid');
-  }
-  function clamp(v,a,b){ return Math.max(a,Math.min(b,v)); }
-
-  function makeSurface(){
-    const wrap = timeline();
-    if(!wrap || !document.querySelector('.week-grid')) return;
-    if(zoomSurface && zoomSurface.isConnected) return;
-
-    const cs = getComputedStyle(wrap);
-    if(cs.position === 'static') wrap.style.position='relative';
-
-    zoomSurface = document.createElement('div');
-    zoomSurface.className='week-zoom-surface';
-    wrap.appendChild(zoomSurface);
-
-    zoomHint = document.createElement('div');
-    zoomHint.className='week-zoom-hint';
-    zoomHint.textContent='双指缩放时间轴';
-    document.body.appendChild(zoomHint);
-
-    zoomSurface.addEventListener('touchstart', onStart, {passive:false});
-    zoomSurface.addEventListener('touchmove', onMove, {passive:false});
-    zoomSurface.addEventListener('touchend', onEnd, {passive:false});
-    zoomSurface.addEventListener('touchcancel', onEnd, {passive:false});
-  }
-
-  function onStart(e){
-    if(e.touches.length !== 2) return;
-    e.preventDefault();
-    const wrap=timeline();
-    if(!wrap) return;
-    const a=e.touches[0], b=e.touches[1];
-    startDist=Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY);
-    if(startDist<10) return;
-    startWidth = Number(window.weekColWidth || localStorage.getItem('todoCalendarWeekWidth') || 120);
-    startWidth = clamp(startWidth,80,260);
-    startScrollLeft=wrap.scrollLeft;
-    startMidX=(a.clientX+b.clientX)/2;
-    active=true;
-    wrap.dataset.zooming='1';
-    wrap.style.overflowX='hidden';
-    if(zoomHint) zoomHint.classList.add('show');
-  }
-
-  function onMove(e){
-    if(!active || e.touches.length!==2) return;
-    e.preventDefault();
-    e.stopPropagation();
-
-    const a=e.touches[0], b=e.touches[1];
-    const dist=Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY);
-    if(dist<10) return;
-
-    const factor=dist/startDist;
-    const newWidth=clamp(startWidth*factor,80,260);
-    window.weekColWidth=Math.round(newWidth);
-    localStorage.setItem('todoCalendarWeekWidth',String(window.weekColWidth));
-
-    const grid=weekGrid(), wrap=timeline();
-    if(!grid || !wrap) return;
-
-    grid.style.setProperty('--week-col-width',window.weekColWidth+'px');
-
-    /* Keep the point under the fingers approximately stationary. */
-    const oldWidth = startWidth;
-    const contentX = startScrollLeft + startMidX;
-    const ratio = window.weekColWidth / oldWidth;
-    const newScroll = contentX * ratio - startMidX;
-
-    if(!raf){
-      raf=requestAnimationFrame(()=>{
-        wrap.scrollLeft=Math.max(0,newScroll);
-        raf=0;
+  function setW(w){
+    w=Math.max(MIN,Math.min(MAX,Math.round(w/10)*10));
+    window.weekColWidth=w;
+    localStorage.setItem(KEY,String(w));
+    document.documentElement.style.setProperty('--week-col-width',w+'px');
+    document.querySelectorAll('.week-grid').forEach(g=>{
+      g.style.setProperty('--week-col-width',w+'px');
+      g.style.gridTemplateColumns='54px repeat(7,'+w+'px)';
+      g.style.width=(54+w*7)+'px';
+      g.querySelectorAll('.daycol').forEach(c=>{
+        c.style.minWidth=w+'px';
+        c.style.width=w+'px';
       });
-    }
-    if(zoomHint) zoomHint.textContent='时间轴 '+window.weekColWidth+' px/天';
-  }
-
-  function onEnd(e){
-    if(!active) return;
-    if(e.cancelable) e.preventDefault();
-    active=false;
-    const wrap=timeline();
-    if(wrap){
-      delete wrap.dataset.zooming;
-      wrap.style.overflowX='';
-    }
-    if(zoomHint){
-      setTimeout(()=>zoomHint.classList.remove('show'),180);
-    }
+    });
+    const v=document.querySelector('.zoom-value');
+    if(v) v.textContent=w+' px';
   }
 
   function install(){
-    if(typeof window.renderCalendar==='function'){
-      // no-op; surface is installed after each calendar render below
+    const grid=document.querySelector('.week-grid');
+    if(!grid) return;
+
+    let box=document.querySelector('.week-zoom-controls');
+    if(!box){
+      box=document.createElement('div');
+      box.className='week-zoom-controls';
+      box.innerHTML='<button type="button" class="zoom-out" aria-label="缩小">−</button>'+
+                    '<span class="zoom-value"></span>'+
+                    '<button type="button" class="zoom-in" aria-label="放大">＋</button>';
+
+      /* Put controls near the week header, but don't require a specific
+         header DOM structure. */
+      const parent=grid.parentElement;
+      const header=parent && (parent.previousElementSibling || parent);
+      if(header && header.parentElement){
+        header.parentElement.insertBefore(box, header.nextSibling);
+      }else{
+        document.body.appendChild(box);
+      }
+
+      box.querySelector('.zoom-out').addEventListener('click',()=>{
+        setW(getW()-STEP);
+      });
+      box.querySelector('.zoom-in').addEventListener('click',()=>{
+        setW(getW()+STEP);
+      });
     }
-    makeSurface();
+    setW(getW());
   }
 
-  /* Reinstall after calendar view changes/re-renders. */
-  const oldRender = window.renderCalendar;
-  if(typeof oldRender==='function'){
-    window.renderCalendar=function(){
-      const r=oldRender.apply(this,arguments);
-      setTimeout(makeSurface,0);
-      return r;
-    };
-  }
+  /* Install after every render without replacing application render methods. */
+  const observer=new MutationObserver(()=>{
+    if(document.querySelector('.week-grid')) install();
+  });
+  observer.observe(document.body,{childList:true,subtree:true});
 
-  document.addEventListener('click',()=>setTimeout(makeSurface,0),true);
-  window.addEventListener('load',()=>setTimeout(makeSurface,100));
-  setTimeout(makeSurface,300);
+  window.addEventListener('load',()=>setTimeout(install,100));
+  setTimeout(install,300);
 })();
 </script>
-
 </body></html>
