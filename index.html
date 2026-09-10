@@ -420,9 +420,53 @@ function bulkShiftTime(){
 function bulkDate(){let d=prompt('请输入日期（YYYY-MM-DD）',today());if(!/^\d{4}-\d{2}-\d{2}$/.test(d||''))return;tasks.filter(t=>selected.has(t.id)).forEach(t=>t.date=d);selectMode=false;selectMode=false;selected.clear();save();render()}
 function bulk(a){let arr=tasks.filter(t=>selected.has(t.id));if(a==='delete'&&!confirm(`删除 ${arr.length} 个事项？`))return;if(a==='copy'){clipboard=arr.map(x=>({...x,id:id(),completed:false,completedAt:null}));selectMode=false;selected.clear();save();render();return}if(a==='paste'){if(!clipboard.length)return;let target=today(),base=clipboard.find(x=>x.date)?.date;let copies=clipboard.map(x=>{let n={...x,id:id(),completed:false,completedAt:null};if(base&&x.date)n.date=addDays(x.date,Math.round((parseDate(target)-parseDate(base))/86400000));else n.date=target;return n});tasks.push(...copies);selectMode=false;selectMode=false;selected.clear();save();render();return}arr.forEach(t=>{if(a==='done'){t.completed=true;t.completedAt=new Date().toISOString()}if(a==='today')t.date=today();if(a==='tomorrow')t.date=addDays(today(),1);if(a==='important')t.important=!t.important;if(a==='urgent')t.urgent=!t.urgent});if(a==='delete')tasks=tasks.filter(t=>!selected.has(t.id));selectMode=false;selectMode=false;selected.clear();save();render()}
 
-function centerWeekToday(){const w=document.querySelector('.timeline-wrap');if(calMode!=='week'||!w)return;const c=w.querySelector('.daycol[data-date="'+today()+'"]');if(!c)return;const wr=w.getBoundingClientRect(),cr=c.getBoundingClientRect();w.scrollLeft=Math.max(0,w.scrollLeft+(cr.left+cr.width/2)-(wr.left+wr.width/2));const rowH=64*weekZoom/100;const headerH=52;const noonY=headerH+12*rowH;w.scrollTop=Math.max(0,noonY-w.clientHeight/2);calScroll={left:w.scrollLeft,top:w.scrollTop};}
-function renderCalendar(options={}){const oldWrap=document.querySelector('.timeline-wrap');const oldScrollLeft=oldWrap?oldWrap.scrollLeft:0;const oldScrollTop=oldWrap?oldWrap.scrollTop:0;const centerToday=!!options.centerToday||(!oldWrap&&calMode==='week');$('#subtabs').innerHTML=`<button class="tabsbtn" onclick="shiftCal(-1)">‹</button><button onclick="calDate=new Date();renderCalendar({centerToday:true})">今天</button><button onclick="shiftCal(1)">›</button>${['day:日','week:周','month:月'].map(x=>{let[a,b]=x.split(':');return `<button type="button" class="${calMode===a?'active':''}" data-calmode="${a}">${b}</button>`}).join('')}${calMode==='week'?`<span class="zoomctl"><button onclick="changeWeekZoom(-1)" aria-label="缩小">−</button><b id="zoomLabel">100%</b><button onclick="changeWeekZoom(1)" aria-label="放大">＋</button></span>`:''}`;$('#headActions').innerHTML='';if(calMode==='month')renderMonth();else renderTimeline();if(calMode==='week'){const z=$('#zoomLabel');if(z)z.textContent=weekZoom+'%';}renderBulk();requestAnimationFrame(()=>{const w=document.querySelector('.timeline-wrap');if(!w)return;if(centerToday){centerWeekToday();w.scrollTop=oldScrollTop;}else{w.scrollLeft=oldScrollLeft;w.scrollTop=oldScrollTop;}});}
-function goToday(){calDate=new Date();selectMode=false;selected.clear();render();}
+function centerWeekToday(){
+  const w=document.querySelector('.timeline-wrap');
+  if(calMode!=='week'||!w)return;
+  const c=w.querySelector('.daycol[data-date="'+today()+'"]');
+  if(!c)return;
+  const wr=w.getBoundingClientRect(),cr=c.getBoundingClientRect();
+  w.scrollLeft=Math.max(0,w.scrollLeft+(cr.left+cr.width/2)-(wr.left+wr.width/2));
+  const rowH=64*weekZoom/100;
+  const headerH=52;
+  const noonContentY=headerH+12*rowH;
+  w.scrollTop=Math.max(0,noonContentY-w.clientHeight/2);
+  calScroll={left:w.scrollLeft,top:w.scrollTop};
+}
+function renderCalendar(options={}){
+  const oldWrap=document.querySelector('.timeline-wrap');
+  const oldScrollLeft=oldWrap?oldWrap.scrollLeft:calScroll.left;
+  const oldScrollTop=oldWrap?oldWrap.scrollTop:calScroll.top;
+  const centerToday=!!options.centerToday||(!oldWrap&&calMode==='week');
+  $('#subtabs').innerHTML=`<button class="tabsbtn" onclick="shiftCal(-1)">‹</button><button onclick="goToday()">今天</button><button onclick="shiftCal(1)">›</button>${['day:日','week:周','month:月'].map(x=>{let[a,b]=x.split(':');return `<button type="button" class="${calMode===a?'active':''}" data-calmode="${a}">${b}</button>`}).join('')}${calMode==='week'?`<span class="zoomctl"><button onclick="changeWeekZoom(-1)" aria-label="缩小">−</button><b id="zoomLabel">${weekZoom}%</b><button onclick="changeWeekZoom(1)" aria-label="放大">＋</button></span>`:''}`;
+  $('#headActions').innerHTML='';
+  if(calMode==='month')renderMonth(); else renderTimeline();
+  if(calMode==='week'){const z=$('#zoomLabel');if(z)z.textContent=weekZoom+'%';}
+  renderBulk();
+  bindCalendarModeButtons();
+  requestAnimationFrame(()=>{
+    const w=document.querySelector('.timeline-wrap');
+    if(!w)return;
+    if(centerToday){centerWeekToday();}
+    else {w.scrollLeft=oldScrollLeft;w.scrollTop=oldScrollTop;calScroll={left:w.scrollLeft,top:w.scrollTop};}
+  });
+}
+function goToday(){calDate=new Date();selectMode=false;selected.clear();renderCalendar({centerToday:calMode==='week'});}
+function bindCalendarModeButtons(){
+  document.querySelectorAll('#subtabs [data-calmode]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const next=btn.dataset.calmode;
+      if(!['day','week','month'].includes(next))return;
+      const wasWeek=calMode==='week';
+      const wrap=document.querySelector('.timeline-wrap');
+      const keepLeft=wrap?wrap.scrollLeft:calScroll.left;
+      const keepTop=wrap?wrap.scrollTop:calScroll.top;
+      calMode=next;selectMode=false;selected.clear();
+      renderCalendar({centerToday:next==='week'&&!wasWeek});
+      if(next!=='week' && wrap){calScroll={left:keepLeft,top:keepTop};}
+    });
+  });
+}
 function shiftCal(n){let d=new Date(calDate);d.setDate(d.getDate()+n*(calMode==='week'?7:1));calDate=d;render()}
 function weekDates(){let base=new Date(calDate),day=(base.getDay()+6)%7;base.setDate(base.getDate()-day);return Array.from({length:7},(_,i)=>{let d=new Date(base);d.setDate(d.getDate()+i);return d})}
 
