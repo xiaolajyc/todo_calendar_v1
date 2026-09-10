@@ -1,282 +1,389 @@
-<!doctype html>
-<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"><meta name="theme-color" content="#ffffff"><title>Todo Calendar V1.6</title>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>House Maintenance Manager V16</title>
 <style>
-:root{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#171717;background:#f5f5f7;--line:#e7e7eb;--muted:#777;--accent:#111}*{box-sizing:border-box}body{margin:0;background:#f5f5f7;overscroll-behavior:none}.app{max-width:1100px;margin:auto;min-height:100vh;background:#fff;padding-bottom:76px}.head{position:sticky;top:0;background:rgba(255,255,255,.96);backdrop-filter:blur(12px);padding:12px 14px;border-bottom:1px solid var(--line);z-index:30}.headtop{display:flex;align-items:center;justify-content:space-between;gap:8px}.head h1{margin:0;font-size:21px}.tabs,.seg{display:flex;gap:6px;margin-top:10px;overflow:auto}.tabs button,.seg button,.chip{border:0;border-radius:10px;padding:8px 11px;background:#eee;white-space:nowrap}.active{background:#111!important;color:#fff}.content{padding:12px}.group{margin:18px 0}.group h3{font-size:14px;margin:0 0 6px}.task{display:flex;align-items:center;gap:10px;padding:13px 7px;border-bottom:1px solid #eee;touch-action:pan-y}.check{width:23px;height:23px;border:2px solid #aaa;border-radius:50%;flex:none}.done .check{background:#111}.done .title{text-decoration:line-through;opacity:.45}.taskmain{flex:1;min-width:0}.title{font-weight:600}.meta{font-size:12px;color:#777;margin-top:3px}.badge{font-size:12px}.fab{position:fixed;right:18px;bottom:88px;width:56px;height:56px;border-radius:50%;border:0;background:#111;color:#fff;font-size:30px;z-index:20;box-shadow:0 5px 20px #0002}.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(1100px,100%);height:70px;background:#fff;border-top:1px solid #ddd;display:flex;z-index:40;padding-bottom:env(safe-area-inset-bottom)}.nav button{flex:1;border:0;background:white;font-size:13px}.nav .active{color:#111;background:#eee!important}.card{background:#f5f5f7;border-radius:16px;padding:14px;margin-bottom:12px}.row{display:flex;gap:10px;align-items:center}.row>*{flex:1}.field{margin:12px 0}.field label{display:block;font-size:12px;color:#666;margin-bottom:5px}.field input,.field textarea,.field select{width:100%;padding:12px;border:1px solid #ddd;border-radius:12px;background:#fff}.primary,.danger{border:0;border-radius:12px;padding:12px 16px}.primary{background:#111;color:#fff}.danger{background:#eee}.hidden{display:none!important}.empty{text-align:center;color:#888;padding:35px 10px}
-/* Google Calendar-like week/day timeline */
-.calbar{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:8px}.calbar .navbtn{border:0;background:#eee;border-radius:10px;padding:8px 12px}.caltitle{font-weight:700;flex:1;text-align:center}.timeline-wrap{border:1px solid var(--line);border-radius:12px;overflow:auto;background:#fff;-webkit-overflow-scrolling:touch}.week-grid{display:grid;grid-template-columns:54px repeat(7,minmax(105px,1fr));min-width:790px}.day-grid{display:grid;grid-template-columns:54px minmax(0,1fr);min-width:0}.dayhead{position:sticky;top:0;background:#fff;z-index:12;border-bottom:1px solid var(--line);height:52px;text-align:center;padding-top:7px;font-size:12px}.dayhead strong{display:block;font-size:16px;margin-top:2px}.dayhead.today strong{background:#111;color:#fff;border-radius:50%;width:28px;height:28px;line-height:28px;margin:2px auto 0}.timecol{background:#fafafa}.timecell{height:64px;border-top:1px solid var(--line);font-size:10px;color:#888;text-align:right;padding:4px 6px 0 0}.daycol{position:relative;height:1152px;border-left:1px solid var(--line);background:repeating-linear-gradient(to bottom,transparent 0,transparent 31px,#f0f0f2 32px,transparent 33px,transparent 63px,#e7e7eb 64px)}.slotline{position:absolute;left:0;right:0;height:1px;background:#ececf0}.event{position:absolute;left:3px;right:3px;border-radius:7px;background:#e8e8ed;border-left:3px solid #111;padding:5px 6px;font-size:11px;line-height:1.25;overflow:hidden;z-index:5;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}.event.done{opacity:.48;text-decoration:line-through}.event .etime{font-size:10px;color:#555}.creating{position:absolute;left:3px;right:3px;border-radius:7px;background:#111;color:#fff;opacity:.78;z-index:15;pointer-events:none;padding:5px;font-size:11px}.nowline{position:absolute;height:2px;background:#111;left:0;right:0;z-index:8}.month{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}.day{min-height:80px;border:1px solid #eee;border-radius:9px;padding:5px;font-size:11px}.day b{display:block}.mini{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:#eee;border-radius:4px;padding:2px;margin-top:3px}.mini.selected{outline:2px solid #111}.copybar{background:#f0f0f3;border-radius:10px;padding:8px 10px;margin-bottom:8px;display:flex;align-items:center;gap:8px;font-size:12px}.copybar button{border:0;background:#111;color:#fff;border-radius:8px;padding:7px 10px}.bulk{position:fixed;left:50%;transform:translateX(-50%);bottom:70px;width:min(1100px,100%);background:#111;color:#fff;padding:9px;display:flex;gap:6px;overflow:auto;z-index:35}.bulk button{white-space:nowrap;border:0;border-radius:9px;padding:8px}.bulk button:disabled{opacity:.45}.event.selected{outline:3px solid #111;outline-offset:1px}.event.bulkable{cursor:grab}.event.dragging{opacity:.55;z-index:50;box-shadow:0 6px 18px #0003}.timeline-wrap{overscroll-behavior:contain}.daycol{touch-action:pan-y}.event{touch-action:none}.daycol.select-mode{touch-action:none}.daycol.select-mode .event{pointer-events:auto}.selectbox{width:22px;height:22px;border:2px solid #aaa;border-radius:5px;flex:none}.selected .selectbox{background:#111;box-shadow:inset 0 0 0 4px #fff}.hint{font-size:12px;color:#777;margin:6px 0 10px}
-@media(min-width:800px){.content{padding:16px 20px}.week-grid{grid-template-columns:58px repeat(7,minmax(120px,1fr))}.day-grid{grid-template-columns:58px minmax(0,1fr)}}
-</style></head><body><div class="app"><header class="head"><div class="headtop"><h1 id="heading">Todo</h1><div id="headActions"></div></div><div id="subtabs" class="tabs"></div></header><main id="main" class="content"></main><button id="fab" class="fab">+</button><div id="bulk" class="bulk hidden"></div><nav class="nav"><button data-page="todo" class="active">📋<br>Todo</button><button data-page="calendar">📅<br>日历</button><button data-page="settings">⚙️<br>设置</button></nav></div>
+:root{--bg:#f4f6f8;--card:#fff;--text:#172033;--muted:#667085;--line:#e1e5ea;--primary:#2563eb;--danger:#dc2626;--warn:#d97706;--ok:#16a34a;--shadow:0 3px 14px rgba(15,23,42,.06)}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,"Microsoft YaHei",sans-serif}
+button,input,select,textarea{font:inherit}button{cursor:pointer}
+.app{max-width:1120px;margin:auto;padding:16px}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}
+h1{font-size:23px;margin:0}.subtitle{color:var(--muted);font-size:13px;margin-top:5px}
+.nav{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:14px}.nav button,.btn{border:1px solid var(--line);background:#fff;color:var(--text);border-radius:10px;padding:9px 12px}.nav button.active,.btn.primary{background:var(--primary);border-color:var(--primary);color:#fff}.btn.danger{background:#fee2e2;border-color:#fecaca;color:#991b1b}.btn.small{font-size:12px;padding:7px 9px}
+.panel{background:var(--card);border-radius:15px;padding:16px;box-shadow:var(--shadow);margin-bottom:14px}.panel h2{font-size:17px;margin:0 0 12px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}.stat{background:#fff;border-radius:14px;padding:14px;box-shadow:var(--shadow)}.stat b{display:block;font-size:26px}.stat span{font-size:12px;color:var(--muted)}
+.section{margin-bottom:20px}.section-title{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:9px}
+.task-list{display:grid;gap:9px}.task{border:1px solid var(--line);border-radius:13px;padding:12px}.task-main{display:flex;justify-content:space-between;gap:12px}.task-name{font-weight:700}.meta{font-size:12px;color:var(--muted);margin-top:4px}
+.badges{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}.badge{font-size:11px;padding:4px 7px;border-radius:999px;background:#eef2ff;color:#334155}.badge.red{background:#fee2e2;color:#991b1b}.badge.orange{background:#ffedd5;color:#9a3412}.badge.green{background:#dcfce7;color:#166534}.badge.gray{background:#f3f4f6;color:#4b5563}
+.actions{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}.toolbar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}.toolbar input,.toolbar select{border:1px solid var(--line);border-radius:10px;padding:10px;background:#fff}.toolbar input{width:min(360px,100%)}
+.form{display:grid;gap:11px}.form label{display:grid;gap:5px;font-size:12px;color:var(--muted)}.form input,.form select,.form textarea{width:100%;border:1px solid var(--line);border-radius:10px;padding:10px;background:#fff;color:var(--text)}.form textarea{min-height:90px;resize:vertical}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.notice{background:#f8fafc;border:1px solid var(--line);padding:11px;border-radius:10px;font-size:13px;color:var(--muted)}.sub-row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #eef0f3}.sub-row:last-child{border-bottom:0}
+.modal{display:none;position:fixed;inset:0;background:rgba(15,23,42,.46);align-items:center;justify-content:center;padding:16px;z-index:100}.modal.show{display:flex}.modal-box{background:#fff;width:min(720px,100%);max-height:92vh;overflow:auto;border-radius:16px;padding:18px}.modal-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}.modal-head h3{margin:0;font-size:18px}.close{border:1px solid var(--line);background:#fff;border-radius:9px;padding:7px 10px}
+.toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:#111827;color:#fff;border-radius:10px;padding:10px 14px;display:none;z-index:200}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:12px}
+.checklist-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:7px}
+.check-item{display:flex!important;align-items:flex-start;gap:8px;padding:9px 10px;background:#f8fafc;border:1px solid var(--line);border-radius:10px;color:var(--text)!important;font-size:13px!important;line-height:1.35}
+.check-item input{flex:0 0 auto;width:18px;height:18px;margin:1px 0 0}
+.check-item span{min-width:0;overflow-wrap:anywhere}.history-wrap{overflow-x:auto}.history-table{width:100%;border-collapse:collapse}.history-table th,.history-table td{padding:8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}.history-detail{min-width:260px;white-space:normal;line-height:1.55}.history-note{min-width:180px;white-space:pre-wrap;overflow-wrap:anywhere}
+@media(max-width:720px){
+.stats{grid-template-columns:1fr 1fr}.grid2{grid-template-columns:1fr}.task-main{flex-direction:column}.app{padding:12px}
+.history-table{display:block!important}
+.history-table thead{display:none}
+.history-table tbody,.history-table tr,.history-table td{display:block;width:100%!important}
+.history-table tr{margin-bottom:12px;border:1px solid var(--line);border-radius:12px;background:#fff;padding:8px}
+.history-table td{padding:7px 8px!important;border:0!important;white-space:normal!important;overflow-wrap:anywhere;word-break:break-word}
+.history-table td::before{display:inline-block;font-weight:700;color:var(--muted);margin-right:6px}
+.history-table td:nth-child(1)::before{content:"日期："}
+.history-table td:nth-child(2)::before{content:"任务："}
+.history-table td:nth-child(3)::before{content:"状态："}
+.history-table td:nth-child(4)::before{content:"花费："}
+.history-table td:nth-child(5)::before{content:"备注："}
+.history-table td:nth-child(6)::before{content:"操作："}
+.history-table .history-note{display:block;margin-top:4px}
+ .photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;margin-top:8px}
+ .photo-card{position:relative;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#f8fafc}
+ .photo-card img{display:block;width:100%;height:110px;object-fit:cover;cursor:pointer}
+ .photo-card button{position:absolute;right:4px;top:4px}
+ .expense-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:10px 0 14px}
+ .expense-stat{border:1px solid var(--line);border-radius:12px;padding:12px;background:#fff}
+ .expense-stat b{display:block;font-size:21px;margin-top:3px};min-width:0
+ @media(max-width:720px){.expense-stats{grid-template-columns:1fr 1fr}.expense-stat:last-child{grid-column:1/-1}}
+
+ .history-table td:nth-child(2){font-weight:700;font-size:15px}
+ .history-table td:nth-child(2)::before,.history-table td:nth-child(5)::before{display:block;margin:0 0 3px}
+}
+@media(max-width:390px){.checklist-grid{grid-template-columns:1fr}}
+
+.before-after-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.photo-section{border:1px solid var(--line);border-radius:12px;padding:10px;background:#fafafa}.photo-section .section-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.before-after-history{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}.before-after-history>div{min-width:0}.before-after-history strong{font-size:12px;color:var(--muted)}.before-after-history .photo-grid{grid-template-columns:repeat(auto-fill,minmax(75px,1fr))}.before-after-history .photo-card img{height:85px}.before-after-history>.btn{grid-column:1/-1}
+.compare-pair{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}.compare-label{font-weight:700;font-size:13px;margin-bottom:5px}.compare-pair img{display:block;width:100%;max-height:42vh;object-fit:contain;background:#f8fafc;border:1px solid var(--line);border-radius:10px;cursor:pointer}.compare-empty{height:180px;display:flex;align-items:center;justify-content:center;border:1px dashed var(--line);border-radius:10px;color:var(--muted);font-size:13px}
+@media(max-width:720px){.before-after-grid,.before-after-history,.compare-pair{grid-template-columns:1fr}.before-after-history>.btn{grid-column:auto}}
+
+.photo-pick{position:relative;background:#fff;border:1px solid var(--line);color:var(--text)}
+.photo-section .meta{line-height:1.45}
+.compare-wrap{padding-bottom:4px}
+@media(max-width:720px){
+ .before-after-grid{display:grid!important;grid-template-columns:1fr!important;gap:12px!important}
+ .photo-section{padding:12px}
+ .photo-pick{min-height:44px}
+ .before-after-history{display:grid!important;grid-template-columns:1fr!important}
+ .before-after-history>.btn{width:100%;min-height:42px}
+ .compare-pair{display:grid!important;grid-template-columns:1fr!important;gap:8px}
+}
+
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <div><h1>🏠 House Maintenance Manager</h1><div class="subtitle">家庭日常任务 · 房屋维护 · 分类管理</div></div>
+  <button type="button" class="btn primary" data-cmd="task-add">＋ 添加任务</button>
+</header>
+
+<nav class="nav" id="nav">
+ <button type="button" class="active" data-page="dashboard">🏠 首页</button>
+ <button type="button" data-page="tasks">📋 任务</button>
+ <button type="button" data-page="maintenance">🔧 房屋维护</button>
+ <button type="button" data-page="calendar">📅 日历</button>
+ <button type="button" data-page="history">📊 历史</button>
+ <button type="button" data-page="settings">⚙️ 设置</button>
+</nav>
+
+<main id="content"></main>
+<footer>数据保存在当前浏览器。建议定期导出 JSON 备份。</footer>
+</div>
+
+<div class="modal" id="modal">
+ <div class="modal-box">
+  <div class="modal-head"><h3 id="modalTitle"></h3><button type="button" class="close" data-cmd="modal-close">关闭</button></div>
+  <div id="modalBody"></div>
+ </div>
+</div>
+<div id="toast" class="toast"></div>
+
 <script>
-const $=s=>document.querySelector(s), DB='todoCalendarV1';
-let tasks=JSON.parse(localStorage.getItem(DB)||'[]'), page='todo', todoTab='today', calMode='week', calDate=new Date(), selected=new Set(), selectMode=false, clipboard=[];
-const save=()=>localStorage.setItem(DB,JSON.stringify(tasks));
-const id=()=>crypto.randomUUID?.()||Date.now()+Math.random()+'';
-function workDate(d=new Date()){let x=new Date(d);if(x.getHours()<6||(x.getHours()===6&&x.getMinutes()<30))x.setDate(x.getDate()-1);return fmt(x)}
-const today=()=>workDate();
-const priority=t=>t.important&&t.urgent?0:t.urgent?1:t.important?2:3;
-const labels=['🔥 重要且紧急','⚡ 紧急','⭐ 重要','○ 其他'];
-const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-function fmt(d){let z=new Date(d.getTime()-d.getTimezoneOffset()*60000);return z.toISOString().slice(0,10)}
-function parseDate(s){return new Date(s+'T12:00:00')}
-function timeMin(t){if(!t)return null;let [h,m]=t.split(':').map(Number);return h*60+m}
-function timeStr(min){min=Math.max(0,Math.min(1439,Math.round(min)));return String(Math.floor(min/60)).padStart(2,'0')+':'+String(min%60).padStart(2,'0')}
-function addDays(s,n){let d=parseDate(s);d.setDate(d.getDate()+n);return fmt(d)}
-function render(){document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===page));$('#fab').classList.toggle('hidden',page==='settings');$('#heading').textContent=page==='todo'?'Todo':page==='calendar'?'日历':'设置';page==='todo'?renderTodo():page==='calendar'?renderCalendar():renderSettings()}
-function renderTodo(){
- $('#subtabs').innerHTML=['today:今天','overdue:逾期','inbox:无日期','done:已完成'].map(x=>{let[a,b]=x.split(':');return `<button class="${todoTab===a?'active':''}" onclick="todoTab='${a}';selectMode=false;selected.clear();render()">${b}${a==='overdue'?` ${tasks.filter(t=>t.date&&t.date<today()&&!t.completed).length||''}`:''}</button>`}).join('');
- let t=tasks.filter(x=>todoTab==='today'?x.date===today()&&!x.completed:todoTab==='overdue'?x.date&&x.date<today()&&!x.completed:todoTab==='inbox'?!x.date&&!x.completed:x.completed).sort((a,b)=>priority(a)-priority(b)||(a.date||'').localeCompare(b.date||'')||(a.start||'').localeCompare(b.start||''));
- let html='';labels.forEach((lab,p)=>{let a=t.filter(x=>priority(x)===p);if(a.length)html+=`<section class="group"><h3>${lab}</h3>${a.map(taskRow).join('')}</section>`});$('#main').innerHTML=html||'<div class="empty">暂无事项</div>';renderBulk();
+const KEY='houseMaintenanceManager_v4_clean';
+const DAY_START_HOUR=10;
+const TYPES_DEFAULT=[
+ {id:'daily',label:'日常'},
+ {id:'maintenance',label:'维护'},
+ {id:'inspection',label:'检查'},
+ {id:'consumable',label:'消耗品'}
+];
+const AREAS_DEFAULT=[
+ {id:'indoor',label:'室内',subs:[
+  {id:'kitchen',label:'厨房'},{id:'bathroom',label:'浴室'},{id:'toilet',label:'厕所'},{id:'bedroom',label:'卧室'},{id:'laundry',label:'洗衣房'}
+ ]},
+ {id:'outdoor',label:'室外',subs:[
+  {id:'garden',label:'花园'},{id:'house',label:'房子'}
+ ]},
+ {id:'other',label:'其他',subs:[{id:'other',label:'其他'}]}
+];
+const CL={
+ '厨房清洁':['清洁台面','清洁水槽','清洁灶台','擦拭橱柜外部','清洁厨房地面','清理明显油污','清理厨房垃圾'],
+ '厨房干货检查':['检查食品是否过期','检查包装是否破损','检查虫害迹象','检查是否受潮','清理需丢弃食品'],
+ '厨房地砖/拉丝地板深度清洁':['清扫','吸尘','深度拖地','清理边角','清理可达区域','检查明显污渍'],
+ '咖啡机、冰格清理':['清空咖啡渣','清洁咖啡机','清洁水箱/滴水盘','清空冰格','清洗冰格','擦干'],
+ '冰箱清洁':['清理过期食品','清洁冷藏室','清洁抽屉','清洁门架','擦拭密封条','清理异常积水','清洁外部'],
+ '烤箱清洁':['拆下烤架','清洁烤架','清洁烤箱内部','清理底部残渣','清洁玻璃门','擦拭外部'],
+ '冰柜除冰':['清空冰柜','安全除冰','清除积冰','清洁内部','擦干','重新整理食品','检查食品状态'],
+ '微波炉、空气炸锅清洁':['清洁微波炉内部','清洁微波炉转盘','清洁微波炉门','清理空气炸锅残渣','清洁炸篮和内胆','擦拭外部'],
+ '浴室清洁':['清洁洗手盆','清洁水龙头','清洁镜子','清洁淋浴区域','清洁浴缸（如有）','清洁玻璃','清理地漏','清洁地面'],
+ '浴室瓷砖/地砖':['深度清洁墙面瓷砖','清洁地砖','清洁 grout','清除明显水垢','检查 grout','检查霉菌'],
+ '刷马桶':['清洁马桶内部','清洁马桶边缘','清洁座圈','清洁盖板','擦拭外部','清洁周围区域'],
+ '厕所清洁':['清洁马桶','清洁洗手盆','清洁镜子','擦拭高频接触表面','清洁地面','清理垃圾桶'],
+ '厕所地砖':['清扫','深度拖地','清理角落','清洁 grout','检查积水/渗水'],
+ '打扫卫生':['整理杂物','除尘','清洁床周区域','清洁家具表面','吸尘','拖地'],
+ '洗衣房清洁':['清洁洗衣机外部','清洁水槽','清洁台面','清理棉絮/灰尘','清洁地面','检查明显漏水'],
+ '洗衣房地砖':['清扫','深度拖地','清理角落','清洁 grout','检查积水'],
+ '洗碗机、洗衣机清洁':['清洁洗碗机滤网','清洁喷淋臂','清洁洗碗机内部','清洁洗衣机 drum','清洁洗涤剂盒','清洁门封','检查异味/漏水'],
+ '除草':['前院','后院','侧院/其他区域'],'施肥':['前院','后院','侧院/其他区域'],
+ '老鼠药检查/补充':['检查 bait station','检查 bait 是否足够','必要时补充/更换','检查鼠害迹象'],
+ '清理 Gutter':['检查 gutter','清除树叶和泥沙','清理落水口','检查 downpipe','检查堵塞','检查锈蚀/变形/松动','检查排水'],
+ '清理屋顶':['清理杂物','清除树叶','清理 moss/algae（如有）','检查瓦片','检查 ridge/capping','检查明显损坏','检查 flashing','检查 gutter/downpipe'],
+ '白蚁检查':['检查室内迹象','检查室外墙边','检查木结构周围','检查潮湿区域','检查 termite entry points','检查 bait/station（如有）'],
+ '清理蜘蛛网':['Front entrance','Eaves','Windows','Garage','Backyard','Outdoor lights'],
+ '擦玻璃':['室内玻璃','室外玻璃','窗框','窗台','检查明显损坏'],
+ '汽车清洁':['冲洗车身','清洁轮圈','清洁车窗','吸尘','清洁仪表台','清理垃圾','清洁玻璃']
+};
+const DEFAULT_TASKS=[
+ ['厨房清洁','daily','indoor','kitchen',1,'month'],['厨房干货检查','inspection','indoor','kitchen',1,'month'],['厨房地砖/拉丝地板深度清洁','maintenance','indoor','kitchen',2,'month'],['咖啡机、冰格清理','maintenance','indoor','kitchen',3,'month'],['冰箱清洁','maintenance','indoor','kitchen',1,'month'],['烤箱清洁','maintenance','indoor','kitchen',6,'month'],['冰柜除冰','maintenance','indoor','kitchen',6,'month'],['微波炉、空气炸锅清洁','maintenance','indoor','kitchen',1,'month'],
+ ['浴室清洁','daily','indoor','bathroom',15,'day'],['浴室瓷砖/地砖','maintenance','indoor','bathroom',2,'month'],['刷马桶','daily','indoor','toilet',15,'day'],['厕所清洁','daily','indoor','toilet',15,'day'],['厕所地砖','maintenance','indoor','toilet',2,'month'],['打扫卫生','daily','indoor','bedroom',1,'month'],
+ ['洗衣房清洁','daily','indoor','laundry',1,'month'],['洗衣房地砖','maintenance','indoor','laundry',2,'month'],['洗碗机、洗衣机清洁','maintenance','indoor','laundry',1,'year'],
+ ['除草','maintenance','outdoor','garden',3,'month'],['施肥','maintenance','outdoor','garden',1,'month'],['堆肥测量温度','inspection','outdoor','garden',1,'nightly'],['推垃圾桶','daily','outdoor','garden',1,'week'],['老鼠药检查/补充','consumable','outdoor','garden',1,'month'],
+ ['清理 Gutter','maintenance','outdoor','house',2,'month'],['清理屋顶','maintenance','outdoor','house',1,'year'],['白蚁检查','inspection','outdoor','house',1,'year'],['清理蜘蛛网','maintenance','outdoor','house',1,'month'],['擦玻璃','maintenance','outdoor','house',3,'month'],['汽车清洁','maintenance','other','other',3,'month']
+];
+
+function clone(v){return JSON.parse(JSON.stringify(v))}
+function uid(p){return p+'_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,7)}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function today(){
+ const d=new Date();
+ if(d.getHours()<DAY_START_HOUR)d.setDate(d.getDate()-1);
+ return new Date(d.getFullYear(),d.getMonth(),d.getDate());
 }
-function taskRow(t){return `<div class="task ${t.completed?'done':''} ${selected.has(t.id)?'selected':''}" data-id="${t.id}" onclick="taskClick(event,'${t.id}')" oncontextmenu="event.preventDefault();toggleSelect('${t.id}')" ontouchstart="startTaskLongPress(event,'${t.id}')" ontouchend="clearTaskLongPress()" ontouchmove="clearTaskLongPress()"><span class="${selected.size?'selectbox':'check'}"></span><div class="taskmain"><div class="title">${esc(t.title)}</div><div class="meta">${t.date||'无日期'} ${t.start||''}${t.end?'–'+t.end:''}</div></div><span class="badge">${t.important?'⭐':''}${t.urgent?'⚡':''}</span></div>`}
-let taskLongTimer=null,taskLongPressed=false;
-function startTaskLongPress(e,i){clearTaskLongPress();taskLongPressed=false;taskLongTimer=setTimeout(()=>{taskLongPressed=true;toggleSelect(i)},450)}
-function clearTaskLongPress(){if(taskLongTimer){clearTimeout(taskLongTimer);taskLongTimer=null}}
-function taskClick(e,i){if(taskLongPressed){taskLongPressed=false;return}if(selectMode){toggleSelect(i);return}let t=tasks.find(x=>x.id===i);if(e.target.classList.contains('check')){t.completed=!t.completed;t.completedAt=t.completed?new Date().toISOString():null;save();render()}else editTask(i)}
-function toggleSelect(i){selectMode=true;selected.has(i)?selected.delete(i):selected.add(i);render()}
-function renderBulk(){let b=$('#bulk');if(!selectMode){b.classList.add('hidden');return}b.classList.remove('hidden');b.innerHTML=`<span style="padding:8px;font-weight:700;position:sticky;left:0;background:#111">已选 ${selected.size}</span><button onclick="bulk('done')">✓完成</button><button onclick="bulk('today')">今天</button><button onclick="bulk('tomorrow')">明天</button><button onclick="bulkDate()">📅日期</button><button onclick="bulkShiftTime()">🕐时间</button><button onclick="bulk('important')">⭐重要</button><button onclick="bulk('urgent')">⚡紧急</button><button onclick="bulk('copy')">📋复制</button><button onclick="bulk('paste')" ${clipboard.length?'':'disabled'}>📌粘贴</button><button onclick="bulk('delete')">🗑删除</button><button onclick="selectMode=false;selected.clear();render()">取消</button>`}
-function bulkShiftTime(){
-  let s=prompt('整体移动多少分钟？例如 30 或 -30','30');
-  if(s===null)return;
-  let delta=Number(s);
-  if(!Number.isFinite(delta))return alert('请输入数字，例如 30 或 -30');
-  tasks.filter(t=>selected.has(t.id)&&t.start).forEach(t=>{
-    let oldStart=timeMin(t.start), oldEnd=t.end?timeMin(t.end):oldStart+60;
-    let duration=Math.max(15,oldEnd-oldStart);
-    let ns=Math.max(0,Math.min(1439-duration,oldStart+delta));
-    t.start=timeStr(ns); t.end=timeStr(ns+duration);
-  });
-  selectMode=false;selectMode=false;selected.clear();save();render();
+function iso(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
+function parseISO(s){const a=String(s).split('-').map(Number);return new Date(a[0],a[1]-1,a[2])}
+function addPeriod(d,n,u){
+ const x=new Date(d);
+ if(u==='nightly'||u==='day')x.setDate(x.getDate()+n);
+ else if(u==='week')x.setDate(x.getDate()+7*n);
+ else if(u==='month'){const day=x.getDate();x.setDate(1);x.setMonth(x.getMonth()+n);x.setDate(Math.min(day,new Date(x.getFullYear(),x.getMonth()+1,0).getDate()))}
+ else if(u==='year'){const m=x.getMonth(),day=x.getDate();x.setDate(1);x.setFullYear(x.getFullYear()+n);x.setMonth(m);x.setDate(Math.min(day,new Date(x.getFullYear(),x.getMonth()+1,0).getDate()))}
+ return x
 }
-function bulkDate(){let d=prompt('请输入日期（YYYY-MM-DD）',today());if(!/^\d{4}-\d{2}-\d{2}$/.test(d||''))return;tasks.filter(t=>selected.has(t.id)).forEach(t=>t.date=d);selectMode=false;selectMode=false;selected.clear();save();render()}
-function bulk(a){let arr=tasks.filter(t=>selected.has(t.id));if(a==='delete'&&!confirm(`删除 ${arr.length} 个事项？`))return;if(a==='copy'){clipboard=arr.map(x=>({...x,id:id(),completed:false,completedAt:null}));selectMode=false;selected.clear();save();render();return}if(a==='paste'){if(!clipboard.length)return;let target=today(),base=clipboard.find(x=>x.date)?.date;let copies=clipboard.map(x=>{let n={...x,id:id(),completed:false,completedAt:null};if(base&&x.date)n.date=addDays(x.date,Math.round((parseDate(target)-parseDate(base))/86400000));else n.date=target;return n});tasks.push(...copies);selectMode=false;selectMode=false;selected.clear();save();render();return}arr.forEach(t=>{if(a==='done'){t.completed=true;t.completedAt=new Date().toISOString()}if(a==='today')t.date=today();if(a==='tomorrow')t.date=addDays(today(),1);if(a==='important')t.important=!t.important;if(a==='urgent')t.urgent=!t.urgent});if(a==='delete')tasks=tasks.filter(t=>!selected.has(t.id));selectMode=false;selectMode=false;selected.clear();save();render()}
+function diff(a,b){return Math.round((parseISO(a)-parseISO(b))/86400000)}
+function typeLabel(id){return db.settings.types.find(x=>x.id===id)?.label||id}
+function areaLabel(id){return db.settings.areas.find(x=>x.id===id)?.label||id}
+function subLabel(a,s){return db.settings.areas.find(x=>x.id===a)?.subs?.find(x=>x.id===s)?.label||s}
+function freq(t){if(t.unit==='nightly')return '每晚';if(t.unit==='day')return t.interval===1?'每天':`每${t.interval}天`;if(t.unit==='week')return t.interval===1?'每周':`每${t.interval}周`;if(t.unit==='month')return t.interval===1?'每月':`每${t.interval}个月`;return t.interval===1?'每年':`每${t.interval}年`}
+function status(t){if(!t.enabled)return 'disabled';const d=diff(t.nextDue,iso(today()));return d<0?'overdue':d===0?'today':'upcoming'}
+function statusHTML(t){const s=status(t);if(s==='overdue')return `<span class="badge red">逾期 ${Math.abs(diff(t.nextDue,iso(today())))} 天</span>`;if(s==='today')return `<span class="badge orange">今天到期</span>`;if(s==='upcoming')return `<span class="badge green">${diff(t.nextDue,iso(today()))} 天后</span>`;return `<span class="badge gray">已停用</span>`}
 
-function renderCalendar(){
-  $('#subtabs').innerHTML=`<button class="tabsbtn" onclick="shiftCal(-1)">‹</button><button onclick="calDate=new Date();render()">今天</button><button onclick="shiftCal(1)">›</button>${['day:日','week:周','month:月'].map(x=>{let[a,b]=x.split(':');return `<button class="${calMode===a?'active':''}" onclick="calMode='${a}';selectMode=false;selected.clear();render()">${b}</button>`}).join('')}`;
-  $('#headActions').innerHTML='';
-  if(calMode==='month') renderMonth(); else renderTimeline();
-  renderBulk();
+function defaultDB(){
+ const tasks=DEFAULT_TASKS.map(([name,type,area,sub,interval,unit])=>({id:uid('task'),name,type,area,sub,interval,unit,lastCompleted:null,nextDue:unit==='nightly'?iso(today()):iso(addPeriod(today(),1,unit)),reminder:unit==='year'?30:unit==='month'?7:unit==='week'?1:0,enabled:true,notes:'',checklist:(CL[name]||[]).map(text=>({text,done:false})),history:[]}));
+ return {tasks,archivedHistory:[],settings:{types:clone(TYPES_DEFAULT),areas:clone(AREAS_DEFAULT)}}
 }
-function shiftCal(n){let d=new Date(calDate);d.setDate(d.getDate()+n*(calMode==='week'?7:1));calDate=d;render()}
-function weekDates(){let base=new Date(calDate),day=(base.getDay()+6)%7;base.setDate(base.getDate()-day);return Array.from({length:7},(_,i)=>{let d=new Date(base);d.setDate(d.getDate()+i);return d})}
-
-function renderTimeline(){
-  let dates=calMode==='week'?weekDates():[new Date(calDate)];
-  let startHour=6,endHour=24,rowH=64,total=(endHour-startHour)*rowH;
-  let title=calMode==='week'?`${dates[0].getMonth()+1}月${dates[0].getDate()}日 – ${dates[6].getMonth()+1}月${dates[6].getDate()}日`:`${dates[0].getFullYear()}年${dates[0].getMonth()+1}月${dates[0].getDate()}日`;
-  let gridClass=calMode==='day'?'day-grid':'week-grid';
-  let dayHeads=dates.map(d=>`<div class="dayhead ${fmt(d)===today()?'today':''}" data-date="${fmt(d)}">${['一','二','三','四','五','六','日'][(d.getDay()+6)%7]}<strong>${d.getDate()}</strong></div>`).join('');
-  let timeColumn=`<div class="timecol">${Array.from({length:18},(_,i)=>`<div class="timecell">${String(i+startHour).padStart(2,'0')}:00</div>`).join('')}</div>`;
-  let cols=dates.map(d=>dayColumn(d,total,startHour,rowH)).join('');
-  let header=calMode==='day'
-    ? `<div class="dayhead"></div>${dayHeads}`
-    : `<div class="dayhead"></div>${dayHeads}`;
-  let copyLabel=calMode==='week'?'复制本周':'复制当天';
-  let hint=selectMode
-    ? `选择模式 · 已选择 ${selected.size} 项 · 点击事项继续选择 · 底部批量操作` 
-    : `长按空白处并上下滑动＝创建；短按＝编辑；长按静止＝批量选择；长按后移动＝拖动`;
-  $('#main').innerHTML=`<div class="calbar"><button class="navbtn" onclick="copyDay()">${copyLabel}</button><div class="caltitle">${title}</div><button class="navbtn" onclick="pasteCalendar()" ${clipboard.length?'':'disabled'}>📌 粘贴${clipboard.length?` ${clipboard.length}`:''}</button></div><div class="hint">${hint}</div><div class="timeline-wrap"><div class="${gridClass}" style="grid-template-rows:52px auto">${header}${timeColumn}${cols}</div></div>`;
-  attachTimelineGestures(dates,startHour,rowH);
+function normalize(x){
+ if(!x||!Array.isArray(x.tasks))x=defaultDB();
+ if(!Array.isArray(x.archivedHistory))x.archivedHistory=[];if(!x.settings)x.settings={};
+ if(!Array.isArray(x.settings.types)||!x.settings.types.length)x.settings.types=clone(TYPES_DEFAULT);
+ if(!Array.isArray(x.settings.areas)||!x.settings.areas.length)x.settings.areas=clone(AREAS_DEFAULT);
+ x.settings.areas.forEach(a=>{if(!Array.isArray(a.subs))a.subs=[]});
+ x.tasks.forEach(t=>{if(!Array.isArray(t.checklist))t.checklist=[];if(!Array.isArray(t.history))t.history=[];if(typeof t.enabled!=='boolean')t.enabled=true;t.history.forEach(h=>{if(!Array.isArray(h.beforePhotos))h.beforePhotos=[];if(!Array.isArray(h.afterPhotos))h.afterPhotos=Array.isArray(h.photos)?h.photos:[]})});x.archivedHistory.forEach(h=>{if(!Array.isArray(h.beforePhotos))h.beforePhotos=[];if(!Array.isArray(h.afterPhotos))h.afterPhotos=Array.isArray(h.photos)?h.photos:[]});
+ return x
 }
+function load(){try{return normalize(JSON.parse(localStorage.getItem(KEY)||'null'))}catch(e){return defaultDB()}}
+let db=load();
+let page='dashboard';
 
-function dayColumn(d,total,startHour,rowH){
-  let ds=fmt(d),events=tasks.filter(t=>t.date===ds&&t.start).sort((a,b)=>timeMin(a.start)-timeMin(b.start));
-  return `<div class="daycol ${selected.size?'select-mode':''}" data-date="${ds}" style="height:${total}px">${events.map(t=>eventHtml(t,startHour,rowH)).join('')}${fmt(d)===today()?nowLine(startHour,rowH):''}</div>`;
+function save(){try{localStorage.setItem(KEY,JSON.stringify(db));return true}catch(e){toast('存储空间不足，请先导出数据或删除部分照片');return false}}
+function toast(msg){const x=document.getElementById('toast');x.textContent=msg;x.style.display='block';clearTimeout(window._toastTimer);window._toastTimer=setTimeout(()=>x.style.display='none',1600)}
+function modal(title,body){document.getElementById('modalTitle').textContent=title;document.getElementById('modalBody').innerHTML=body;document.getElementById('modal').classList.add('show')}
+function closeModal(){document.getElementById('modal').classList.remove('show')}
+
+function card(t){return `<div class="task"><div class="task-main"><div><div class="task-name">${esc(t.name)}</div><div class="meta">${esc(areaLabel(t.area))} · ${esc(subLabel(t.area,t.sub))} · ${esc(typeLabel(t.type))} · ${freq(t)}</div><div class="badges">${statusHTML(t)}<span class="badge">到期 ${esc(t.nextDue)}</span></div></div></div><div class="actions"><button type="button" class="btn primary small" data-cmd="task-complete" data-id="${t.id}">✅ 完成</button>${t.unit==='nightly'?'':`<button type="button" class="btn small" data-cmd="task-snooze" data-id="${t.id}">⏭ 延期</button>`}<button type="button" class="btn small" data-cmd="task-edit" data-id="${t.id}">编辑</button><button type="button" class="btn danger small" data-cmd="task-delete" data-id="${t.id}">删除</button></div></div>`}
+
+function render(){
+ document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===page));
+ const c=document.getElementById('content');
+ if(page==='dashboard')renderDashboard(c);else if(page==='tasks')renderTasks(c);else if(page==='maintenance')renderMaintenance(c);else if(page==='calendar')renderCalendar(c);else if(page==='history')renderHistory(c);else renderSettings(c);
 }
-function eventHtml(t,startHour,rowH){
-  let s=timeMin(t.start),e=timeMin(t.end)||Math.min(s+60,1439),top=(s-startHour*60)/60*rowH,height=Math.max(28,(e-s)/60*rowH);
-  return `<div class="event bulkable ${t.completed?'done':''} ${selected.has(t.id)?'selected':''}" data-id="${t.id}" style="top:${top}px;height:${height}px"><b>${esc(t.title)}</b><div class="etime">${t.start}${t.end?'–'+t.end:''}</div></div>`;
+function renderDashboard(c){
+ const en=db.tasks.filter(t=>t.enabled),ov=en.filter(t=>status(t)==='overdue'),td=en.filter(t=>status(t)==='today'),up=en.filter(t=>status(t)==='upcoming').sort((a,b)=>a.nextDue.localeCompare(b.nextDue)).slice(0,8),night=en.filter(t=>t.unit==='nightly');
+ c.innerHTML=`<div class="notice" style="margin-bottom:14px">维护日每天上午 ${DAY_START_HOUR}:00 切换。凌晨 ${DAY_START_HOUR}:00 前完成的每日任务仍归入前一天。</div><div class="stats"><div class="stat"><b style="color:var(--danger)">${ov.length}</b><span>逾期</span></div><div class="stat"><b style="color:var(--warn)">${td.length}</b><span>今天到期</span></div><div class="stat"><b style="color:var(--ok)">${up.length}</b><span>近期任务</span></div><div class="stat"><b>${en.length}</b><span>启用任务</span></div></div><div class="panel">${sec('🔴 逾期',ov)}${sec('📌 今天',td)}${night.length?sec('🌙 今晚',night):''}${sec('🟠 即将到期',up)}</div>`
 }
-function nowLine(startHour,rowH){let d=new Date(),m=d.getHours()*60+d.getMinutes(),top=(m-startHour*60)/60*rowH;if(top<0||top>1152)return '';return `<div class="nowline" style="top:${top}px"></div>`}
-
-function attachTimelineGestures(dates,startHour,rowH){
-  const cols=[...document.querySelectorAll('.daycol')];
-  const snap=m=>Math.round(m/15)*15;
-  const clamp=(m,duration)=>Math.max(startHour*60,Math.min(1439-duration,snap(m)));
-  const colAtX=x=>{
-    for(const c of cols){const r=c.getBoundingClientRect();if(x>=r.left&&x<=r.right)return c}
-    if(calMode==='week'){
-      let best=cols[0],bd=Infinity;
-      cols.forEach(c=>{const r=c.getBoundingClientRect();const d=x<r.left?r.left-x:x>r.right?x-r.right:0;if(d<bd){bd=d;best=c}});
-      return best;
-    }
-    return cols[0];
-  };
-  const minAt=(e,col)=>{const r=col.getBoundingClientRect();return (e.clientY-r.top)/rowH*60+startHour*60};
-
-  /* 空白区域：长按后拖动创建时间段 */
-  cols.forEach(col=>{
-    let timer=null,creating=null,pid=null,startY=0,startX=0;
-    const clear=()=>{if(timer){clearTimeout(timer);timer=null}};
-    col.addEventListener('pointerdown',e=>{
-      if(e.target.closest('.event')||selectMode)return;
-      if(e.pointerType==='mouse'&&e.button!==0)return;
-      pid=e.pointerId;startX=e.clientX;startY=e.clientY;
-      const m=clamp(minAt(e,col),0);
-      timer=setTimeout(()=>{
-        timer=null;creating={start:m,end:m+60};
-        drawCreating(col,creating,startHour,rowH);
-        try{col.setPointerCapture(pid)}catch{}
-      },450);
-    });
-    col.addEventListener('pointermove',e=>{
-      if(!timer&&!creating)return;
-      if(timer && Math.hypot(e.clientX-startX,e.clientY-startY)>10){clear();return}
-      if(!creating)return;
-      e.preventDefault();
-      const m=clamp(minAt(e,col),0);
-      creating.end=Math.max(creating.start+15,m);
-      drawCreating(col,creating,startHour,rowH);
-    },{passive:false});
-    col.addEventListener('pointerup',e=>{
-      clear();
-      if(!creating)return;
-      const c=creating;creating=null;col.querySelector('.creating')?.remove();
-      newTask(col.dataset.date,timeStr(c.start),timeStr(c.end));
-    });
-    col.addEventListener('pointercancel',()=>{clear();creating=null;col.querySelector('.creating')?.remove()});
-  });
-
-  /* 事项：iPhone 上不要用“长按立即选择”。采用三态：
-     短按=编辑；长按后松手=批量选择；长按后继续移动=拖动。
-     关键点：ready 状态只在长按计时结束后出现，松手前不改变 DOM，
-     因此不会触发 iOS 原生文字选择，也不会与拖动抢手势。 */
-  document.querySelectorAll('.event').forEach(ev=>{
-    let timer=null,press=null,ready=false,drag=null,moved=false;
-    const clearTimer=()=>{if(timer){clearTimeout(timer);timer=null}};
-    const reset=()=>{clearTimer();press=null;ready=false;drag=null;moved=false;ev.classList.remove('dragging')};
-
-    const startDrag=(e,t)=>{
-      const source=ev.closest('.daycol'); if(!source)return;
-      const rect=ev.getBoundingClientRect();
-      const origMin=timeMin(t.start);
-      const duration=Math.max(15,(timeMin(t.end)||origMin+60)-origMin);
-      drag={
-        t,source,duration,
-        grabOffset:e.clientY-rect.top,
-        pointerId:e.pointerId
-      };
-      ev.classList.add('dragging');
-      try{ev.setPointerCapture(e.pointerId)}catch{}
-    };
-
-    ev.addEventListener('pointerdown',e=>{
-      e.stopPropagation();
-      if(e.pointerType==='mouse'&&e.button!==0)return;
-      const t=tasks.find(x=>x.id===ev.dataset.id);if(!t)return;
-
-      clearTimer();press={x:e.clientX,y:e.clientY,id:t.id};ready=false;drag=null;moved=false;
-
-      /* 已经在选择模式：一次触摸只做选择，绝不启动拖动 */
-      if(selectMode){
-        e.preventDefault();
-        return;
-      }
-
-      /* 防止 iOS 长按产生文本选择/系统菜单 */
-      if(e.pointerType==='touch')e.preventDefault();
-
-      /* 650ms 后进入“可选择/可拖动”状态，但暂不执行任何动作 */
-      timer=setTimeout(()=>{
-        timer=null;ready=true;
-      },650);
-    },{passive:false});
-
-    ev.addEventListener('pointermove',e=>{
-      if(!press)return;
-      const dist=Math.hypot(e.clientX-press.x,e.clientY-press.y);
-
-      /* 长按计时未完成：允许用户正常滚动页面，不启动拖动 */
-      if(!ready&&!drag){
-        if(dist>10)clearTimer();
-        return;
-      }
-
-      /* 长按已经完成，再移动才真正进入拖动 */
-      if(ready&&!drag&&dist>10){
-        const t=tasks.find(x=>x.id===press.id);
-        if(t){
-          startDrag(e,t);
-          moved=true;
-        }
-      }
-
-      if(!drag)return;
-      e.preventDefault();
-
-      const target=colAtX(e.clientX)||drag.source;
-      const raw=minAt(e,target)-(drag.grabOffset/rowH*60);
-      const nm=clamp(raw,drag.duration);
-
-      /* 用 transform 只做视觉预览，不频繁改 DOM 布局 */
-      ev.style.top=((nm-startHour*60)/60*rowH)+'px';
-      ev.style.height=Math.max(28,drag.duration/60*rowH)+'px';
-      const label=ev.querySelector('.etime');
-      if(label)label.textContent=timeStr(nm)+'–'+timeStr(nm+drag.duration);
-      ev.dataset.previewDate=target.dataset.date;
-      ev.dataset.previewMin=String(nm);
-    },{passive:false});
-
-    ev.addEventListener('pointerup',e=>{
-      const p=press;
-      if(!p){reset();return}
-      clearTimer();
-
-      /* 已进入批量选择模式：只切换选择 */
-      if(selectMode){
-        toggleCalendarSelect(p.id);
-        reset();
-        return;
-      }
-
-      /* 真正拖动完成 */
-      if(drag){
-        const t=tasks.find(x=>x.id===p.id);
-        if(t){
-          const target=colAtX(e.clientX)||drag.source;
-          const raw=minAt(e,target)-(drag.grabOffset/rowH*60);
-          const nm=clamp(raw,drag.duration);
-          t.date=target.dataset.date;
-          t.start=timeStr(nm);
-          t.end=timeStr(nm+drag.duration);
-          save();
-        }
-        reset();
-        render();
-        return;
-      }
-
-      /* 长按后没有移动：进入批量选择 */
-      if(ready){
-        toggleCalendarSelect(p.id);
-        reset();
-        return;
-      }
-
-      /* 普通短按：编辑 */
-      reset();
-      editTask(p.id);
-    });
-
-    ev.addEventListener('pointercancel',()=>reset());
-  });
+function sec(title,arr){return `<div class="section"><div class="section-title"><h2>${title}</h2></div>${arr.length?`<div class="task-list">${arr.map(card).join('')}</div>`:'<div class="empty">暂无任务</div>'}</div>`}
+function renderTasks(c){const q=(window.q||'').toLowerCase(),f=window.f||'all';let a=db.tasks.filter(t=>t.name.toLowerCase().includes(q)||subLabel(t.area,t.sub).toLowerCase().includes(q));if(f!=='all')a=a.filter(t=>t.type===f);c.innerHTML=`<div class="panel"><h2>📋 所有任务</h2><div class="toolbar"><input data-role="search" value="${esc(q)}" placeholder="搜索任务"><select data-role="filter"><option value="all">全部类型</option>${db.settings.types.map(x=>`<option value="${x.id}" ${f===x.id?'selected':''}>${esc(x.label)}</option>`).join('')}</select><button type="button" class="btn primary" data-cmd="task-add">＋ 添加</button></div><div class="task-list">${a.map(card).join('')||'<div class="empty">没有找到任务</div>'}</div></div>`}
+function renderMaintenance(c){c.innerHTML=`<div class="panel"><h2>🔧 房屋维护</h2><div class="task-list">${db.tasks.filter(t=>t.enabled&&t.type==='maintenance').map(card).join('')||'<div class="empty">暂无维护任务</div>'}</div></div>`}
+function renderCalendar(c){
+ const d=today(),y=d.getFullYear(),m=d.getMonth(),first=new Date(y,m,1),last=new Date(y,m+1,0);let days=[];for(let i=0;i<first.getDay();i++)days.push(null);for(let i=1;i<=last.getDate();i++)days.push(i);let rows='';
+ for(let i=0;i<Math.ceil(days.length/7);i++){const row=days.slice(i*7,i*7+7);rows+='<tr>'+row.map(n=>{if(!n)return '<td style="height:72px"></td>';const ls=db.tasks.filter(t=>t.enabled&&parseISO(t.nextDue).getFullYear()===y&&parseISO(t.nextDue).getMonth()===m&&parseISO(t.nextDue).getDate()===n).slice(0,4);return `<td style="height:72px;padding:7px;border:1px solid var(--line);vertical-align:top"><b>${n}</b>${ls.map(t=>`<div style="font-size:11px;margin-top:4px">• ${esc(t.name)}</div>`).join('')}</td>`}).join('')+'</tr>'}
+ c.innerHTML=`<div class="panel"><h2>📅 ${y}年${m+1}月</h2><table style="width:100%;border-collapse:collapse"><thead><tr>${['日','一','二','三','四','五','六'].map(x=>`<th style="padding:7px;border-bottom:1px solid var(--line)">${x}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table></div>`
+}
+function checklistSummary(h){
+ const r=Array.isArray(h.checklistResults)?h.checklistResults:[];
+ if(!r.length)return '';
+ const done=r.filter(x=>x.done).length;
+ return '<div style=\"margin-top:6px;font-size:12px\"><strong>小项：'+done+'/'+r.length+'</strong><div style=\"margin-top:4px\">'+r.map(x=>(x.done?'☑️ ':'☐ ')+esc(x.text)).join('<br>')+'</div></div>';
+}
+function renderHistory(c){
+ const all=[];
+ db.tasks.forEach(t=>(t.history||[]).forEach(h=>all.push({task:t.name,taskId:t.id,...h,archived:false})));
+ (db.archivedHistory||[]).forEach(h=>all.push({task:h.task||'已删除任务',taskId:null,...h,archived:true}));
+ const selected=window.historyTask||'all';
+ const taskOptions=[];
+ db.tasks.forEach(t=>taskOptions.push({value:t.id,label:t.name}));
+ (db.archivedHistory||[]).forEach(h=>{
+   if(h.task && !taskOptions.some(x=>x.label===h.task))taskOptions.push({value:'archived:'+h.task,label:h.task+'（已删除）'});
+ });
+ let a=selected==='all'?all:all.filter(h=>selected.startsWith('archived:')?(h.archived&&h.task===selected.slice(9)):h.taskId===selected);
+ a.sort((x,y)=>y.date.localeCompare(x.date));const years=[...new Set(a.map(x=>String(x.date||'').slice(0,4)).filter(Boolean))].sort((x,y)=>y.localeCompare(x)),yearStats=years.map(y=>({year:y,total:a.filter(x=>String(x.date||'').startsWith(y)).reduce((s,x)=>s+Number(x.cost||0),0),count:a.filter(x=>String(x.date||'').startsWith(y)).length}));c.innerHTML=`<div class="panel"><h2>📊 完成历史</h2><div class="expense-stats">${yearStats.length?yearStats.map(x=>`<div class="expense-stat"><span class="meta">${x.year} 年</span><b>$${x.total.toFixed(2)}</b><div class="meta">${x.count} 次</div></div>`).join(''):'<div class="expense-stat"><span class="meta">暂无花费记录</span><b>$0.00</b></div>'}</div><div class="toolbar"><label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)">选择任务<select data-role="history-task" style="border:1px solid var(--line);border-radius:10px;padding:10px;background:#fff;color:var(--text);min-width:min(360px,100%)"><option value="all" ${selected==='all'?'selected':''}>全部任务</option>${taskOptions.map(x=>`<option value="${esc(x.value)}" ${selected===x.value?'selected':''}>${esc(x.label)}</option>`).join('')}</select></label></div><div class="history-wrap">${a.length?`<table class="history-table"><thead><tr><th style="text-align:left;padding:8px;border-bottom:1px solid var(--line)">日期</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--line)">任务</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--line)">状态</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--line)">花费</th><th class="history-note">备注</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--line)">操作</th></tr></thead><tbody>${a.slice(0,300).map(h=>`<tr><td>${esc(h.date)}</td><td>${esc(h.task)}${h.archived?' <span class="badge gray">已删除任务</span>':''}</td><td>${esc(h.condition||'Normal')}</td><td>$${Number(h.cost||0).toFixed(2)}</td><td style="padding:8px;border-bottom:1px solid var(--line)"><div class="history-note">${esc(h.notes||'')}</div>${checklistSummary(h)}${(Array.isArray(h.beforePhotos)?h.beforePhotos.length:0)||(Array.isArray(h.afterPhotos)?h.afterPhotos.length:(Array.isArray(h.photos)?h.photos.length:0))?`<div class="before-after-history"><div><strong>Before</strong>${photoHTML(h.beforePhotos||[],true,'before')}</div><div><strong>After</strong>${photoHTML(h.afterPhotos||h.photos||[],true,'after')}</div><button type="button" class="btn small" data-cmd="photo-compare" data-task="${esc(h.taskId||'')}" data-history="${esc(h.id)}" data-archived="${h.archived?'1':'0'}">前后对比</button></div>`:''}</td><td><button type="button" class="btn danger small" data-cmd="history-delete" data-task="${esc(h.taskId||'')}" data-history="${esc(h.id)}" data-archived="${h.archived?'1':'0'}">删除</button></td></tr>`).join('')}</tbody></table>`:'<div class="empty">暂无历史记录</div>'}</div></div>`
+}
+function renderSettings(c){
+ c.innerHTML=`<div class="panel"><h2>⚙️ 设置与分类管理</h2>
+ <div class="section"><div class="section-title"><h2>任务类型</h2><button type="button" class="btn primary small" data-settings="type-add">＋ 新增类型</button></div><div class="task-list">${db.settings.types.map(x=>`<div class="task"><div class="task-main"><div><div class="task-name">${esc(x.label)}</div></div><div class="actions"><button type="button" class="btn small" data-settings="type-edit" data-id="${x.id}">编辑</button><button type="button" class="btn danger small" data-settings="type-delete" data-id="${x.id}">删除</button></div></div></div>`).join('')}</div></div>
+ <div class="section"><div class="section-title"><h2>区域</h2><button type="button" class="btn primary small" data-settings="area-add">＋ 新增区域</button></div><div class="task-list">${db.settings.areas.map(a=>`<div class="task"><div class="task-main"><div><div class="task-name">${esc(a.label)}</div></div><div class="actions"><button type="button" class="btn small" data-settings="area-edit" data-id="${a.id}">编辑区域</button><button type="button" class="btn danger small" data-settings="area-delete" data-id="${a.id}">删除区域</button></div></div><div class="actions"><button type="button" class="btn small" data-settings="sub-add" data-area="${a.id}">＋ 新增子区域</button></div>${(a.subs||[]).map(s=>`<div class="sub-row"><span>${esc(s.label)}</span><span class="actions" style="margin:0"><button type="button" class="btn small" data-settings="sub-edit" data-area="${a.id}" data-id="${s.id}">编辑</button><button type="button" class="btn danger small" data-settings="sub-delete" data-area="${a.id}" data-id="${s.id}">删除</button></span></div>`).join('')}</div>`).join('')}</div></div>
+ <div class="section"><h2>每日开始时间</h2><div class="notice">当前设置：每天 ${DAY_START_HOUR}:00 开始新的一天。该设置用于判断每日/周期任务属于哪一天；例如凌晨 5–6 点完成任务，仍计入前一天。</div></div>
+ <div class="section"><h2>数据</h2><div class="actions"><button type="button" class="btn primary" data-cmd="export">💾 导出 JSON</button><button type="button" class="btn" data-cmd="import">📥 导入 JSON</button><input id="fileInput" type="file" accept=".json" hidden><button type="button" class="btn danger" data-cmd="reset">恢复初始数据</button></div><div class="notice" style="margin-top:10px">分类管理完全独立于任务管理。修改名称不会影响已有任务；删除被使用的分类时，相关任务会自动移动到其他可用分类。</div></div>
+ </div>`
+}
+function taskEditor(id){
+ const t=id?db.tasks.find(x=>x.id===id):null;
+ const a=db.settings.areas[0];
+ const v=t||{name:'',type:db.settings.types[0].id,area:a.id,sub:a.subs[0]?.id||'',interval:1,unit:'month',nextDue:iso(today()),reminder:7,notes:'',checklist:[]};
+ modal(t?'编辑任务':'添加任务',`<form id="taskForm" class="form"><input type="hidden" name="id" value="${t?esc(t.id):''}"><label>任务名称<input required name="name" value="${esc(v.name)}"></label><div class="grid2"><label>类型<select name="type">${db.settings.types.map(x=>`<option value="${x.id}" ${x.id===v.type?'selected':''}>${esc(x.label)}</option>`).join('')}</select></label><label>区域<select name="area" id="taskArea">${db.settings.areas.map(x=>`<option value="${x.id}" ${x.id===v.area?'selected':''}>${esc(x.label)}</option>`).join('')}</select></label></div><label>子区域<select name="sub" id="taskSub">${subOpts(v.area,v.sub)}</select></label><div class="grid2"><label>周期数量<input required type="number" min="1" step="1" name="interval" value="${v.interval}"></label><label>周期单位<select name="unit"><option value="day" ${v.unit==='day'?'selected':''}>天</option><option value="week" ${v.unit==='week'?'selected':''}>周</option><option value="month" ${v.unit==='month'?'selected':''}>月</option><option value="year" ${v.unit==='year'?'selected':''}>年</option><option value="nightly" ${v.unit==='nightly'?'selected':''}>每晚</option></select></label></div><div class="grid2"><label>下次到期<input required type="date" name="nextDue" value="${esc(v.nextDue)}"></label><label>提前提醒（天）<input type="number" min="0" step="1" name="reminder" value="${v.reminder||0}"></label></div><label>备注<textarea name="notes">${esc(v.notes||'')}</textarea></label><label>Checklist（每行一项）<textarea name="checklist">${esc((v.checklist||[]).map(x=>x.text||x).join('\\n'))}</textarea></label><div class="actions"><button type="button" class="btn primary" data-cmd="task-save">保存</button>${t?`<button type="button" class="btn danger" data-cmd="task-delete" data-id="${esc(t.id)}">删除任务</button>`:''}</div></form>`)
+}
+function subOpts(area,sel){const a=db.settings.areas.find(x=>x.id===area);return(a?.subs||[]).map(x=>`<option value="${x.id}" ${x.id===sel?'selected':''}>${esc(x.label)}</option>`).join('')}
+function saveTask(){
+ const f=new FormData(document.getElementById('taskForm')),id=f.get('id');let t=id?db.tasks.find(x=>x.id===id):null;
+ if(!t){t={id:uid('task'),lastCompleted:null,history:[],enabled:true};db.tasks.push(t)}
+ t.name=String(f.get('name')||'').trim();t.type=f.get('type');t.area=f.get('area');t.sub=f.get('sub');t.interval=Math.max(1,parseInt(f.get('interval'))||1);t.unit=f.get('unit');t.nextDue=f.get('nextDue')||iso(today());t.reminder=Math.max(0,parseInt(f.get('reminder'))||0);t.notes=f.get('notes')||'';t.checklist=String(f.get('checklist')||'').split('\\n').map(x=>x.trim()).filter(Boolean).map(text=>({text,done:false}));save();closeModal();render();toast('任务已保存')
+}
+function compressPhoto(file){
+ return new Promise((resolve,reject)=>{
+  const r=new FileReader();r.onload=()=>{
+   const img=new Image();img.onload=()=>{
+    const max=1600,s=Math.min(1,max/Math.max(img.naturalWidth,img.naturalHeight)),w=Math.max(1,Math.round(img.naturalWidth*s)),hh=Math.max(1,Math.round(img.naturalHeight*s));
+    const cv=document.createElement('canvas');cv.width=w;cv.height=hh;cv.getContext('2d').drawImage(img,0,0,w,hh);
+    cv.toBlob(b=>{if(!b)return reject();const rr=new FileReader();rr.onload=()=>resolve(rr.result);rr.onerror=reject;rr.readAsDataURL(b)},'image/jpeg',.82)
+   };img.onerror=reject;img.src=r.result
+  };r.onerror=reject;r.readAsDataURL(file)
+ })
+}
+function photoHTML(photos,historyMode,kind){
+ const p=Array.isArray(photos)?photos:[];if(!p.length)return '';
+ return '<div class="photo-grid">'+p.map((x,i)=>`<div class="photo-card"><img src="${x.data}" alt="${kind==='before'?'Before':'After'} 照片 ${i+1}" data-cmd="photo-view" data-src="${x.data}">${historyMode?'':`<button type="button" class="btn danger small" data-cmd="photo-delete" data-kind="${kind||'after'}" data-index="${i}">删除</button>`}</div>`).join('')+'</div>'
+}
+function photoSection(title,kind){
+ return `<div class="photo-section"><div class="section-title"><strong>${title}</strong><span class="meta">照片 / 相册</span></div><label class="btn small photo-pick" style="display:inline-flex;align-items:center;justify-content:center;width:100%;margin:0;cursor:pointer">📷 选择照片或拍照<input id="${kind}Photos" type="file" accept="image/*" multiple style="position:absolute;width:1px;height:1px;opacity:0"></label><div class="meta">手机可从相册选择，也可在系统选择器中直接拍照；支持多张照片。</div><div id="${kind}PhotoPreview"></div></div>`
+}
+function completeModal(id){
+ const t=db.tasks.find(x=>x.id===id);if(!t)return;window.pendingBeforePhotos=[];window.pendingAfterPhotos=[];
+ modal(`完成：${t.name}`,`<form id="completeForm" class="form"><div class="notice"><strong>任务备注</strong><br>${t.notes?esc(t.notes).replace(/\n/g,'<br>'):'暂无备注'}</div>${t.unit==='nightly'&&t.name==='堆肥测量温度'?'<label>堆肥温度（°C）<input required type="number" step="0.1" name="temp"></label>':''}${t.checklist.length?`<div><div class="meta" style="margin-bottom:6px">Checklist</div><div class="checklist-grid">${t.checklist.map((x,i)=>`<label class="check-item"><input type="checkbox" name="c${i}"><span>${esc(x.text)}</span></label>`).join('')}</div></div>`:''}<div class="grid2"><label>完成日期<input required type="date" name="date" value="${iso(today())}"></label><label>状态<select name="condition"><option>Normal</option><option>Minor issue</option><option>Needs attention</option><option>Major issue</option></select></label></div><div class="grid2"><label>花费<input type="number" min="0" step="0.01" name="cost" value="0"></label><label>本次完成备注<textarea name="notes"></textarea></label></div><div class="before-after-grid">${photoSection('📷 Before：任务开始前','before')}${photoSection('📷 After：任务完成后','after')}</div><div class="notice">建议先拍 Before 照片，再进行清洁/维护，完成后拍 After 照片。历史记录中可直接进行前后对比。</div><div class="actions"><button type="button" class="btn primary" data-cmd="complete-save" data-id="${esc(id)}">保存完成</button></div></form>`)
+}
+function saveComplete(id){
+ const t=db.tasks.find(x=>x.id===id);if(!t)return;const f=new FormData(document.getElementById('completeForm')),date=f.get('date');
+ t.lastCompleted=date;
+ t.nextDue=iso(addPeriod(parseISO(date),t.unit==='nightly'?1:t.interval,t.unit==='nightly'?'day':t.unit));
+ t.history.unshift({
+  id:uid('hist'),
+  date,
+  condition:f.get('condition'),
+  cost:Number(f.get('cost')||0),
+  notes:f.get('notes')||'',
+  temperature:f.get('temp')||'',
+  beforePhotos:Array.isArray(window.pendingBeforePhotos)?window.pendingBeforePhotos:[],
+  afterPhotos:Array.isArray(window.pendingAfterPhotos)?window.pendingAfterPhotos:[],
+  photos:Array.isArray(window.pendingAfterPhotos)?window.pendingAfterPhotos:[],
+  checklistResults:(t.checklist||[]).map((x,i)=>({text:x.text,done:f.get('c'+i)==='on'}))
+ });
+ save();closeModal();render();toast('完成记录已保存')
 }
 
-function toggleCalendarSelect(i){selectMode=true;selected.has(i)?selected.delete(i):selected.add(i);renderCalendar()}
-function drawCreating(col,c,startHour,rowH){let old=col.querySelector('.creating');if(old)old.remove();let el=document.createElement('div');el.className='creating';let top=(c.start-startHour*60)/60*rowH,h=(c.end-c.start)/60*rowH;el.style.top=top+'px';el.style.height=Math.max(24,h)+'px';el.textContent=timeStr(c.start)+'–'+timeStr(c.end);col.appendChild(el)}
+function comparePhotosModal(h){
+ const before=Array.isArray(h.beforePhotos)?h.beforePhotos:[],after=Array.isArray(h.afterPhotos)?h.afterPhotos:(Array.isArray(h.photos)?h.photos:[]);
+ if(!before.length&&!after.length){modal('Before / After 对比','<div class="empty">这条历史记录没有照片。</div>');return}
+ const n=Math.max(before.length,after.length);
+ const pair=[];for(let i=0;i<n;i++){pair.push(`<div class="compare-pair"><div><div class="compare-label">Before ${i+1}</div>${before[i]?`<img src="${before[i].data}" data-cmd="photo-view" data-src="${before[i].data}">`:'<div class="compare-empty">无照片</div>'}</div><div><div class="compare-label">After ${i+1}</div>${after[i]?`<img src="${after[i].data}" data-cmd="photo-view" data-src="${after[i].data}">`:'<div class="compare-empty">无照片</div>'}</div></div>`)}
+ modal('Before / After 对比',`<div class="compare-wrap">${pair.join('')}</div>`)
+}
 
-function renderMonth(){let y=calDate.getFullYear(),m=calDate.getMonth(),first=new Date(y,m,1),start=(first.getDay()+6)%7,days=new Date(y,m+1,0).getDate();let html=`<div class="calbar"><button class="navbtn" onclick="copyMonth()">📋 复制本月</button><div class="caltitle">${y}年${m+1}月</div><button class="navbtn" onclick="pasteCalendar()" ${clipboard.length?'':'disabled'}>📌 粘贴${clipboard.length?` ${clipboard.length}`:''}</button></div><div class="hint">点击日期进入日视图；长按事项可进入批量选择</div><div class="month">`;for(let i=0;i<start;i++)html+='<div></div>';for(let n=1;n<=days;n++){let ds=fmt(new Date(y,m,n)),a=tasks.filter(t=>t.date===ds);html+=`<div class="day" onclick="calDate=parseDate('${ds}');calMode='day';selectMode=false;selected.clear();render()"><b>${n}</b>${a.slice(0,4).map(t=>`<div class="mini ${selected.has(t.id)?'selected':''}" onclick="if(selected.size){event.stopPropagation();toggleCalendarSelect('${t.id}')}" oncontextmenu="event.preventDefault();toggleCalendarSelect('${t.id}')">${t.completed?'✓ ':''}${esc(t.title)}</div>`).join('')}</div>`}$('#main').innerHTML=html+'</div>';renderBulk()}
+function deleteHistory(taskId,historyId,archived){
+ if(!confirm('确定删除这条历史记录吗？'))return;
+ if(archived==='1'){
+  db.archivedHistory=(db.archivedHistory||[]).filter(h=>h.id!==historyId);
+ }else{
+  const t=db.tasks.find(x=>x.id===taskId);
+  if(t)t.history=(t.history||[]).filter(h=>h.id!==historyId);
+ }
+ save();render();toast('历史记录已删除');
+}
+function deleteTaskConfirm(id){const t=db.tasks.find(x=>x.id===id);if(!t)return;modal('确认删除任务',`<div class="notice">确定删除 <strong>${esc(t.name)}</strong> 吗？<br>该任务的历史记录会保留在“历史”中。</div><div class="actions"><button type="button" class="btn" data-cmd="modal-close">取消</button><button type="button" class="btn danger" data-cmd="task-delete-confirm" data-id="${esc(id)}">确定删除</button></div>`)}
+function snoozeModal(id){modal('延期任务',`<form class="form" id="snoozeForm"><label>延后天数<input required type="number" min="1" step="1" name="days" value="7"></label><div class="actions"><button type="button" class="btn primary" data-cmd="snooze-save" data-id="${esc(id)}">保存延期</button></div></form>`)}
+function saveSnooze(id){const t=db.tasks.find(x=>x.id===id);if(!t)return;const f=new FormData(document.getElementById('snoozeForm')),n=Math.max(1,parseInt(f.get('days'))||1);t.nextDue=iso(addPeriod(parseISO(t.nextDue),n,'day'));save();closeModal();render();toast('任务已延期')}
 
-function copyDay(){let dates=calMode==='week'?weekDates():[new Date(calDate)],from=dates.map(fmt);clipboard=tasks.filter(t=>from.includes(t.date)).map(x=>({...x}));render()}
-function copyMonth(){let y=calDate.getFullYear(),m=calDate.getMonth(),a=tasks.filter(t=>{let d=t.date&&parseDate(t.date);return d&&d.getFullYear()===y&&d.getMonth()===m});clipboard=a.map(x=>({...x}));render()}
-function pasteCalendar(){if(!clipboard.length)return;let target=calMode==='week'?fmt(weekDates()[0]):fmt(calDate),base=clipboard.filter(x=>x.date)[0]?.date;let copies=clipboard.map(x=>{let n={...x,id:id(),completed:false,completedAt:null};if(base&&x.date){let delta=Math.round((parseDate(target)-parseDate(base))/86400000);n.date=addDays(x.date,delta)}else if(target)n.date=target;return n});tasks.push(...copies);selectMode=false;selected.clear();save();render()}
+function typeEditor(id){const x=id?db.settings.types.find(v=>v.id===id):null;modal(x?'编辑任务类型':'新增任务类型',`<form id="typeForm" class="form"><input type="hidden" name="id" value="${x?esc(x.id):''}"><label>类型名称<input required name="label" value="${x?esc(x.label):''}"></label><div class="actions"><button type="button" class="btn primary" data-settings="type-save">保存</button></div></form>`)}
+function typeDelete(id){const x=db.settings.types.find(v=>v.id===id);if(!x)return;if(db.settings.types.length<=1){toast('至少保留一个任务类型');return}modal('删除任务类型',`<div class="notice">删除“${esc(x.label)}”后，使用它的任务会自动移动到其他类型。</div><div class="actions"><button type="button" class="btn" data-cmd="modal-close">取消</button><button type="button" class="btn danger" data-settings="type-delete-confirm" data-id="${esc(id)}">确定删除</button></div>`)}
+function typeSave(){const f=new FormData(document.getElementById('typeForm')),id=f.get('id'),label=String(f.get('label')||'').trim();if(!label)return;const x=id?db.settings.types.find(v=>v.id===id):null;if(x)x.label=label;else db.settings.types.push({id:uid('type'),label});save();closeModal();render();toast('类型已保存')}
+function typeDeleteConfirm(id){const remain=db.settings.types.filter(v=>v.id!==id),fallback=remain[0].id;db.tasks.forEach(t=>{if(t.type===id)t.type=fallback});db.settings.types=remain;save();closeModal();render();toast('类型已删除')}
 
-function newTask(date=today(),start='',end=''){editTask(null,{date,start,end})}
-function editTask(i,p={}){let old=i?tasks.find(x=>x.id===i):null;let t=old||{id:id(),title:'',date:p.date??today(),start:p.start||'',end:p.end||'',important:false,urgent:false,completed:false,notes:'',repeat:'none'};$('#subtabs').innerHTML='';$('#headActions').innerHTML='';$('#heading').textContent=i?'编辑事项':'新事项';$('#main').innerHTML=`<div class="field"><label>事项</label><input id="fTitle" value="${esc(t.title)}" autofocus></div><div class="field"><label>日期</label><input id="fDate" type="date" value="${t.date||''}"></div><div class="row"><div class="field"><label>开始</label><input id="fStart" type="time" value="${t.start||''}"></div><div class="field"><label>结束</label><input id="fEnd" type="time" value="${t.end||''}"></div></div><div class="row"><button id="imp" class="chip ${t.important?'active':''}" onclick="this.classList.toggle('active')">⭐ 重要</button><button id="urg" class="chip ${t.urgent?'active':''}" onclick="this.classList.toggle('active')">⚡ 紧急</button></div><div class="field"><label>重复</label><select id="fRepeat"><option value="none">不重复</option><option value="daily">每天</option><option value="weekdays">工作日</option><option value="weekly">每周</option><option value="monthly">每月</option></select></div><div class="field"><label>备注</label><textarea id="fNotes">${esc(t.notes||'')}</textarea></div><div class="row"><button class="primary" onclick="commit('${i||''}','${t.id}')">保存</button>${i?`<button class="danger" onclick="copyOne('${i}')">📋复制</button><button class="danger" onclick="removeTask('${i}')">删除</button>`:''}<button class="danger" onclick="render()">取消</button></div>`;$('#fRepeat').value=t.repeat||'none'}
-function commit(old,newid){let x={id:newid,title:$('#fTitle').value.trim(),date:$('#fDate').value||null,start:$('#fStart').value,end:$('#fEnd').value,important:$('#imp').classList.contains('active'),urgent:$('#urg').classList.contains('active'),completed:false,notes:$('#fNotes').value,repeat:$('#fRepeat').value};if(!x.title)return alert('请输入事项名称');if(old){let o=tasks.find(t=>t.id===old);Object.assign(o,x,{completed:o.completed,completedAt:o.completedAt})}else tasks.push(x);save();render()}
-function copyOne(i){let t=tasks.find(x=>x.id===i);if(t){clipboard=[{...t,id:id(),completed:false,completedAt:null}];alert('已复制，可在日历顶部点击“粘贴”或在 Todo 批量模式粘贴。');render()}}
-function removeTask(i){if(confirm('删除此事项？')){tasks=tasks.filter(t=>t.id!==i);save();render()}}
-function renderSettings(){$('#subtabs').innerHTML='';$('#headActions').innerHTML='';$('#main').innerHTML=`<div class="card"><b>每日开始时间</b><p>06:30（今天/逾期和每日刷新边界）</p></div><div class="card"><b>默认事件时长</b><p>60 分钟</p></div><div class="card"><button class="primary" onclick="exportData()">导出 JSON</button> <button class="danger" onclick="clipboard=[];render()">清空复制板</button> <label class="danger">导入 JSON<input type="file" accept="application/json" hidden onchange="importData(this)"></label></div><div class="card"><b>本地数据</b><p>${tasks.length} 个事项。当前数据保存在浏览器本地。</p></div>`}
-function exportData(){let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(tasks,null,2)],{type:'application/json'}));a.download='todo-calendar-backup.json';a.click()}
-function importData(el){let r=new FileReader();r.onload=()=>{try{let x=JSON.parse(r.result);if(!Array.isArray(x))throw 0;tasks=x;save();render()}catch{alert('文件格式错误')}};if(el.files[0])r.readAsText(el.files[0])}
-document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>{page=b.dataset.page;selectMode=false;selected.clear();render()});$('#fab').onclick=()=>newTask();render();
-</script></body></html>
+function areaEditor(id){const x=id?db.settings.areas.find(v=>v.id===id):null;modal(x?'编辑区域':'新增区域',`<form id="areaForm" class="form"><input type="hidden" name="id" value="${x?esc(x.id):''}"><label>区域名称<input required name="label" value="${x?esc(x.label):''}"></label><div class="actions"><button type="button" class="btn primary" data-settings="area-save">保存</button></div></form>`)}
+function areaDelete(id){const x=db.settings.areas.find(v=>v.id===id);if(!x)return;if(db.settings.areas.length<=1){toast('至少保留一个区域');return}modal('删除区域',`<div class="notice">删除“${esc(x.label)}”后，相关任务会自动移动到其他区域。</div><div class="actions"><button type="button" class="btn" data-cmd="modal-close">取消</button><button type="button" class="btn danger" data-settings="area-delete-confirm" data-id="${esc(id)}">确定删除</button></div>`)}
+function areaSave(){const f=new FormData(document.getElementById('areaForm')),id=f.get('id'),label=String(f.get('label')||'').trim();if(!label)return;const x=id?db.settings.areas.find(v=>v.id===id):null;if(x)x.label=label;else db.settings.areas.push({id:uid('area'),label,subs:[]});save();closeModal();render();toast('区域已保存')}
+function areaDeleteConfirm(id){const remain=db.settings.areas.filter(v=>v.id!==id),fallback=remain[0];db.tasks.forEach(t=>{if(t.area===id){t.area=fallback.id;t.sub=fallback.subs[0]?.id||''}});db.settings.areas=remain;save();closeModal();render();toast('区域已删除')}
+
+function subEditor(areaId,subId){const a=db.settings.areas.find(v=>v.id===areaId),x=a?.subs?.find(v=>v.id===subId);if(!a)return;modal(x?'编辑子区域':'新增子区域',`<form id="subForm" class="form"><input type="hidden" name="area" value="${esc(areaId)}"><input type="hidden" name="id" value="${x?esc(x.id):''}"><label>子区域名称<input required name="label" value="${x?esc(x.label):''}"></label><div class="actions"><button type="button" class="btn primary" data-settings="sub-save">保存</button></div></form>`)}
+function subDelete(areaId,subId){const a=db.settings.areas.find(v=>v.id===areaId),x=a?.subs?.find(v=>v.id===subId);if(!a||!x)return;if(a.subs.length<=1){toast('至少保留一个子区域');return}modal('删除子区域',`<div class="notice">删除“${esc(x.label)}”后，使用它的任务会自动移动到该区域的其他子区域。</div><div class="actions"><button type="button" class="btn" data-cmd="modal-close">取消</button><button type="button" class="btn danger" data-settings="sub-delete-confirm" data-area="${esc(areaId)}" data-id="${esc(subId)}">确定删除</button></div>`)}
+function subSave(){const f=new FormData(document.getElementById('subForm')),area=f.get('area'),id=f.get('id'),label=String(f.get('label')||'').trim();if(!label)return;const a=db.settings.areas.find(v=>v.id===area);if(!a)return;const x=id?a.subs.find(v=>v.id===id):null;if(x)x.label=label;else a.subs.push({id:uid('sub'),label});save();closeModal();render();toast('子区域已保存')}
+function subDeleteConfirm(area,id){const a=db.settings.areas.find(v=>v.id===area);if(!a)return;const remain=a.subs.filter(v=>v.id!==id),fallback=remain[0]?.id;db.tasks.forEach(t=>{if(t.area===area&&t.sub===id)t.sub=fallback});a.subs=remain;save();closeModal();render();toast('子区域已删除')}
+
+function exportData(){const blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`house-maintenance-v4-${iso(today())}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500)}
+function resetData(){db=defaultDB();save();closeModal();render();toast('已恢复初始数据')}
+function importData(file){const r=new FileReader();r.onload=()=>{try{db=normalize(JSON.parse(r.result));save();render();toast('导入成功')}catch(e){alert('导入失败：不是有效的备份文件')}};r.readAsText(file)}
+
+document.addEventListener('click',function(e){
+ const nav=e.target.closest('[data-page]');
+ if(nav){page=nav.dataset.page;render();return}
+ const s=e.target.closest('[data-settings]');
+ if(s){
+  const a=s.dataset.settings,id=s.dataset.id,area=s.dataset.area;
+  if(a==='type-add')typeEditor();else if(a==='type-edit')typeEditor(id);else if(a==='type-delete')typeDelete(id);else if(a==='type-save')typeSave();else if(a==='type-delete-confirm')typeDeleteConfirm(id);
+  else if(a==='area-add')areaEditor();else if(a==='area-edit')areaEditor(id);else if(a==='area-delete')areaDelete(id);else if(a==='area-save')areaSave();else if(a==='area-delete-confirm')areaDeleteConfirm(id);
+  else if(a==='sub-add')subEditor(area);else if(a==='sub-edit')subEditor(area,id);else if(a==='sub-delete')subDelete(area,id);else if(a==='sub-save')subSave();else if(a==='sub-delete-confirm')subDeleteConfirm(area,id);
+  return
+ }
+ const c=e.target.closest('[data-cmd]');
+ if(c){
+  const a=c.dataset.cmd,id=c.dataset.id;
+  if(a==='photo-view'){const src=c.dataset.src;if(src)modal('照片',`<img src="${src}" style="display:block;max-width:100%;max-height:75vh;margin:auto;border-radius:10px">`);return}
+   if(a==='photo-delete'){const k=c.dataset.kind||'after',arr=k==='before'?window.pendingBeforePhotos:window.pendingAfterPhotos;if(Array.isArray(arr)){arr.splice(Number(c.dataset.index),1);const p=document.getElementById(k+'PhotoPreview');if(p)p.innerHTML=photoHTML(arr,false,k)}return}
+   if(a==='photo-compare'){const taskId=c.dataset.task,historyId=c.dataset.history,archived=c.dataset.archived==='1';let h=null;if(archived)h=(db.archivedHistory||[]).find(x=>x.id===historyId);else{const t=db.tasks.find(x=>x.id===taskId);if(t)h=(t.history||[]).find(x=>x.id===historyId)}if(h)comparePhotosModal(h);return}
+   if(a==='task-add')taskEditor();else if(a==='task-edit')taskEditor(id);else if(a==='task-complete')completeModal(id);else if(a==='task-delete')deleteTaskConfirm(id);else if(a==='task-delete-confirm'){
+ const t=db.tasks.find(x=>x.id===id);
+ if(t){
+  if(!Array.isArray(db.archivedHistory))db.archivedHistory=[];
+  (t.history||[]).forEach(h=>db.archivedHistory.push({id:uid('arch'),taskId:null,task:t.name,...h}));
+  db.tasks=db.tasks.filter(x=>x.id!==id);
+ }
+ save();closeModal();render();toast('任务已删除，相关历史记录已保留')
+}
+  else if(a==='history-delete')deleteHistory(c.dataset.task,c.dataset.history,c.dataset.archived);
+  else if(a==='task-snooze')snoozeModal(id);else if(a==='snooze-save')saveSnooze(id);else if(a==='task-save')saveTask();else if(a==='complete-save')saveComplete(id);else if(a==='modal-close')closeModal();else if(a==='export')exportData();else if(a==='import')document.getElementById('fileInput').click();else if(a==='reset'){if(confirm('确定恢复全部初始数据吗？当前任务、历史和分类都会被覆盖。'))resetData()}
+ }
+});
+document.addEventListener('input',e=>{if(e.target.dataset.role==='search'){window.q=e.target.value;render()}});
+document.addEventListener('change',e=>{if(e.target.id==='beforePhotos'||e.target.id==='afterPhotos'){const kind=e.target.id==='beforePhotos'?'before':'after',fs=Array.from(e.target.files||[]);Promise.all(fs.map(compressPhoto)).then(xs=>{const key=kind==='before'?'pendingBeforePhotos':'pendingAfterPhotos';window[key]=(window[key]||[]).concat(xs.map(data=>({data})));const p=document.getElementById(kind+'PhotoPreview');if(p)p.innerHTML=photoHTML(window[key],false,kind)}).catch(()=>toast('照片处理失败'));e.target.value='';return}
+  
+  if(e.target.dataset.role==='history-task'){window.historyTask=e.target.value;render();return}
+ if(e.target.dataset.role==='filter'){window.f=e.target.value;render()}
+ if(e.target.id==='taskArea'){const sub=document.getElementById('taskSub');if(sub)sub.innerHTML=subOpts(e.target.value,'')}
+ if(e.target.id==='fileInput'&&e.target.files[0]){importData(e.target.files[0]);e.target.value=''}
+});
+render();
+</script>
+</body>
+</html>
