@@ -336,21 +336,24 @@ body{
   .app{border-left:1px solid #e4eaf2;border-right:1px solid #e4eaf2}
 }
 .repeat-custom{margin-top:8px;padding:10px;border:1px solid #e1e8f0;border-radius:13px;background:#f8fafc}.repeat-days{display:flex;gap:5px;margin-top:8px}.repeat-days button{flex:1;border:1px solid #dce4ee;background:#fff;border-radius:9px;padding:8px 0}.repeat-days button.active{background:#1677ff;color:#fff;border-color:#1677ff}
-/* ===== V2.5 refined motion ===== */
-:root{--ease-standard:cubic-bezier(.2,.8,.2,1);--ease-emphasized:cubic-bezier(.16,1,.3,1)}
-button,.chip,.tabs button,.seg button,.nav button,.navbtn,.fab,.danger,.primary,.task,.event,.mini,.day,.card,.group,.selectbox{transition:transform .18s var(--ease-standard),background-color .20s var(--ease-standard),border-color .20s var(--ease-standard),box-shadow .20s var(--ease-standard),opacity .20s ease,color .20s var(--ease-standard)}
+/* ===== V2.6 natural motion ===== */
+:root{--ease-standard:cubic-bezier(.22,.7,.2,1);--ease-emphasized:cubic-bezier(.16,1,.3,1)}
+button,.chip,.tabs button,.seg button,.nav button,.navbtn,.fab,.danger,.primary,.task,.event,.mini,.day,.card,.group,.selectbox{transition:transform .22s var(--ease-standard),background-color .22s var(--ease-standard),border-color .22s var(--ease-standard),box-shadow .24s var(--ease-standard),opacity .22s ease,color .22s var(--ease-standard)}
 @media (hover:hover) and (pointer:fine){button:not(:disabled):hover,.chip:hover,.navbtn:hover{transform:translateY(-1px)}}
-button:not(:disabled):active,.chip:active,.navbtn:active{transform:scale(.975);transition-duration:.07s}
-.page-transition{animation:viewIn .16s var(--ease-emphasized) both;will-change:opacity,transform}
-@keyframes viewIn{from{opacity:.92;transform:translateY(2px)}to{opacity:1;transform:translateY(0)}}
-.task,.event,.mini,.day,.group{animation:none!important}
-.event.dragging{transition:box-shadow .14s var(--ease-standard),opacity .14s ease,transform .12s var(--ease-emphasized);will-change:transform,box-shadow,opacity}
-.drag-ghost{transition:top .055s linear,left .08s var(--ease-standard),right .08s var(--ease-standard),height .055s linear,opacity .12s ease,box-shadow .14s var(--ease-standard);will-change:top,left,right,height}
-.event.selected,.task.selected{transition:background-color .18s var(--ease-standard),box-shadow .18s var(--ease-standard),outline-color .18s ease,opacity .18s ease}
-.bulk{transition:transform .18s var(--ease-emphasized),opacity .16s ease}
-.fab{transition:transform .18s var(--ease-emphasized),box-shadow .20s var(--ease-standard)}
-.fab:active{transform:scale(.93)}
-.nav button,.tabs button{transition:color .18s var(--ease-standard),background .18s var(--ease-standard),transform .14s var(--ease-standard)}
+button:not(:disabled):active,.chip:active,.navbtn:active{transform:scale(.985);transition-duration:.09s}
+.page-transition{animation:viewIn .34s var(--ease-emphasized) both;will-change:opacity,transform}
+@keyframes viewIn{0%{opacity:0;transform:translate3d(0,8px,0)}55%{opacity:.96;transform:translate3d(0,2px,0)}100%{opacity:1;transform:translate3d(0,0,0)}}
+.task,.event,.mini,.day,.group{animation:contentIn .28s var(--ease-emphasized) both}
+.group:nth-child(2){animation-delay:.025s}.group:nth-child(3){animation-delay:.05s}.group:nth-child(4){animation-delay:.075s}
+.task{animation-delay:.025s}.event{animation-delay:.015s}
+@keyframes contentIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.event.dragging{transition:box-shadow .18s var(--ease-standard),opacity .18s ease,transform .14s var(--ease-emphasized);will-change:transform,box-shadow,opacity}
+.drag-ghost{transition:top .075s linear,left .10s var(--ease-standard),right .10s var(--ease-standard),height .075s linear,opacity .16s ease,box-shadow .18s var(--ease-standard);will-change:top,left,right,height}
+.event.selected,.task.selected{transition:background-color .20s var(--ease-standard),box-shadow .22s var(--ease-standard),outline-color .20s ease,opacity .20s ease,transform .20s var(--ease-standard)}
+.bulk{transition:transform .28s var(--ease-emphasized),opacity .22s ease}
+.fab{transition:transform .22s var(--ease-emphasized),box-shadow .24s var(--ease-standard)}
+.fab:active{transform:scale(.96)}
+.nav button,.tabs button{transition:color .22s var(--ease-standard),background .22s var(--ease-standard),transform .18s var(--ease-standard)}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
 </style></head><body><div class="app"><header class="head"><div class="headtop"><h1 id="heading">Todo</h1><div id="headActions"></div></div><div id="subtabs" class="tabs"></div></header><main id="main" class="content"></main><button id="fab" class="fab">+</button><div id="bulk" class="bulk hidden"></div><nav class="nav"><button data-page="todo" class="active">📋<br>Todo</button><button data-page="calendar">📅<br>日历</button><button data-page="settings">⚙️<br>设置</button></nav></div>
 <script>
@@ -417,7 +420,7 @@ function weekDates(){let base=new Date(calDate),day=(base.getDay()+6)%7;base.set
 
 function renderTimeline(){
   let dates=calMode==='week'?weekDates():[new Date(calDate)];
-  let startHour=6,endHour=24,rowH=64,total=(endHour-startHour)*rowH;
+  let startHour=0,endHour=24,rowH=64,total=(endHour-startHour)*rowH;
   let title=calMode==='week'?`${dates[0].getMonth()+1}月${dates[0].getDate()}日 – ${dates[6].getMonth()+1}月${dates[6].getDate()}日`:`${dates[0].getFullYear()}年${dates[0].getMonth()+1}月${dates[0].getDate()}日`;
   let gridClass=calMode==='day'?'day-grid':'week-grid';
   let dayHeads=dates.map(d=>`<div class="dayhead ${fmt(d)===today()?'today':''}" data-date="${fmt(d)}">${['一','二','三','四','五','六','日'][(d.getDay()+6)%7]}<strong>${d.getDate()}</strong></div>`).join('');
@@ -432,8 +435,10 @@ function renderTimeline(){
     : (calMode==='week'
       ? `左右滑动查看完整一周（可横向拖动）；长按空白处创建；短按编辑；长按静止选择；长按后移动拖动`
       : `长按空白处并上下滑动＝创建；短按＝编辑；长按静止＝批量选择；长按后移动＝拖动`);
+  const oldWrap=$('#main .timeline-wrap'); const savedScrollLeft=oldWrap?oldWrap.scrollLeft:0, savedScrollTop=oldWrap?oldWrap.scrollTop:0;
   $('#main').innerHTML=`<div class="calbar"><button class="navbtn" onclick="copyDay()">${copyLabel}</button><div class="caltitle">${title}</div><button class="navbtn" onclick="pasteCalendar()" ${clipboard.length?'':'disabled'}>📌 粘贴${clipboard.length?` ${clipboard.length}`:''}</button></div><div class="hint">${hint}</div><div class="timeline-wrap" style="position:relative"><div class="week-zoom-label" id="weekZoomLabel">100%</div><div class="${gridClass}" style="grid-template-rows:52px auto;--week-col-width:${weekColWidth}px">${header}${timeColumn}${cols}</div></div>`;
   attachTimelineGestures(dates,startHour,rowH); if(calMode==='week')attachWeekPinchZoom();
+  requestAnimationFrame(()=>{const w=$('#main .timeline-wrap');if(w){w.scrollLeft=savedScrollLeft;w.scrollTop=savedScrollTop;}});
 }
 
 function dayColumn(d,total,startHour,rowH){
@@ -632,31 +637,47 @@ function attachTimelineGestures(dates,startHour,rowH){
 function attachWeekPinchZoom(){
   const wrap=document.querySelector('.timeline-wrap'), grid=wrap?.querySelector('.week-grid');
   if(!wrap||!grid)return;
-  let active=false,startDist=0,startWidth=weekColWidth;
+  let active=false,startDist=0,startWidth=weekColWidth,raf=0;
+  const pts=new Map();
   const distance=(a,b)=>Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY);
-  wrap.addEventListener('touchstart',e=>{
-    if(e.touches.length!==2)return;
-    active=true;startDist=distance(e.touches[0],e.touches[1]);startWidth=weekColWidth;
-  },{passive:false});
-  wrap.addEventListener('touchmove',e=>{
-    if(!active||e.touches.length!==2)return;
-    e.preventDefault();
-    const scale=distance(e.touches[0],e.touches[1])/Math.max(1,startDist);
-    weekColWidth=Math.round(Math.max(80,Math.min(220,startWidth*scale)));
-    grid.style.setProperty('--week-col-width',weekColWidth+'px');
-    const label=$('#weekZoomLabel');
-    if(label){label.textContent=Math.round(weekColWidth/120*100)+'%';label.classList.add('show')}
-  },{passive:false});
-  const end=()=>{
-    if(!active)return;
-    active=false;
-    localStorage.setItem('todoCalendarWeekWidth',String(weekColWidth));
-    setTimeout(()=>$('#weekZoomLabel')?.classList.remove('show'),500);
+  const two=()=>pts.size>=2?Array.from(pts.values()).slice(0,2):null;
+  const showZoom=()=>{const label=$('#weekZoomLabel');if(label){label.textContent=Math.round(weekColWidth/120*100)+'%';label.classList.add('show');clearTimeout(showZoom.timer);showZoom.timer=setTimeout(()=>label.classList.remove('show'),650)}};
+  const update=(dist)=>{
+    const scale=dist/Math.max(1,startDist);
+    weekColWidth=Math.round(Math.max(80,Math.min(260,startWidth*scale)));
+    if(!raf){raf=requestAnimationFrame(()=>{raf=0;grid.style.setProperty('--week-col-width',weekColWidth+'px');showZoom()})}
   };
-  wrap.addEventListener('touchend',end,{passive:true});
-  wrap.addEventListener('touchcancel',end,{passive:true});
-}
+  wrap.addEventListener('pointerdown',e=>{
+    if(e.pointerType!=='touch')return;
+    pts.set(e.pointerId,e);
+    if(pts.size===2){const a=two();active=true;startDist=distance(a[0],a[1]);startWidth=weekColWidth;e.preventDefault();}
+  },{passive:false});
+  wrap.addEventListener('pointermove',e=>{
+    if(e.pointerType!=='touch')return;
+    if(pts.has(e.pointerId))pts.set(e.pointerId,e);
+    if(!active)return;
+    const a=two();if(!a)return;
+    e.preventDefault();update(distance(a[0],a[1]));
+  },{passive:false});
+  const endPointer=e=>{
+    if(e.pointerType!=='touch')return;
+    pts.delete(e.pointerId);
+    if(pts.size<2&&active){active=false;localStorage.setItem('todoCalendarWeekWidth',String(weekColWidth));}
+  };
+  wrap.addEventListener('pointerup',endPointer,{passive:false});
+  wrap.addEventListener('pointercancel',endPointer,{passive:false});
+  wrap.addEventListener('pointerleave',e=>{if(e.pointerType==='touch'&&active&&pts.has(e.pointerId))pts.set(e.pointerId,e)},{passive:false});
 
+  // iOS Safari fallback: native gesture events are more reliable for two-finger pinch.
+  let gestureStartWidth=weekColWidth;
+  wrap.addEventListener('gesturestart',e=>{gestureStartWidth=weekColWidth;e.preventDefault()},{passive:false});
+  wrap.addEventListener('gesturechange',e=>{
+    e.preventDefault();
+    weekColWidth=Math.round(Math.max(80,Math.min(260,gestureStartWidth*e.scale)));
+    grid.style.setProperty('--week-col-width',weekColWidth+'px');showZoom();
+  },{passive:false});
+  wrap.addEventListener('gestureend',()=>localStorage.setItem('todoCalendarWeekWidth',String(weekColWidth)),{passive:true});
+}
 function toggleCalendarSelect(i){selectMode=true;selected.has(i)?selected.delete(i):selected.add(i);renderCalendar()}
 function drawCreating(col,c,startHour,rowH){let old=col.querySelector('.creating');if(old)old.remove();let el=document.createElement('div');el.className='creating';let top=(c.start-startHour*60)/60*rowH,h=(c.end-c.start)/60*rowH;el.style.top=top+'px';el.style.height=Math.max(24,h)+'px';el.textContent=timeStr(c.start)+'–'+timeStr(c.end);col.appendChild(el)}
 
