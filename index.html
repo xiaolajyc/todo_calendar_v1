@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"><meta name="theme-color" content="#ffffff"><title>Todo Calendar V1.3</title>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"><meta name="theme-color" content="#ffffff"><title>Todo Calendar V1.6</title>
 <style>
 :root{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#171717;background:#f5f5f7;--line:#e7e7eb;--muted:#777;--accent:#111}*{box-sizing:border-box}body{margin:0;background:#f5f5f7;overscroll-behavior:none}.app{max-width:1100px;margin:auto;min-height:100vh;background:#fff;padding-bottom:76px}.head{position:sticky;top:0;background:rgba(255,255,255,.96);backdrop-filter:blur(12px);padding:12px 14px;border-bottom:1px solid var(--line);z-index:30}.headtop{display:flex;align-items:center;justify-content:space-between;gap:8px}.head h1{margin:0;font-size:21px}.tabs,.seg{display:flex;gap:6px;margin-top:10px;overflow:auto}.tabs button,.seg button,.chip{border:0;border-radius:10px;padding:8px 11px;background:#eee;white-space:nowrap}.active{background:#111!important;color:#fff}.content{padding:12px}.group{margin:18px 0}.group h3{font-size:14px;margin:0 0 6px}.task{display:flex;align-items:center;gap:10px;padding:13px 7px;border-bottom:1px solid #eee;touch-action:pan-y}.check{width:23px;height:23px;border:2px solid #aaa;border-radius:50%;flex:none}.done .check{background:#111}.done .title{text-decoration:line-through;opacity:.45}.taskmain{flex:1;min-width:0}.title{font-weight:600}.meta{font-size:12px;color:#777;margin-top:3px}.badge{font-size:12px}.fab{position:fixed;right:18px;bottom:88px;width:56px;height:56px;border-radius:50%;border:0;background:#111;color:#fff;font-size:30px;z-index:20;box-shadow:0 5px 20px #0002}.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(1100px,100%);height:70px;background:#fff;border-top:1px solid #ddd;display:flex;z-index:40;padding-bottom:env(safe-area-inset-bottom)}.nav button{flex:1;border:0;background:white;font-size:13px}.nav .active{color:#111;background:#eee!important}.card{background:#f5f5f7;border-radius:16px;padding:14px;margin-bottom:12px}.row{display:flex;gap:10px;align-items:center}.row>*{flex:1}.field{margin:12px 0}.field label{display:block;font-size:12px;color:#666;margin-bottom:5px}.field input,.field textarea,.field select{width:100%;padding:12px;border:1px solid #ddd;border-radius:12px;background:#fff}.primary,.danger{border:0;border-radius:12px;padding:12px 16px}.primary{background:#111;color:#fff}.danger{background:#eee}.hidden{display:none!important}.empty{text-align:center;color:#888;padding:35px 10px}
 /* Google Calendar-like week/day timeline */
-.calbar{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:8px}.calbar .navbtn{border:0;background:#eee;border-radius:10px;padding:8px 12px}.caltitle{font-weight:700;flex:1;text-align:center}.timeline-wrap{border:1px solid var(--line);border-radius:12px;overflow:auto;background:#fff;-webkit-overflow-scrolling:touch}.week-grid{display:grid;grid-template-columns:54px repeat(7,minmax(105px,1fr));min-width:790px}.day-grid{display:grid;grid-template-columns:54px minmax(0,1fr);min-width:0}.dayhead{position:sticky;top:0;background:#fff;z-index:12;border-bottom:1px solid var(--line);height:52px;text-align:center;padding-top:7px;font-size:12px}.dayhead strong{display:block;font-size:16px;margin-top:2px}.dayhead.today strong{background:#111;color:#fff;border-radius:50%;width:28px;height:28px;line-height:28px;margin:2px auto 0}.timecol{background:#fafafa}.timecell{height:64px;border-top:1px solid var(--line);font-size:10px;color:#888;text-align:right;padding:4px 6px 0 0}.daycol{position:relative;height:1152px;border-left:1px solid var(--line);background:repeating-linear-gradient(to bottom,transparent 0,transparent 31px,#f0f0f2 32px,transparent 33px,transparent 63px,#e7e7eb 64px)}.slotline{position:absolute;left:0;right:0;height:1px;background:#ececf0}.event{position:absolute;left:3px;right:3px;border-radius:7px;background:#e8e8ed;border-left:3px solid #111;padding:5px 6px;font-size:11px;line-height:1.25;overflow:hidden;z-index:5;touch-action:none;user-select:none}.event.done{opacity:.48;text-decoration:line-through}.event .etime{font-size:10px;color:#555}.creating{position:absolute;left:3px;right:3px;border-radius:7px;background:#111;color:#fff;opacity:.78;z-index:15;pointer-events:none;padding:5px;font-size:11px}.nowline{position:absolute;height:2px;background:#111;left:0;right:0;z-index:8}.month{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}.day{min-height:80px;border:1px solid #eee;border-radius:9px;padding:5px;font-size:11px}.day b{display:block}.mini{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:#eee;border-radius:4px;padding:2px;margin-top:3px}.mini.selected{outline:2px solid #111}.copybar{background:#f0f0f3;border-radius:10px;padding:8px 10px;margin-bottom:8px;display:flex;align-items:center;gap:8px;font-size:12px}.copybar button{border:0;background:#111;color:#fff;border-radius:8px;padding:7px 10px}.bulk{position:fixed;left:50%;transform:translateX(-50%);bottom:70px;width:min(1100px,100%);background:#111;color:#fff;padding:9px;display:flex;gap:6px;overflow:auto;z-index:35}.bulk button{white-space:nowrap;border:0;border-radius:9px;padding:8px}.bulk button:disabled{opacity:.45}.event.selected{outline:3px solid #111;outline-offset:1px}.event.bulkable{cursor:grab}.event.dragging{opacity:.55;z-index:50;box-shadow:0 6px 18px #0003}.timeline-wrap{overscroll-behavior:contain}.daycol{touch-action:pan-y}.event{touch-action:none}.daycol.select-mode{touch-action:none}.daycol.select-mode .event{pointer-events:auto}.selectbox{width:22px;height:22px;border:2px solid #aaa;border-radius:5px;flex:none}.selected .selectbox{background:#111;box-shadow:inset 0 0 0 4px #fff}.hint{font-size:12px;color:#777;margin:6px 0 10px}
+.calbar{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:8px}.calbar .navbtn{border:0;background:#eee;border-radius:10px;padding:8px 12px}.caltitle{font-weight:700;flex:1;text-align:center}.timeline-wrap{border:1px solid var(--line);border-radius:12px;overflow:auto;background:#fff;-webkit-overflow-scrolling:touch}.week-grid{display:grid;grid-template-columns:54px repeat(7,minmax(105px,1fr));min-width:790px}.day-grid{display:grid;grid-template-columns:54px minmax(0,1fr);min-width:0}.dayhead{position:sticky;top:0;background:#fff;z-index:12;border-bottom:1px solid var(--line);height:52px;text-align:center;padding-top:7px;font-size:12px}.dayhead strong{display:block;font-size:16px;margin-top:2px}.dayhead.today strong{background:#111;color:#fff;border-radius:50%;width:28px;height:28px;line-height:28px;margin:2px auto 0}.timecol{background:#fafafa}.timecell{height:64px;border-top:1px solid var(--line);font-size:10px;color:#888;text-align:right;padding:4px 6px 0 0}.daycol{position:relative;height:1152px;border-left:1px solid var(--line);background:repeating-linear-gradient(to bottom,transparent 0,transparent 31px,#f0f0f2 32px,transparent 33px,transparent 63px,#e7e7eb 64px)}.slotline{position:absolute;left:0;right:0;height:1px;background:#ececf0}.event{position:absolute;left:3px;right:3px;border-radius:7px;background:#e8e8ed;border-left:3px solid #111;padding:5px 6px;font-size:11px;line-height:1.25;overflow:hidden;z-index:5;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}.event.done{opacity:.48;text-decoration:line-through}.event .etime{font-size:10px;color:#555}.creating{position:absolute;left:3px;right:3px;border-radius:7px;background:#111;color:#fff;opacity:.78;z-index:15;pointer-events:none;padding:5px;font-size:11px}.nowline{position:absolute;height:2px;background:#111;left:0;right:0;z-index:8}.month{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}.day{min-height:80px;border:1px solid #eee;border-radius:9px;padding:5px;font-size:11px}.day b{display:block}.mini{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:#eee;border-radius:4px;padding:2px;margin-top:3px}.mini.selected{outline:2px solid #111}.copybar{background:#f0f0f3;border-radius:10px;padding:8px 10px;margin-bottom:8px;display:flex;align-items:center;gap:8px;font-size:12px}.copybar button{border:0;background:#111;color:#fff;border-radius:8px;padding:7px 10px}.bulk{position:fixed;left:50%;transform:translateX(-50%);bottom:70px;width:min(1100px,100%);background:#111;color:#fff;padding:9px;display:flex;gap:6px;overflow:auto;z-index:35}.bulk button{white-space:nowrap;border:0;border-radius:9px;padding:8px}.bulk button:disabled{opacity:.45}.event.selected{outline:3px solid #111;outline-offset:1px}.event.bulkable{cursor:grab}.event.dragging{opacity:.55;z-index:50;box-shadow:0 6px 18px #0003}.timeline-wrap{overscroll-behavior:contain}.daycol{touch-action:pan-y}.event{touch-action:none}.daycol.select-mode{touch-action:none}.daycol.select-mode .event{pointer-events:auto}.selectbox{width:22px;height:22px;border:2px solid #aaa;border-radius:5px;flex:none}.selected .selectbox{background:#111;box-shadow:inset 0 0 0 4px #fff}.hint{font-size:12px;color:#777;margin:6px 0 10px}
 @media(min-width:800px){.content{padding:16px 20px}.week-grid{grid-template-columns:58px repeat(7,minmax(120px,1fr))}.day-grid{grid-template-columns:58px minmax(0,1fr)}}
 </style></head><body><div class="app"><header class="head"><div class="headtop"><h1 id="heading">Todo</h1><div id="headActions"></div></div><div id="subtabs" class="tabs"></div></header><main id="main" class="content"></main><button id="fab" class="fab">+</button><div id="bulk" class="bulk hidden"></div><nav class="nav"><button data-page="todo" class="active">📋<br>Todo</button><button data-page="calendar">📅<br>日历</button><button data-page="settings">⚙️<br>设置</button></nav></div>
 <script>
@@ -90,112 +90,177 @@ function nowLine(startHour,rowH){let d=new Date(),m=d.getHours()*60+d.getMinutes
 
 function attachTimelineGestures(dates,startHour,rowH){
   const cols=[...document.querySelectorAll('.daycol')];
-  const wrap=document.querySelector('.timeline-wrap');
   const snap=m=>Math.round(m/15)*15;
   const clamp=(m,duration)=>Math.max(startHour*60,Math.min(1439-duration,snap(m)));
-  const dateAtX=x=>{
-    for(const c of cols){const r=c.getBoundingClientRect();if(x>=r.left&&x<=r.right)return c.dataset.date}
+  const colAtX=x=>{
+    for(const c of cols){const r=c.getBoundingClientRect();if(x>=r.left&&x<=r.right)return c}
     if(calMode==='week'){
-      const nearest=cols.reduce((best,c)=>{const r=c.getBoundingClientRect();const dist=x<r.left?r.left-x:x>r.right?x-r.right:0;return !best||dist<best.dist?{c,dist}:best},null);return nearest?.c?.dataset.date||dates[0]&&fmt(dates[0]);
+      let best=cols[0],bd=Infinity;
+      cols.forEach(c=>{const r=c.getBoundingClientRect();const d=x<r.left?r.left-x:x>r.right?x-r.right:0;if(d<bd){bd=d;best=c}});
+      return best;
     }
-    return cols[0]?.dataset.date;
+    return cols[0];
   };
-  const colAtX=x=>cols.find(c=>{const r=c.getBoundingClientRect();return x>=r.left&&x<=r.right})||cols[0];
   const minAt=(e,col)=>{const r=col.getBoundingClientRect();return (e.clientY-r.top)/rowH*60+startHour*60};
 
+  /* 空白区域：长按后拖动创建时间段 */
   cols.forEach(col=>{
-    let timer=null,creating=null,startY=0,pointerId=null,moved=false;
+    let timer=null,creating=null,pid=null,startY=0,startX=0;
     const clear=()=>{if(timer){clearTimeout(timer);timer=null}};
     col.addEventListener('pointerdown',e=>{
       if(e.target.closest('.event')||selectMode)return;
       if(e.pointerType==='mouse'&&e.button!==0)return;
-      pointerId=e.pointerId;startY=e.clientY;moved=false;
+      pid=e.pointerId;startX=e.clientX;startY=e.clientY;
       const m=clamp(minAt(e,col),0);
       timer=setTimeout(()=>{
         timer=null;creating={start:m,end:m+60};
         drawCreating(col,creating,startHour,rowH);
-        try{col.setPointerCapture(pointerId)}catch{}
-      },420);
+        try{col.setPointerCapture(pid)}catch{}
+      },450);
     });
     col.addEventListener('pointermove',e=>{
       if(!timer&&!creating)return;
-      if(timer&&Math.hypot(e.clientX-(e._sx||e.clientX),e.clientY-startY)>10){clear();return;}
+      if(timer && Math.hypot(e.clientX-startX,e.clientY-startY)>10){clear();return}
       if(!creating)return;
-      e.preventDefault();moved=true;
-      const m=clamp(minAt(e,col),0);creating.end=Math.max(creating.start+15,m);
+      e.preventDefault();
+      const m=clamp(minAt(e,col),0);
+      creating.end=Math.max(creating.start+15,m);
       drawCreating(col,creating,startHour,rowH);
-    });
+    },{passive:false});
     col.addEventListener('pointerup',e=>{
-      clear();if(!creating)return;
+      clear();
+      if(!creating)return;
       const c=creating;creating=null;col.querySelector('.creating')?.remove();
       newTask(col.dataset.date,timeStr(c.start),timeStr(c.end));
     });
     col.addEventListener('pointercancel',()=>{clear();creating=null;col.querySelector('.creating')?.remove()});
   });
 
+  /* 事项：iPhone 上不要用“长按立即选择”。采用三态：
+     短按=编辑；长按后松手=批量选择；长按后继续移动=拖动。
+     关键点：ready 状态只在长按计时结束后出现，松手前不改变 DOM，
+     因此不会触发 iOS 原生文字选择，也不会与拖动抢手势。 */
   document.querySelectorAll('.event').forEach(ev=>{
-    let timer=null,drag=null,press=null,dragArmed=false,longPressed=false;
+    let timer=null,press=null,ready=false,drag=null,moved=false;
     const clearTimer=()=>{if(timer){clearTimeout(timer);timer=null}};
+    const reset=()=>{clearTimer();press=null;ready=false;drag=null;moved=false;ev.classList.remove('dragging')};
+
     const startDrag=(e,t)=>{
       const source=ev.closest('.daycol'); if(!source)return;
-      const rect=ev.getBoundingClientRect(),origMin=timeMin(t.start);
+      const rect=ev.getBoundingClientRect();
+      const origMin=timeMin(t.start);
       const duration=Math.max(15,(timeMin(t.end)||origMin+60)-origMin);
-      drag={t,source,origMin,duration,grabOffset:e.clientY-rect.top,pointerId:e.pointerId};
-      ev.classList.add('dragging'); try{ev.setPointerCapture(e.pointerId)}catch{}
+      drag={
+        t,source,duration,
+        grabOffset:e.clientY-rect.top,
+        pointerId:e.pointerId
+      };
+      ev.classList.add('dragging');
+      try{ev.setPointerCapture(e.pointerId)}catch{}
     };
+
     ev.addEventListener('pointerdown',e=>{
       e.stopPropagation();
       if(e.pointerType==='mouse'&&e.button!==0)return;
-      const t=tasks.find(x=>x.id===ev.dataset.id); if(!t)return;
-      clearTimer(); drag=null; dragArmed=false; longPressed=false;
-      press={x:e.clientX,y:e.clientY,id:t.id};
-      /* 进入批量选择后：所有日历事项只负责选择，绝不启动拖动 */
-      if(selectMode)return;
-      /* 普通模式：短按=编辑；长按静止=选择；长按后移动=拖动 */
-      timer=setTimeout(()=>{dragArmed=true;timer=null},300);
-      try{ev.setPointerCapture(e.pointerId)}catch{}
-    });
+      const t=tasks.find(x=>x.id===ev.dataset.id);if(!t)return;
+
+      clearTimer();press={x:e.clientX,y:e.clientY,id:t.id};ready=false;drag=null;moved=false;
+
+      /* 已经在选择模式：一次触摸只做选择，绝不启动拖动 */
+      if(selectMode){
+        e.preventDefault();
+        return;
+      }
+
+      /* 防止 iOS 长按产生文本选择/系统菜单 */
+      if(e.pointerType==='touch')e.preventDefault();
+
+      /* 650ms 后进入“可选择/可拖动”状态，但暂不执行任何动作 */
+      timer=setTimeout(()=>{
+        timer=null;ready=true;
+      },650);
+    },{passive:false});
+
     ev.addEventListener('pointermove',e=>{
       if(!press)return;
       const dist=Math.hypot(e.clientX-press.x,e.clientY-press.y);
-      if(!drag && timer && dist>12){
-        /* 尚未长按，不抢走页面滚动 */
-        clearTimer(); return;
+
+      /* 长按计时未完成：允许用户正常滚动页面，不启动拖动 */
+      if(!ready&&!drag){
+        if(dist>10)clearTimer();
+        return;
       }
-      if(!drag && dragArmed && dist>8){
-        const t=tasks.find(x=>x.id===press.id); if(t)startDrag(e,t);
+
+      /* 长按已经完成，再移动才真正进入拖动 */
+      if(ready&&!drag&&dist>10){
+        const t=tasks.find(x=>x.id===press.id);
+        if(t){
+          startDrag(e,t);
+          moved=true;
+        }
       }
+
       if(!drag)return;
       e.preventDefault();
+
       const target=colAtX(e.clientX)||drag.source;
       const raw=minAt(e,target)-(drag.grabOffset/rowH*60);
       const nm=clamp(raw,drag.duration);
+
+      /* 用 transform 只做视觉预览，不频繁改 DOM 布局 */
       ev.style.top=((nm-startHour*60)/60*rowH)+'px';
       ev.style.height=Math.max(28,drag.duration/60*rowH)+'px';
-      const label=ev.querySelector('.etime'); if(label)label.textContent=timeStr(nm)+'–'+timeStr(nm+drag.duration);
-      ev.dataset.previewDate=target.dataset.date; ev.dataset.previewMin=String(nm);
-    });
-    const finish=(e,cancel=false)=>{
-      clearTimer(); if(!press)return;
-      const id0=press.id,t=tasks.find(x=>x.id===id0);
-      if(drag){
-        if(!cancel&&t){
-          const target=colAtX(e.clientX)||drag.source;
-          const raw=minAt(e,target)-(drag.grabOffset/rowH*60),nm=clamp(raw,drag.duration);
-          t.date=target.dataset.date; t.start=timeStr(nm); t.end=timeStr(nm+drag.duration); save();
-        }
-        ev.classList.remove('dragging'); drag=null; press=null; render(); return;
+      const label=ev.querySelector('.etime');
+      if(label)label.textContent=timeStr(nm)+'–'+timeStr(nm+drag.duration);
+      ev.dataset.previewDate=target.dataset.date;
+      ev.dataset.previewMin=String(nm);
+    },{passive:false});
+
+    ev.addEventListener('pointerup',e=>{
+      const p=press;
+      if(!p){reset();return}
+      clearTimer();
+
+      /* 已进入批量选择模式：只切换选择 */
+      if(selectMode){
+        toggleCalendarSelect(p.id);
+        reset();
+        return;
       }
-      if(cancel){press=null;dragArmed=false;return}
-      if(selectMode){toggleCalendarSelect(id0)}
-      else if(dragArmed){toggleCalendarSelect(id0)}
-      else{editTask(id0)}
-      press=null;dragArmed=false;longPressed=false;
-    };
-    ev.addEventListener('pointerup',e=>finish(e,false));
-    ev.addEventListener('pointercancel',e=>finish(e,true));
+
+      /* 真正拖动完成 */
+      if(drag){
+        const t=tasks.find(x=>x.id===p.id);
+        if(t){
+          const target=colAtX(e.clientX)||drag.source;
+          const raw=minAt(e,target)-(drag.grabOffset/rowH*60);
+          const nm=clamp(raw,drag.duration);
+          t.date=target.dataset.date;
+          t.start=timeStr(nm);
+          t.end=timeStr(nm+drag.duration);
+          save();
+        }
+        reset();
+        render();
+        return;
+      }
+
+      /* 长按后没有移动：进入批量选择 */
+      if(ready){
+        toggleCalendarSelect(p.id);
+        reset();
+        return;
+      }
+
+      /* 普通短按：编辑 */
+      reset();
+      editTask(p.id);
+    });
+
+    ev.addEventListener('pointercancel',()=>reset());
   });
 }
+
 function toggleCalendarSelect(i){selectMode=true;selected.has(i)?selected.delete(i):selected.add(i);renderCalendar()}
 function drawCreating(col,c,startHour,rowH){let old=col.querySelector('.creating');if(old)old.remove();let el=document.createElement('div');el.className='creating';let top=(c.start-startHour*60)/60*rowH,h=(c.end-c.start)/60*rowH;el.style.top=top+'px';el.style.height=Math.max(24,h)+'px';el.textContent=timeStr(c.start)+'–'+timeStr(c.end);col.appendChild(el)}
 
