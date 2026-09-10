@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"><meta name="theme-color" content="#ffffff"><title>Todo Calendar V1.9</title>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"><meta name="theme-color" content="#ffffff"><title>Todo Calendar V2.5</title>
 <style>
 :root{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#171717;background:#f5f5f7;--line:#e7e7eb;--muted:#777;--accent:#111}*{box-sizing:border-box}body{margin:0;background:#f5f5f7;overscroll-behavior:none}.app{max-width:1100px;margin:auto;min-height:100vh;background:#fff;padding-bottom:76px}.head{position:sticky;top:0;background:rgba(255,255,255,.96);backdrop-filter:blur(12px);padding:12px 14px;border-bottom:1px solid var(--line);z-index:30}.headtop{display:flex;align-items:center;justify-content:space-between;gap:8px}.head h1{margin:0;font-size:21px}.tabs,.seg{display:flex;gap:6px;margin-top:10px;overflow:auto}.tabs button,.seg button,.chip{border:0;border-radius:10px;padding:8px 11px;background:#eee;white-space:nowrap}.active{background:#111!important;color:#fff}.content{padding:12px}.group{margin:18px 0}.group h3{font-size:14px;margin:0 0 6px}.task{display:flex;align-items:center;gap:10px;padding:13px 7px;border-bottom:1px solid #eee;touch-action:pan-y}.check{width:23px;height:23px;border:2px solid #aaa;border-radius:50%;flex:none}.done .check{background:#111}.done .title{text-decoration:line-through;opacity:.45}.taskmain{flex:1;min-width:0}.title{font-weight:600}.meta{font-size:12px;color:#777;margin-top:3px}.badge{font-size:12px}.fab{position:fixed;right:18px;bottom:88px;width:56px;height:56px;border-radius:50%;border:0;background:#111;color:#fff;font-size:30px;z-index:20;box-shadow:0 5px 20px #0002}.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(1100px,100%);height:70px;background:#fff;border-top:1px solid #ddd;display:flex;z-index:40;padding-bottom:env(safe-area-inset-bottom)}.nav button{flex:1;border:0;background:white;font-size:13px}.nav .active{color:#111;background:#eee!important}.card{background:#f5f5f7;border-radius:16px;padding:14px;margin-bottom:12px}.row{display:flex;gap:10px;align-items:center}.row>*{flex:1}.field{margin:12px 0}.field label{display:block;font-size:12px;color:#666;margin-bottom:5px}.field input,.field textarea,.field select{width:100%;padding:12px;border:1px solid #ddd;border-radius:12px;background:#fff}.primary,.danger{border:0;border-radius:12px;padding:12px 16px}.primary{background:#111;color:#fff}.danger{background:#eee}.hidden{display:none!important}.empty{text-align:center;color:#888;padding:35px 10px}
 /* Google Calendar-like week/day timeline */
-.calbar{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:8px}.calbar .navbtn{border:0;background:#eee;border-radius:10px;padding:8px 12px}.caltitle{font-weight:700;flex:1;text-align:center}.timeline-wrap{border:1px solid var(--line);border-radius:12px;overflow-x:auto;overflow-y:auto;background:#fff;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;touch-action:pan-x pan-y;scrollbar-width:thin}.week-grid{display:grid;grid-template-columns:54px repeat(7,120px)!important;width:894px!important;min-width:894px!important}.day-grid{display:grid;grid-template-columns:54px minmax(0,1fr);min-width:0}.dayhead{position:sticky;top:0;background:#fff;z-index:12;border-bottom:1px solid var(--line);height:52px;text-align:center;padding-top:7px;font-size:12px}.dayhead strong{display:block;font-size:16px;margin-top:2px}.dayhead.today strong{background:#111;color:#fff;border-radius:50%;width:28px;height:28px;line-height:28px;margin:2px auto 0}.timecol{background:#fafafa}.timecell{height:64px;border-top:1px solid var(--line);font-size:10px;color:#888;text-align:right;padding:4px 6px 0 0}.daycol{position:relative;height:1152px;border-left:1px solid var(--line);background:repeating-linear-gradient(to bottom,transparent 0,transparent 31px,#f0f0f2 32px,transparent 33px,transparent 63px,#e7e7eb 64px)}.slotline{position:absolute;left:0;right:0;height:1px;background:#ececf0}.event{position:absolute;left:3px;right:3px;border-radius:7px;background:#e8e8ed;border-left:3px solid #111;padding:5px 6px;font-size:11px;line-height:1.25;overflow:hidden;z-index:5;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}.event.done{opacity:.48;text-decoration:line-through}.event .etime{font-size:10px;color:#555}.creating{position:absolute;left:3px;right:3px;border-radius:7px;background:#111;color:#fff;opacity:.78;z-index:15;pointer-events:none;padding:5px;font-size:11px}.nowline{position:absolute;height:2px;background:#111;left:0;right:0;z-index:8}.month{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}.day{min-height:80px;border:1px solid #eee;border-radius:9px;padding:5px;font-size:11px}.day b{display:block}.mini{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:#eee;border-radius:4px;padding:2px;margin-top:3px}.mini.selected{outline:2px solid #111}.copybar{background:#f0f0f3;border-radius:10px;padding:8px 10px;margin-bottom:8px;display:flex;align-items:center;gap:8px;font-size:12px}.copybar button{border:0;background:#111;color:#fff;border-radius:8px;padding:7px 10px}.bulk{position:fixed;left:50%;transform:translateX(-50%);bottom:70px;width:min(1100px,100%);background:#111;color:#fff;padding:9px;display:flex;gap:6px;overflow:auto;z-index:35}.bulk button{white-space:nowrap;border:0;border-radius:9px;padding:8px}.bulk button:disabled{opacity:.45}.event.selected{outline:3px solid #111;outline-offset:1px}.event.bulkable{cursor:grab}.event.dragging{opacity:.55;z-index:50;box-shadow:0 6px 18px #0003}.timeline-wrap{overscroll-behavior:contain}.week-grid{touch-action:auto}.daycol{touch-action:pan-y}.week-grid .daycol{touch-action:auto}.event{touch-action:none}.daycol.select-mode{touch-action:none}.daycol.select-mode .event{pointer-events:auto}.selectbox{width:22px;height:22px;border:2px solid #aaa;border-radius:5px;flex:none}.selected .selectbox{background:#111;box-shadow:inset 0 0 0 4px #fff}.hint{font-size:12px;color:#777;margin:6px 0 10px}
+.calbar{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:8px}.calbar .navbtn{border:0;background:#eee;border-radius:10px;padding:8px 12px}.caltitle{font-weight:700;flex:1;text-align:center}.timeline-wrap{border:1px solid var(--line);border-radius:12px;overflow-x:auto;overflow-y:auto;background:#fff;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;touch-action:pan-x pan-y;scrollbar-width:thin}.week-grid{display:grid;grid-template-columns:54px repeat(7,var(--week-col-width,120px))!important;width:calc(54px + var(--week-col-width,120px)*7)!important;min-width:calc(54px + var(--week-col-width,120px)*7)!important}.day-grid{display:grid;grid-template-columns:54px minmax(0,1fr);min-width:0}.dayhead{position:sticky;top:0;background:#fff;z-index:12;border-bottom:1px solid var(--line);height:52px;text-align:center;padding-top:7px;font-size:12px}.dayhead strong{display:block;font-size:16px;margin-top:2px}.dayhead.today strong{background:#111;color:#fff;border-radius:50%;width:28px;height:28px;line-height:28px;margin:2px auto 0}.timecol{background:#fafafa}.timecell{height:64px;border-top:1px solid var(--line);font-size:10px;color:#888;text-align:right;padding:4px 6px 0 0}.daycol{position:relative;height:1152px;border-left:1px solid var(--line);background:repeating-linear-gradient(to bottom,transparent 0,transparent 31px,#f0f0f2 32px,transparent 33px,transparent 63px,#e7e7eb 64px)}.slotline{position:absolute;left:0;right:0;height:1px;background:#ececf0}.event{position:absolute;left:3px;right:3px;border-radius:7px;background:#e8e8ed;border-left:3px solid #111;padding:5px 6px;font-size:11px;line-height:1.25;overflow:hidden;z-index:5;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}.event.done{opacity:.48;text-decoration:line-through}.event .etime{font-size:10px;color:#555}.creating{position:absolute;left:3px;right:3px;border-radius:7px;background:#111;color:#fff;opacity:.78;z-index:15;pointer-events:none;padding:5px;font-size:11px}.nowline{position:absolute;height:2px;background:#111;left:0;right:0;z-index:8}.month{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}.day{min-height:80px;border:1px solid #eee;border-radius:9px;padding:5px;font-size:11px}.day b{display:block}.mini{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:#eee;border-radius:4px;padding:2px;margin-top:3px}.mini.selected{outline:2px solid #111}.copybar{background:#f0f0f3;border-radius:10px;padding:8px 10px;margin-bottom:8px;display:flex;align-items:center;gap:8px;font-size:12px}.copybar button{border:0;background:#111;color:#fff;border-radius:8px;padding:7px 10px}.bulk{position:fixed;left:50%;transform:translateX(-50%);bottom:70px;width:min(1100px,100%);background:#111;color:#fff;padding:9px;display:flex;gap:6px;overflow:auto;z-index:35}.bulk button{white-space:nowrap;border:0;border-radius:9px;padding:8px}.bulk button:disabled{opacity:.45}.event.selected{outline:3px solid #111;outline-offset:1px}.event.bulkable{cursor:grab}.event.dragging{opacity:.55;z-index:50;box-shadow:0 6px 18px #0003}.timeline-wrap{overscroll-behavior:contain}.week-grid{touch-action:auto}.drag-ghost{position:absolute;left:3px;right:3px;border-radius:10px;border:2px dashed currentColor;box-sizing:border-box;opacity:.78;z-index:20;pointer-events:none;padding:6px 8px;font-size:11px;line-height:1.25;overflow:hidden;box-shadow:0 5px 16px rgba(30,60,100,.10)}.drag-ghost .etime{font-size:10px;opacity:.75}.week-zoom-label{position:absolute;right:10px;top:58px;z-index:25;padding:4px 8px;border-radius:10px;background:rgba(23,32,50,.72);color:#fff;font-size:11px;pointer-events:none;opacity:0;transition:opacity .2s}.week-zoom-label.show{opacity:1}.daycol{touch-action:pan-y}.week-grid .daycol{touch-action:auto}.event{touch-action:none}.daycol.select-mode{touch-action:none}.daycol.select-mode .event{pointer-events:auto}.selectbox{width:22px;height:22px;border:2px solid #aaa;border-radius:5px;flex:none}.selected .selectbox{background:#111;box-shadow:inset 0 0 0 4px #fff}.hint{font-size:12px;color:#777;margin:6px 0 10px}
 @media(min-width:800px){.content{padding:16px 20px}.week-grid{grid-template-columns:58px repeat(7,120px)!important;width:898px!important;min-width:898px!important}.day-grid{grid-template-columns:58px minmax(0,1fr)}}
 
 /* ===== V2 professional iOS-inspired visual system ===== */
@@ -335,10 +335,27 @@ body{
 @media(min-width:800px){
   .app{border-left:1px solid #e4eaf2;border-right:1px solid #e4eaf2}
 }
+.repeat-custom{margin-top:8px;padding:10px;border:1px solid #e1e8f0;border-radius:13px;background:#f8fafc}.repeat-days{display:flex;gap:5px;margin-top:8px}.repeat-days button{flex:1;border:1px solid #dce4ee;background:#fff;border-radius:9px;padding:8px 0}.repeat-days button.active{background:#1677ff;color:#fff;border-color:#1677ff}
+/* ===== V2.5 refined motion ===== */
+:root{--ease-standard:cubic-bezier(.2,.8,.2,1);--ease-emphasized:cubic-bezier(.16,1,.3,1)}
+button,.chip,.tabs button,.seg button,.nav button,.navbtn,.fab,.danger,.primary,.task,.event,.mini,.day,.card,.group,.selectbox{transition:transform .18s var(--ease-standard),background-color .20s var(--ease-standard),border-color .20s var(--ease-standard),box-shadow .20s var(--ease-standard),opacity .20s ease,color .20s var(--ease-standard)}
+@media (hover:hover) and (pointer:fine){button:not(:disabled):hover,.chip:hover,.navbtn:hover{transform:translateY(-1px)}}
+button:not(:disabled):active,.chip:active,.navbtn:active{transform:scale(.975);transition-duration:.07s}
+.page-transition{animation:viewIn .16s var(--ease-emphasized) both;will-change:opacity,transform}
+@keyframes viewIn{from{opacity:.92;transform:translateY(2px)}to{opacity:1;transform:translateY(0)}}
+.task,.event,.mini,.day,.group{animation:none!important}
+.event.dragging{transition:box-shadow .14s var(--ease-standard),opacity .14s ease,transform .12s var(--ease-emphasized);will-change:transform,box-shadow,opacity}
+.drag-ghost{transition:top .055s linear,left .08s var(--ease-standard),right .08s var(--ease-standard),height .055s linear,opacity .12s ease,box-shadow .14s var(--ease-standard);will-change:top,left,right,height}
+.event.selected,.task.selected{transition:background-color .18s var(--ease-standard),box-shadow .18s var(--ease-standard),outline-color .18s ease,opacity .18s ease}
+.bulk{transition:transform .18s var(--ease-emphasized),opacity .16s ease}
+.fab{transition:transform .18s var(--ease-emphasized),box-shadow .20s var(--ease-standard)}
+.fab:active{transform:scale(.93)}
+.nav button,.tabs button{transition:color .18s var(--ease-standard),background .18s var(--ease-standard),transform .14s var(--ease-standard)}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
 </style></head><body><div class="app"><header class="head"><div class="headtop"><h1 id="heading">Todo</h1><div id="headActions"></div></div><div id="subtabs" class="tabs"></div></header><main id="main" class="content"></main><button id="fab" class="fab">+</button><div id="bulk" class="bulk hidden"></div><nav class="nav"><button data-page="todo" class="active">📋<br>Todo</button><button data-page="calendar">📅<br>日历</button><button data-page="settings">⚙️<br>设置</button></nav></div>
 <script>
 const $=s=>document.querySelector(s), DB='todoCalendarV1';
-let tasks=JSON.parse(localStorage.getItem(DB)||'[]'), page='todo', todoTab='today', calMode='week', calDate=new Date(), selected=new Set(), selectMode=false, clipboard=[];
+let tasks=JSON.parse(localStorage.getItem(DB)||'[]'), page='todo', todoTab='today', calMode='week', calDate=new Date(), selected=new Set(), selectMode=false, clipboard=[]; let weekColWidth=Math.max(80,Math.min(220,Number(localStorage.getItem('todoCalendarWeekWidth')||120)));
 const save=()=>localStorage.setItem(DB,JSON.stringify(tasks));
 const id=()=>crypto.randomUUID?.()||Date.now()+Math.random()+'';
 function workDate(d=new Date()){let x=new Date(d);if(x.getHours()<6||(x.getHours()===6&&x.getMinutes()<30))x.setDate(x.getDate()-1);return fmt(x)}
@@ -351,7 +368,16 @@ function parseDate(s){return new Date(s+'T12:00:00')}
 function timeMin(t){if(!t)return null;let [h,m]=t.split(':').map(Number);return h*60+m}
 function timeStr(min){min=Math.max(0,Math.min(1439,Math.round(min)));return String(Math.floor(min/60)).padStart(2,'0')+':'+String(min%60).padStart(2,'0')}
 function addDays(s,n){let d=parseDate(s);d.setDate(d.getDate()+n);return fmt(d)}
-function render(){document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===page));$('#fab').classList.toggle('hidden',page==='settings');$('#heading').textContent=page==='todo'?'Todo':page==='calendar'?'日历':'设置';page==='todo'?renderTodo():page==='calendar'?renderCalendar():renderSettings()}
+function render(){
+  document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===page));
+  $('#fab').classList.toggle('hidden',page==='settings');
+  $('#heading').textContent=page==='todo'?'Todo':page==='calendar'?'日历':'设置';
+  const main=$('#main');
+  main.classList.remove('page-transition');
+  void main.offsetWidth;
+  main.classList.add('page-transition');
+  page==='todo'?renderTodo():page==='calendar'?renderCalendar():renderSettings();
+}
 function renderTodo(){
  $('#subtabs').innerHTML=['today:今天','overdue:逾期','inbox:无日期','done:已完成'].map(x=>{let[a,b]=x.split(':');return `<button class="${todoTab===a?'active':''}" onclick="todoTab='${a}';selectMode=false;selected.clear();render()">${b}${a==='overdue'?` ${tasks.filter(t=>t.date&&t.date<today()&&!t.completed).length||''}`:''}</button>`}).join('');
  let t=tasks.filter(x=>todoTab==='today'?x.date===today()&&!x.completed:todoTab==='overdue'?x.date&&x.date<today()&&!x.completed:todoTab==='inbox'?!x.date&&!x.completed:x.completed).sort((a,b)=>priority(a)-priority(b)||(a.date||'').localeCompare(b.date||'')||(a.start||'').localeCompare(b.start||''));
@@ -406,8 +432,8 @@ function renderTimeline(){
     : (calMode==='week'
       ? `左右滑动查看完整一周（可横向拖动）；长按空白处创建；短按编辑；长按静止选择；长按后移动拖动`
       : `长按空白处并上下滑动＝创建；短按＝编辑；长按静止＝批量选择；长按后移动＝拖动`);
-  $('#main').innerHTML=`<div class="calbar"><button class="navbtn" onclick="copyDay()">${copyLabel}</button><div class="caltitle">${title}</div><button class="navbtn" onclick="pasteCalendar()" ${clipboard.length?'':'disabled'}>📌 粘贴${clipboard.length?` ${clipboard.length}`:''}</button></div><div class="hint">${hint}</div><div class="timeline-wrap"><div class="${gridClass}" style="grid-template-rows:52px auto">${header}${timeColumn}${cols}</div></div>`;
-  attachTimelineGestures(dates,startHour,rowH);
+  $('#main').innerHTML=`<div class="calbar"><button class="navbtn" onclick="copyDay()">${copyLabel}</button><div class="caltitle">${title}</div><button class="navbtn" onclick="pasteCalendar()" ${clipboard.length?'':'disabled'}>📌 粘贴${clipboard.length?` ${clipboard.length}`:''}</button></div><div class="hint">${hint}</div><div class="timeline-wrap" style="position:relative"><div class="week-zoom-label" id="weekZoomLabel">100%</div><div class="${gridClass}" style="grid-template-rows:52px auto;--week-col-width:${weekColWidth}px">${header}${timeColumn}${cols}</div></div>`;
+  attachTimelineGestures(dates,startHour,rowH); if(calMode==='week')attachWeekPinchZoom();
 }
 
 function dayColumn(d,total,startHour,rowH){
@@ -475,7 +501,7 @@ function attachTimelineGestures(dates,startHour,rowH){
   document.querySelectorAll('.event').forEach(ev=>{
     let timer=null,press=null,ready=false,drag=null,moved=false;
     const clearTimer=()=>{if(timer){clearTimeout(timer);timer=null}};
-    const reset=()=>{clearTimer();press=null;ready=false;drag=null;moved=false;ev.classList.remove('dragging')};
+    const reset=()=>{clearTimer();if(drag?.ghost)drag.ghost.remove();press=null;ready=false;drag=null;moved=false;ev.classList.remove('dragging');ev.style.opacity=''};
 
     const startDrag=(e,t)=>{
       const source=ev.closest('.daycol'); if(!source)return;
@@ -539,13 +565,22 @@ function attachTimelineGestures(dates,startHour,rowH){
       const raw=minAt(e,target)-(drag.grabOffset/rowH*60);
       const nm=clamp(raw,drag.duration);
 
-      /* 用 transform 只做视觉预览，不频繁改 DOM 布局 */
-      ev.style.top=((nm-startHour*60)/60*rowH)+'px';
-      ev.style.height=Math.max(28,drag.duration/60*rowH)+'px';
-      const label=ev.querySelector('.etime');
-      if(label)label.textContent=timeStr(nm)+'–'+timeStr(nm+drag.duration);
-      ev.dataset.previewDate=target.dataset.date;
-      ev.dataset.previewMin=String(nm);
+      /* 原事件留在原位置，目标位置显示事件虚影 */
+      ev.style.opacity='.28';
+      let ghost=drag.ghost;
+      if(!ghost || ghost.parentElement!==target){
+        ghost?.remove();
+        ghost=document.createElement('div');
+        ghost.className='drag-ghost priority-'+priority(drag.t);
+        ghost.innerHTML=`<b>${esc(drag.t.title)}</b><div class="etime"></div>`;
+        target.appendChild(ghost);
+        drag.ghost=ghost;
+      }
+      ghost.style.top=((nm-startHour*60)/60*rowH)+'px';
+      ghost.style.height=Math.max(28,drag.duration/60*rowH)+'px';
+      ghost.querySelector('.etime').textContent=timeStr(nm)+'–'+timeStr(nm+drag.duration);
+      ghost.dataset.previewDate=target.dataset.date;
+      ghost.dataset.previewMin=String(nm);
     },{passive:false});
 
     ev.addEventListener('pointerup',e=>{
@@ -593,6 +628,35 @@ function attachTimelineGestures(dates,startHour,rowH){
   });
 }
 
+
+function attachWeekPinchZoom(){
+  const wrap=document.querySelector('.timeline-wrap'), grid=wrap?.querySelector('.week-grid');
+  if(!wrap||!grid)return;
+  let active=false,startDist=0,startWidth=weekColWidth;
+  const distance=(a,b)=>Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY);
+  wrap.addEventListener('touchstart',e=>{
+    if(e.touches.length!==2)return;
+    active=true;startDist=distance(e.touches[0],e.touches[1]);startWidth=weekColWidth;
+  },{passive:false});
+  wrap.addEventListener('touchmove',e=>{
+    if(!active||e.touches.length!==2)return;
+    e.preventDefault();
+    const scale=distance(e.touches[0],e.touches[1])/Math.max(1,startDist);
+    weekColWidth=Math.round(Math.max(80,Math.min(220,startWidth*scale)));
+    grid.style.setProperty('--week-col-width',weekColWidth+'px');
+    const label=$('#weekZoomLabel');
+    if(label){label.textContent=Math.round(weekColWidth/120*100)+'%';label.classList.add('show')}
+  },{passive:false});
+  const end=()=>{
+    if(!active)return;
+    active=false;
+    localStorage.setItem('todoCalendarWeekWidth',String(weekColWidth));
+    setTimeout(()=>$('#weekZoomLabel')?.classList.remove('show'),500);
+  };
+  wrap.addEventListener('touchend',end,{passive:true});
+  wrap.addEventListener('touchcancel',end,{passive:true});
+}
+
 function toggleCalendarSelect(i){selectMode=true;selected.has(i)?selected.delete(i):selected.add(i);renderCalendar()}
 function drawCreating(col,c,startHour,rowH){let old=col.querySelector('.creating');if(old)old.remove();let el=document.createElement('div');el.className='creating';let top=(c.start-startHour*60)/60*rowH,h=(c.end-c.start)/60*rowH;el.style.top=top+'px';el.style.height=Math.max(24,h)+'px';el.textContent=timeStr(c.start)+'–'+timeStr(c.end);col.appendChild(el)}
 
@@ -603,8 +667,29 @@ function copyMonth(){let y=calDate.getFullYear(),m=calDate.getMonth(),a=tasks.fi
 function pasteCalendar(){if(!clipboard.length)return;let target=calMode==='week'?fmt(weekDates()[0]):fmt(calDate),base=clipboard.filter(x=>x.date)[0]?.date;let copies=clipboard.map(x=>{let n={...x,id:id(),completed:false,completedAt:null};if(base&&x.date){let delta=Math.round((parseDate(target)-parseDate(base))/86400000);n.date=addDays(x.date,delta)}else if(target)n.date=target;return n});tasks.push(...copies);selectMode=false;selected.clear();save();render()}
 
 function newTask(date=today(),start='',end=''){editTask(null,{date,start,end})}
-function editTask(i,p={}){let old=i?tasks.find(x=>x.id===i):null;let t=old||{id:id(),title:'',date:p.date??today(),start:p.start||'',end:p.end||'',important:false,urgent:false,completed:false,notes:'',repeat:'none'};$('#subtabs').innerHTML='';$('#headActions').innerHTML='';$('#heading').textContent=i?'编辑事项':'新事项';$('#main').innerHTML=`<div class="field"><label>事项</label><input id="fTitle" value="${esc(t.title)}" autofocus></div><div class="field"><label>日期</label><input id="fDate" type="date" value="${t.date||''}"></div><div class="row"><div class="field"><label>开始</label><input id="fStart" type="time" value="${t.start||''}"></div><div class="field"><label>结束</label><input id="fEnd" type="time" value="${t.end||''}"></div></div><div class="row"><button id="imp" class="chip ${t.important?'active':''}" onclick="this.classList.toggle('active')">⭐ 重要</button><button id="urg" class="chip ${t.urgent?'active':''}" onclick="this.classList.toggle('active')">⚡ 紧急</button></div><div class="field"><label>重复</label><select id="fRepeat"><option value="none">不重复</option><option value="daily">每天</option><option value="weekdays">工作日</option><option value="weekly">每周</option><option value="monthly">每月</option></select></div><div class="field"><label>备注</label><textarea id="fNotes">${esc(t.notes||'')}</textarea></div><div class="row"><button class="primary" onclick="commit('${i||''}','${t.id}')">保存</button>${i?`<button class="danger" onclick="copyOne('${i}')">📋复制</button><button class="danger" onclick="removeTask('${i}')">删除</button>`:''}<button class="danger" onclick="render()">取消</button></div>`;$('#fRepeat').value=t.repeat||'none'}
-function commit(old,newid){let x={id:newid,title:$('#fTitle').value.trim(),date:$('#fDate').value||null,start:$('#fStart').value,end:$('#fEnd').value,important:$('#imp').classList.contains('active'),urgent:$('#urg').classList.contains('active'),completed:false,notes:$('#fNotes').value,repeat:$('#fRepeat').value};if(!x.title)return alert('请输入事项名称');if(old){let o=tasks.find(t=>t.id===old);Object.assign(o,x,{completed:o.completed,completedAt:o.completedAt})}else tasks.push(x);save();render()}
+function editTask(i,p={}){let old=i?tasks.find(x=>x.id===i):null;let t=old||{id:id(),title:'',date:p.date??today(),start:p.start||'',end:p.end||'',important:false,urgent:false,completed:false,notes:'',repeat:'none'};$('#subtabs').innerHTML='';$('#headActions').innerHTML='';$('#heading').textContent=i?'编辑事项':'新事项';$('#main').innerHTML=`<div class="field"><label>事项</label><input id="fTitle" value="${esc(t.title)}" autofocus></div><div class="field"><label>日期</label><input id="fDate" type="date" value="${t.date||''}"></div><div class="row"><div class="field"><label>开始</label><input id="fStart" type="time" value="${t.start||''}"></div><div class="field"><label>结束</label><input id="fEnd" type="time" value="${t.end||''}"></div></div><div class="row"><button id="imp" class="chip ${t.important?'active':''}" onclick="this.classList.toggle('active')">⭐ 重要</button><button id="urg" class="chip ${t.urgent?'active':''}" onclick="this.classList.toggle('active')">⚡ 紧急</button></div><div class="field"><label>重复</label><select id="fRepeat" onchange="toggleCustomRepeat()"><option value="none">不重复</option><option value="daily">每天</option><option value="weekdays">工作日</option><option value="weekly">每周</option><option value="monthly">每月</option><option value="custom">自定义</option></select>
+<div id="customRepeat" class="repeat-custom hidden"><div class="row"><input id="rEvery" type="number" min="1" max="365" value="1"><select id="rUnit"><option value="day">天</option><option value="week">周</option><option value="month">月</option></select></div>
+<div id="repeatWeekdays" class="repeat-days"><button type="button" data-d="1">一</button><button type="button" data-d="2">二</button><button type="button" data-d="3">三</button><button type="button" data-d="4">四</button><button type="button" data-d="5">五</button><button type="button" data-d="6">六</button><button type="button" data-d="0">日</button></div>
+<div class="row" style="margin-top:8px"><select id="rEndType"><option value="forever">永不结束</option><option value="date">结束日期</option><option value="count">重复次数</option></select><input id="rEndValue" placeholder="结束日期或次数"></div></div></div><div class="field"><label>备注</label><textarea id="fNotes">${esc(t.notes||'')}</textarea></div><div class="row"><button class="primary" onclick="commit('${i||''}','${t.id}')">保存</button>${i?`<button class="danger" onclick="copyOne('${i}')">📋复制</button><button class="danger" onclick="removeTask('${i}')">删除</button>`:''}<button class="danger" onclick="render()">取消</button></div>`;$('#fRepeat').value=typeof t.repeat==='string'?(t.repeat||'none'):(t.repeat?.type||'custom');
+if(t.repeat&&typeof t.repeat==='object'){
+ $('#rEvery').value=t.repeat.interval||1;$('#rUnit').value=t.repeat.unit||'week';$('#rEndType').value=t.repeat.endType||'forever';$('#rEndValue').value=t.repeat.endValue||'';
+ (t.repeat.weekdays||[]).forEach(d=>document.querySelector(`#repeatWeekdays button[data-d="${d}"]`)?.classList.add('active'));
+}
+document.querySelectorAll('#repeatWeekdays button').forEach(b=>b.onclick=()=>b.classList.toggle('active'));toggleCustomRepeat()}
+
+function toggleCustomRepeat(){
+  const v=$('#fRepeat')?.value, box=$('#customRepeat');
+  if(box)box.classList.toggle('hidden',v!=='custom');
+  const days=$('#repeatWeekdays'); if(days)days.classList.toggle('hidden',v!=='custom'||$('#rUnit')?.value!=='week');
+}
+function getRepeatValue(){
+  const v=$('#fRepeat').value;if(v!=='custom')return v;
+  return {type:'custom',interval:Math.max(1,Number($('#rEvery').value)||1),unit:$('#rUnit').value,
+    weekdays:[...document.querySelectorAll('#repeatWeekdays button.active')].map(b=>Number(b.dataset.d)),
+    endType:$('#rEndType').value,endValue:$('#rEndValue').value.trim()};
+}
+
+function commit(old,newid){let x={id:newid,title:$('#fTitle').value.trim(),date:$('#fDate').value||null,start:$('#fStart').value,end:$('#fEnd').value,important:$('#imp').classList.contains('active'),urgent:$('#urg').classList.contains('active'),completed:false,notes:$('#fNotes').value,repeat:getRepeatValue()};if(!x.title)return alert('请输入事项名称');if(old){let o=tasks.find(t=>t.id===old);Object.assign(o,x,{completed:o.completed,completedAt:o.completedAt})}else tasks.push(x);save();render()}
 function copyOne(i){let t=tasks.find(x=>x.id===i);if(t){clipboard=[{...t,id:id(),completed:false,completedAt:null}];alert('已复制，可在日历顶部点击“粘贴”或在 Todo 批量模式粘贴。');render()}}
 function removeTask(i){if(confirm('删除此事项？')){tasks=tasks.filter(t=>t.id!==i);save();render()}}
 function renderSettings(){$('#subtabs').innerHTML='';$('#headActions').innerHTML='';$('#main').innerHTML=`<div class="card"><b>每日开始时间</b><p>06:30（今天/逾期和每日刷新边界）</p></div><div class="card"><b>默认事件时长</b><p>60 分钟</p></div><div class="card"><button class="primary" onclick="exportData()">导出 JSON</button> <button class="danger" onclick="clipboard=[];render()">清空复制板</button> <label class="danger">导入 JSON<input type="file" accept="application/json" hidden onchange="importData(this)"></label></div><div class="card"><b>本地数据</b><p>${tasks.length} 个事项。当前数据保存在浏览器本地。</p></div>`}
