@@ -637,45 +637,64 @@ function attachTimelineGestures(dates,startHour,rowH){
 function attachWeekPinchZoom(){
   const wrap=document.querySelector('.timeline-wrap'), grid=wrap?.querySelector('.week-grid');
   if(!wrap||!grid)return;
-  let active=false,startDist=0,startWidth=weekColWidth,raf=0;
-  const pts=new Map();
-  const distance=(a,b)=>Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY);
-  const two=()=>pts.size>=2?Array.from(pts.values()).slice(0,2):null;
-  const showZoom=()=>{const label=$('#weekZoomLabel');if(label){label.textContent=Math.round(weekColWidth/120*100)+'%';label.classList.add('show');clearTimeout(showZoom.timer);showZoom.timer=setTimeout(()=>label.classList.remove('show'),650)}};
-  const update=(dist)=>{
-    const scale=dist/Math.max(1,startDist);
-    weekColWidth=Math.round(Math.max(80,Math.min(260,startWidth*scale)));
-    if(!raf){raf=requestAnimationFrame(()=>{raf=0;grid.style.setProperty('--week-col-width',weekColWidth+'px');showZoom()})}
+  let active=false, startDist=0, startWidth=weekColWidth, startScrollLeft=0, startCenterX=0;
+  const clamp=n=>Math.max(80,Math.min(260,Math.round(n)));
+  const dist=(a,b)=>Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY);
+  const center=(a,b)=>({x:(a.clientX+b.clientX)/2,y:(a.clientY+b.clientY)/2});
+  const zoomLabel=()=>{const el=$('#weekZoomLabel');if(!el)return;el.textContent=Math.round(weekColWidth/120*100)+'%';el.classList.add('show');clearTimeout(zoomLabel.t);zoomLabel.t=setTimeout(()=>el.classList.remove('show'),700)};
+  const apply=(scale,cx)=>{
+    const old=weekColWidth;
+    weekColWidth=clamp(startWidth*scale);
+    if(weekColWidth===old)return;
+    grid.style.setProperty('--week-col-width',weekColWidth+'px');
+    // Keep the content under the fingers instead of letting the browser jump the scroll position.
+    const ratio=weekColWidth/startWidth;
+    const localX=cx-wrap.getBoundingClientRect().left+wrap.scrollLeft;
+    wrap.scrollLeft=Math.max(0,localX*ratio-(cx-wrap.getBoundingClientRect().left));
+    zoomLabel();
   };
+
+  // iOS Safari/Chrome reliable path: native Touch Events. Pointer Events alone can be
+  // consumed by the scroll container before the second finger is delivered.
+  wrap.addEventListener('touchstart',e=>{
+    if(e.touches.length!==2)return;
+    const a=e.touches[0],b=e.touches[1];
+    active=true;startDist=Math.max(1,dist(a,b));startWidth=weekColWidth;startScrollLeft=wrap.scrollLeft;startCenterX=(a.clientX+b.clientX)/2;
+    e.preventDefault();
+  },{passive:false});
+  wrap.addEventListener('touchmove',e=>{
+    if(!active||e.touches.length<2)return;
+    const a=e.touches[0],b=e.touches[1],d=dist(a,b),c=center(a,b);
+    e.preventDefault();
+    apply(d/startDist,c.x);
+  },{passive:false});
+  const touchEnd=e=>{
+    if(active && e.touches.length<2){active=false;localStorage.setItem('todoCalendarWeekWidth',String(weekColWidth));}
+  };
+  wrap.addEventListener('touchend',touchEnd,{passive:false});
+  wrap.addEventListener('touchcancel',touchEnd,{passive:false});
+
+  // Pointer fallback for browsers that do not dispatch Touch Events.
+  const pts=new Map();
   wrap.addEventListener('pointerdown',e=>{
     if(e.pointerType!=='touch')return;
-    pts.set(e.pointerId,e);
-    if(pts.size===2){const a=two();active=true;startDist=distance(a[0],a[1]);startWidth=weekColWidth;e.preventDefault();}
+    pts.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    if(pts.size===2){const v=[...pts.values()];active=true;startDist=Math.max(1,Math.hypot(v[0].x-v[1].x,v[0].y-v[1].y));startWidth=weekColWidth;}
   },{passive:false});
   wrap.addEventListener('pointermove',e=>{
-    if(e.pointerType!=='touch')return;
-    if(pts.has(e.pointerId))pts.set(e.pointerId,e);
-    if(!active)return;
-    const a=two();if(!a)return;
-    e.preventDefault();update(distance(a[0],a[1]));
+    if(e.pointerType!=='touch'||!pts.has(e.pointerId)||!active)return;
+    pts.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    if(pts.size<2)return;
+    const v=[...pts.values()].slice(0,2),d=Math.hypot(v[0].x-v[1].x,v[0].y-v[1].y),cx=(v[0].x+v[1].x)/2;
+    e.preventDefault();apply(d/startDist,cx);
   },{passive:false});
-  const endPointer=e=>{
-    if(e.pointerType!=='touch')return;
-    pts.delete(e.pointerId);
-    if(pts.size<2&&active){active=false;localStorage.setItem('todoCalendarWeekWidth',String(weekColWidth));}
-  };
-  wrap.addEventListener('pointerup',endPointer,{passive:false});
-  wrap.addEventListener('pointercancel',endPointer,{passive:false});
-  wrap.addEventListener('pointerleave',e=>{if(e.pointerType==='touch'&&active&&pts.has(e.pointerId))pts.set(e.pointerId,e)},{passive:false});
+  const pe=e=>{if(e.pointerType!=='touch')return;pts.delete(e.pointerId);if(pts.size<2&&active){active=false;localStorage.setItem('todoCalendarWeekWidth',String(weekColWidth));}};
+  wrap.addEventListener('pointerup',pe,{passive:false});wrap.addEventListener('pointercancel',pe,{passive:false});
 
-  // iOS Safari fallback: native gesture events are more reliable for two-finger pinch.
-  let gestureStartWidth=weekColWidth;
-  wrap.addEventListener('gesturestart',e=>{gestureStartWidth=weekColWidth;e.preventDefault()},{passive:false});
-  wrap.addEventListener('gesturechange',e=>{
-    e.preventDefault();
-    weekColWidth=Math.round(Math.max(80,Math.min(260,gestureStartWidth*e.scale)));
-    grid.style.setProperty('--week-col-width',weekColWidth+'px');showZoom();
-  },{passive:false});
+  // Desktop Safari/iPad fallback.
+  let gs=weekColWidth;
+  wrap.addEventListener('gesturestart',e=>{gs=weekColWidth;e.preventDefault();},{passive:false});
+  wrap.addEventListener('gesturechange',e=>{e.preventDefault();weekColWidth=clamp(gs*e.scale);grid.style.setProperty('--week-col-width',weekColWidth+'px');zoomLabel();},{passive:false});
   wrap.addEventListener('gestureend',()=>localStorage.setItem('todoCalendarWeekWidth',String(weekColWidth)),{passive:true});
 }
 function toggleCalendarSelect(i){selectMode=true;selected.has(i)?selected.delete(i):selected.add(i);renderCalendar()}
