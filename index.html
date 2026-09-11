@@ -437,7 +437,9 @@ function centerWeekToday(){
   // Center today's column from the actual scroll-content coordinates.
   const left=c.offsetLeft + c.offsetWidth/2 - w.clientWidth/2;
   // The 12:00 line is the TOP edge of the 12:00 cell (13th cell).
-  const noonY=noonCell.offsetTop;
+  const wrapRect=w.getBoundingClientRect();
+  const noonRect=noonCell.getBoundingClientRect();
+  const noonY=(noonRect.top-wrapRect.top)+w.scrollTop;
   const top=noonY - w.clientHeight/2;
   const maxLeft=Math.max(0,w.scrollWidth-w.clientWidth);
   const maxTop=Math.max(0,w.scrollHeight-w.clientHeight);
@@ -450,44 +452,37 @@ function centerWeekToday(){
     const nc=ww?.querySelector('.timecol .timecell:nth-child(13)');
     if(!ww||!cc||!nc)return;
     const l=cc.offsetLeft+cc.offsetWidth/2-ww.clientWidth/2;
-    const t=nc.offsetTop-ww.clientHeight/2;
+    const wr=ww.getBoundingClientRect();
+    const nr=nc.getBoundingClientRect();
+    const noon=(nr.top-wr.top)+ww.scrollTop;
+    const t=noon-ww.clientHeight/2;
     ww.scrollLeft=Math.max(0,Math.min(l,Math.max(0,ww.scrollWidth-ww.clientWidth)));
     ww.scrollTop=Math.max(0,Math.min(t,Math.max(0,ww.scrollHeight-ww.clientHeight)));
     calScroll={left:ww.scrollLeft,top:ww.scrollTop};
   });
 }
-function rememberCalendarScroll(){
+function captureCalendarView(){
   const w=document.querySelector('.timeline-wrap');
-  if(w) calScroll={left:w.scrollLeft,top:w.scrollTop};
+  if(w){
+    calScroll={left:w.scrollLeft,top:w.scrollTop};
+    return true;
+  }
+  return false;
 }
+function rememberCalendarScroll(){captureCalendarView()}
 function restoreCalendarScroll(){
   requestAnimationFrame(()=>{
     const w=document.querySelector('.timeline-wrap');
-    if(w){w.scrollLeft=calScroll.left||0;w.scrollTop=calScroll.top||0;}
+    if(!w)return;
+    w.scrollLeft=calScroll.left;
+    w.scrollTop=calScroll.top;
+    requestAnimationFrame(()=>{
+      w.scrollLeft=calScroll.left;
+      w.scrollTop=calScroll.top;
+    });
   });
 }
 
-function renderCalendar(options={}){
-  const oldWrap=document.querySelector('.timeline-wrap');
-  if(oldWrap) calScroll={left:oldWrap.scrollLeft,top:oldWrap.scrollTop};
-  const oldScrollLeft=calScroll.left||0;
-  const oldScrollTop=calScroll.top||0;
-  const centerToday=!!options.centerToday||weekCenterRequested;
-  weekCenterRequested=false;
-  $('#subtabs').innerHTML=`<button class="tabsbtn" onclick="shiftCal(-1)">‹</button><button onclick="goToday()">今天</button><button onclick="shiftCal(1)">›</button>${['day:日','week:周','month:月'].map(x=>{let[a,b]=x.split(':');return `<button type="button" class="${calMode===a?'active':''}" data-calmode="${a}">${b}</button>`}).join('')}${calMode==='week'?`<span class="zoomctl"><button onclick="changeWeekZoom(-1)" aria-label="缩小">−</button><b id="zoomLabel">${weekZoom}%</b><button onclick="changeWeekZoom(1)" aria-label="放大">＋</button></span>`:''}`;
-  $('#headActions').innerHTML='';
-  if(calMode==='month')renderMonth(); else renderTimeline();
-  if(calMode==='week'){const z=$('#zoomLabel');if(z)z.textContent=weekZoom+'%';}
-  renderBulk();
-  bindCalendarModeButtons();
-  requestAnimationFrame(()=>{
-    const w=document.querySelector('.timeline-wrap');
-    if(!w)return;
-    if(centerToday){centerWeekToday();}
-    else {w.scrollLeft=oldScrollLeft;w.scrollTop=oldScrollTop;calScroll={left:w.scrollLeft,top:w.scrollTop};}
-    w.onscroll=()=>{calScroll={left:w.scrollLeft,top:w.scrollTop};};
-  });
-}
 function goToday(){calDate=new Date();selectMode=false;selected.clear();if(calMode==='week')weekCenterRequested=true;render();}
 function bindCalendarModeButtons(){
   document.querySelectorAll('#subtabs [data-calmode]').forEach(btn=>{
