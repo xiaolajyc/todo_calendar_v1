@@ -483,18 +483,30 @@ function centerTimelineToday(){
   const set=()=>{
     const now=new Date();
     const minutes=now.getHours()*60+now.getMinutes()+now.getSeconds()/60;
-    const rowH=64*(calMode==='week'?weekZoom:100)/100;
-    const wr=w.getBoundingClientRect(), cr=c.getBoundingClientRect();
-    const contentX=(cr.left-wr.left)+w.scrollLeft;
-    const contentY=(cr.top-wr.top)+w.scrollTop;
-    const currentY=contentY+(minutes/60)*rowH;
-    const targetX=contentX+c.offsetWidth/2-w.clientWidth/2;
+    const zoom=calMode==='week'?weekZoom:dayZoom;
+    const rowH=64*zoom/100;
+    const headerH=52;
+    // The timeline starts immediately below the 52px day header.
+    // Calculate the current-time position directly in content coordinates,
+    // avoiding getBoundingClientRect/scroll-position feedback during rendering.
+    const currentY=headerH+(minutes/60)*rowH;
     const targetY=currentY-w.clientHeight/2;
-    w.scrollLeft=Math.max(0,Math.min(targetX,w.scrollWidth-w.clientWidth));
-    w.scrollTop=Math.max(0,Math.min(targetY,w.scrollHeight-w.clientHeight));
+    const maxY=Math.max(0,w.scrollHeight-w.clientHeight);
+    w.scrollTop=Math.max(0,Math.min(targetY,maxY));
+    if(calMode==='week'){
+      const wr=w.getBoundingClientRect(), cr=c.getBoundingClientRect();
+      const contentX=(cr.left-wr.left)+w.scrollLeft;
+      const targetX=contentX+c.offsetWidth/2-w.clientWidth/2;
+      const maxX=Math.max(0,w.scrollWidth-w.clientWidth);
+      w.scrollLeft=Math.max(0,Math.min(targetX,maxX));
+    }
     calScroll={left:w.scrollLeft,top:w.scrollTop};
   };
-  set();requestAnimationFrame(()=>{set();setTimeout(set,50)});
+  set();
+  requestAnimationFrame(()=>{
+    set();
+    setTimeout(set,80);
+  });
 }
 
 function rememberCalendarScroll(){
@@ -540,13 +552,12 @@ function bindCalendarModeButtons(){
     btn.addEventListener('click',()=>{
       const next=btn.dataset.calmode;
       if(!['day','week','month'].includes(next))return;
-      const wasWeek=calMode==='week';
       const wrap=document.querySelector('.timeline-wrap');
       const keepLeft=wrap?wrap.scrollLeft:calScroll.left;
       const keepTop=wrap?wrap.scrollTop:calScroll.top;
       calMode=next;selectMode=false;selected.clear();
       renderCalendar({centerToday:next==='week'||next==='day'});
-      if(next!=='week' && wrap){calScroll={left:keepLeft,top:keepTop};}
+      if(next==='month' && wrap){calScroll={left:keepLeft,top:keepTop};}
     });
   });
 }
