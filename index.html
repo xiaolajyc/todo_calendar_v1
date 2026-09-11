@@ -351,7 +351,7 @@ body{
 </style></head><body><div class="app"><header class="head"><div class="headtop"><h1 id="heading">Todo</h1><div id="headActions"></div></div><div id="subtabs" class="tabs"></div></header><main id="main" class="content"></main><button id="fab" class="fab">+</button><div id="bulk" class="bulk hidden"></div><nav class="nav"><button data-page="todo" class="active">📋<br>Todo</button><button data-page="calendar">📅<br>日历</button><button data-page="settings">⚙️<br>设置</button></nav></div>
 <script>
 const $=s=>document.querySelector(s), DB='todoCalendarV1';
-let tasks=JSON.parse(localStorage.getItem(DB)||'[]'), page='todo', todoTab='today', calMode='week', calDate=new Date(), selected=new Set(), selectMode=false, clipboard=[], weekZoom=100, calScroll={left:0,top:0}, weekCenterRequested=false, calendarViewInitialized=false;
+let tasks=JSON.parse(localStorage.getItem(DB)||'[]'), page='todo', todoTab='today', calMode='week', calDate=new Date(), selected=new Set(), selectMode=false, clipboard=[], weekZoom=Math.max(50,Math.min(170,Number(localStorage.getItem('todoCalendarWeekZoom')||100))), calScroll={left:0,top:0}, weekCenterRequested=false, calendarViewInitialized=false;
 const save=()=>localStorage.setItem(DB,JSON.stringify(tasks));
 const id=()=>crypto.randomUUID?.()||Date.now()+Math.random()+'';
 function workDate(d=new Date()){let x=new Date(d);if(x.getHours()<6||(x.getHours()===6&&x.getMinutes()<30))x.setDate(x.getDate()-1);return fmt(x)}
@@ -370,6 +370,7 @@ function changeWeekZoom(dir){
   const oldZoom=weekZoom;
   const oldRowH=64*oldZoom/100;
   weekZoom=Math.max(50,Math.min(170,weekZoom+dir*10));
+  localStorage.setItem('todoCalendarWeekZoom',String(weekZoom));
   const newRowH=64*weekZoom/100;
 
   const wrap=document.querySelector('.timeline-wrap');
@@ -596,10 +597,10 @@ function attachTimelineGestures(dates,startHour,rowH){
   /* 事项手势：长按后移动 = 拖动；长按后松手 = 批量选择。
      拖动时原事件不跟着跑，目标位置显示虚影，释放后才真正写入数据。 */
   document.querySelectorAll('.event').forEach(ev=>{
-    let timer=null,press=null,ready=false,drag=null;
+    let timer=null,press=null,ready=false,drag=null,moved=false;
     const clearTimer=()=>{if(timer){clearTimeout(timer);timer=null}};
     const removeGhost=()=>{if(drag?.ghost){drag.ghost.remove();drag.ghost=null}};
-    const reset=()=>{clearTimer();removeGhost();press=null;ready=false;drag=null;ev.classList.remove('dragging');ev.style.visibility='';};
+    const reset=()=>{clearTimer();removeGhost();press=null;ready=false;drag=null;moved=false;ev.classList.remove('dragging');ev.style.visibility='';};
     const startDrag=(e,t)=>{
       const source=ev.closest('.daycol'); if(!source)return;
       const rect=ev.getBoundingClientRect();
@@ -635,7 +636,7 @@ function attachTimelineGestures(dates,startHour,rowH){
       e.stopPropagation();
       if(e.pointerType==='mouse'&&e.button!==0)return;
       const t=tasks.find(x=>x.id===ev.dataset.id);if(!t)return;
-      clearTimer();press={x:e.clientX,y:e.clientY,id:t.id};ready=false;drag=null;
+      clearTimer();press={x:e.clientX,y:e.clientY,id:t.id};ready=false;drag=null;moved=false;
       if(selectMode){e.preventDefault();return}
       if(e.pointerType==='touch')e.preventDefault();
       timer=setTimeout(()=>{timer=null;ready=true},650);
@@ -643,7 +644,7 @@ function attachTimelineGestures(dates,startHour,rowH){
     ev.addEventListener('pointermove',e=>{
       if(!press)return;
       const dist=Math.hypot(e.clientX-press.x,e.clientY-press.y);
-      if(!ready&&!drag){if(dist>10)clearTimer();return}
+      if(!ready&&!drag){if(dist>10){moved=true;clearTimer();}return}
       if(ready&&!drag&&dist>10){const t=tasks.find(x=>x.id===press.id);if(t)startDrag(e,t)}
       if(!drag)return;
       e.preventDefault();
@@ -662,6 +663,7 @@ function attachTimelineGestures(dates,startHour,rowH){
         reset();render();return;
       }
       if(ready){toggleCalendarSelect(p.id);reset();return}
+      if(moved){reset();return}
       reset();editTask(p.id);
     });
     ev.addEventListener('pointercancel',()=>reset());
