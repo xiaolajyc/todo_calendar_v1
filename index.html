@@ -349,7 +349,10 @@ body{
 .event-ghost{position:absolute!important;border:2px dashed #1677ff!important;border-left:4px dashed #1677ff!important;border-radius:10px!important;background:rgba(22,119,255,.14)!important;box-shadow:0 0 0 2px rgba(22,119,255,.12),0 5px 14px rgba(30,60,100,.10)!important;display:block!important;visibility:visible!important;opacity:1!important;z-index:100!important;pointer-events:none!important;color:#1459b8!important}
 @media(max-width:799px){.zoomctl{margin-left:2px}.zoomctl b{min-width:40px}}
 .timeline-wrap.calendar-scroll{height:calc(100vh - 300px);min-height:300px;max-height:calc(100vh - 230px);overflow:auto;}@supports(height:100dvh){.timeline-wrap.calendar-scroll{height:calc(100dvh - 300px);max-height:calc(100dvh - 230px)}}
-<style>.timeline-wrap .day-grid,.timeline-wrap .week-grid{padding-bottom:calc(100vh - 352px)}@supports(height:100dvh){.timeline-wrap .day-grid,.timeline-wrap .week-grid{padding-bottom:calc(100dvh - 352px)}}</style></head><body><div class="app"><header class="head"><div class="headtop"><h1 id="heading">Todo</h1><div id="headActions"></div></div><div id="subtabs" class="tabs"></div></header><main id="main" class="content"></main><button id="fab" class="fab">+</button><div id="bulk" class="bulk hidden"></div><nav class="nav"><button data-page="todo" class="active">📋<br>Todo</button><button data-page="calendar">📅<br>日历</button><button data-page="settings">⚙️<br>设置</button></nav></div>
+.timeline-wrap .daycol{height:calc(var(--timeline-day-content-height,1152px) + var(--calendar-center-spacer,420px))!important}
+@supports(height:100dvh){.timeline-wrap{--calendar-center-spacer:calc(100dvh - 352px)}}
+@supports not (height:100dvh){.timeline-wrap{--calendar-center-spacer:calc(100vh - 352px)}}
+</head><body><div class="app"><header class="head"><div class="headtop"><h1 id="heading">Todo</h1><div id="headActions"></div></div><div id="subtabs" class="tabs"></div></header><main id="main" class="content"></main><button id="fab" class="fab">+</button><div id="bulk" class="bulk hidden"></div><nav class="nav"><button data-page="todo" class="active">📋<br>Todo</button><button data-page="calendar">📅<br>日历</button><button data-page="settings">⚙️<br>设置</button></nav></div>
 <script>
 const $=s=>document.querySelector(s), DB='todoCalendarV1';
 let tasks=JSON.parse(localStorage.getItem(DB)||'[]'), page='todo', todoTab='today', calMode='week', calDate=new Date(), selected=new Set(), selectMode=false, clipboard=[], weekZoom=Math.max(50,Math.min(170,Number(localStorage.getItem('todoCalendarWeekZoom')||100))), dayZoom=Math.max(50,Math.min(170,Number(localStorage.getItem('todoCalendarDayZoom')||100))), calScroll={left:0,top:0}, weekCenterRequested=false, calendarViewInitialized=false;
@@ -479,24 +482,19 @@ function centerTimelineToday(){
   if(!w||!['week','day'].includes(calMode))return;
   const c=w.querySelector('.daycol[data-date="'+today()+'"]');
   if(!c)return;
-
   const set=()=>{
     const now=new Date();
     const minutes=now.getHours()*60+now.getMinutes()+now.getSeconds()/60;
     const zoom=calMode==='week'?weekZoom:dayZoom;
     const rowH=64*zoom/100;
-
-    // IMPORTANT: use offsetTop/offsetLeft, which are coordinates inside the
-    // scroll content and therefore do NOT change when scrollTop changes.
-    // The previous implementation derived this from getBoundingClientRect()
-    // and then added scrollTop; repeating the centering pass accumulated the
-    // scroll offset and pushed the current-time line too high.
-    const dayTop=c.offsetTop;
-    const currentY=dayTop+(minutes/60)*rowH;
-    const targetY=currentY-w.clientHeight/2;
+    const headerH=52;
+    // The sticky day header occupies the first 52px. Center the current-time
+    // line in the remaining visible timeline area, not in the whole wrapper.
+    const timelineViewportH=Math.max(1,w.clientHeight-headerH);
+    const currentY=headerH+(minutes/60)*rowH;
+    const targetY=currentY-(headerH+timelineViewportH/2);
     const maxY=Math.max(0,w.scrollHeight-w.clientHeight);
     w.scrollTop=Math.max(0,Math.min(targetY,maxY));
-
     if(calMode==='week'){
       const targetX=c.offsetLeft+c.offsetWidth/2-w.clientWidth/2;
       const maxX=Math.max(0,w.scrollWidth-w.clientWidth);
@@ -504,11 +502,9 @@ function centerTimelineToday(){
     }
     calScroll={left:w.scrollLeft,top:w.scrollTop};
   };
-
   set();
-  requestAnimationFrame(()=>{set();setTimeout(set,80);});
+  requestAnimationFrame(()=>set());
 }
-
 function rememberCalendarScroll(){
   const w=document.querySelector('.timeline-wrap');
   if(w) calScroll={left:w.scrollLeft,top:w.scrollTop};
