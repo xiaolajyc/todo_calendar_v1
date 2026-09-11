@@ -443,23 +443,6 @@ html,body{height:100%;overflow:hidden}
   -webkit-overflow-scrolling:touch;
 }
 
-
-/* v2.54: one authoritative calendar scroll container */
-.timeline-wrap.calendar-scroll{
-  overflow:auto!important;
-  -webkit-overflow-scrolling:touch!important;
-  overscroll-behavior:contain;
-  touch-action:pan-x pan-y!important;
-  flex:1 1 auto!important;
-  min-height:0!important;
-}
-.timeline-wrap.calendar-scroll>.week-grid,
-.timeline-wrap.calendar-scroll>.day-grid{
-  min-width:max-content;
-  min-height:max-content;
-}
-.timeline-wrap.calendar-scroll .daycol{touch-action:pan-x pan-y!important}
-.timeline-wrap.calendar-scroll .event{touch-action:none!important}
 </style></head><body><div class="app"><header class="head"><div class="headtop"><h1 id="heading">Todo</h1><div id="headActions"></div></div><div id="subtabs" class="tabs"></div></header><main id="main" class="content"></main><button id="fab" class="fab">+</button><div id="bulk" class="bulk hidden"></div><nav class="nav">
 <button data-page="todo" class="active"><span class="navicon todoicon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 8l1.5 1.5L12 7"/><path d="M13.5 8H17"/><path d="M8 13l1.5 1.5L12 12"/><path d="M13.5 13H17"/></svg></span><span>Todo</span></button>
 <button data-page="calendar"><span class="navicon calendaricon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="16" rx="2.5"/><path d="M7 3v4M17 3v4M3.5 9.5h17"/><path d="M7.5 13h.01M12 13h.01M16.5 13h.01M7.5 17h.01M12 17h.01M16.5 17h.01"/></svg></span><span>日历</span></button>
@@ -772,7 +755,117 @@ function eventHtml(t,startHour,rowH){
 }
 function nowLine(startHour,rowH){let d=new Date(),m=d.getHours()*60+d.getMinutes(),top=(m-startHour*60)/60*rowH;if(top<0||top>24*rowH)return '';return `<div class="nowline" style="top:${top}px"></div>`}
 
+function attachTimelineGestures(dates,startHour,rowH){
+  const cols=[...document.querySelectorAll('.daycol')];
+  const snap=m=>Math.round(m/15)*15;
+  const clamp=(m,duration)=>Math.max(startHour*60,Math.min(1439-duration,snap(m)));
+  const colAtX=x=>{
+    for(const c of cols){const r=c.getBoundingClientRect();if(x>=r.left&&x<=r.right)return c}
+    if(calMode==='week'){
+      let best=cols[0],bd=Infinity;
+      cols.forEach(c=>{const r=c.getBoundingClientRect();const d=x<r.left?r.left-x:x>r.right?x-r.right:0;if(d<bd){bd=d;best=c}});
+      return best;
+    }
+    return cols[0];
+  };
+  const minAt=(e,col)=>{const r=col.getBoundingClientRect();return (e.clientY-r.top)/rowH*60+startHour*60};
 
+  /* 空白区域：iOS-safe 长按创建；普通滑动由应用手动滚动，避免 Safari 抢走手势 */
+  cols.forEach(col=>{
+    let timer=null,creating=null,pid=null,startX=0,startY=0,lastX=0,lastY=0,scrolling=false;
+
+    const wrap=()=>document.querySelector('.timeline-wrap');
+    const clear=()=>{if(timer){clearTimeout(timer);timer=null}};
+    const removeCreating=()=>{col.querySelector('.creating')?.remove()};
+    const reset=()=>{
+      clear(); creating=null; scrolling=false; pid=null; removeCreating();
+      document.documentElement.classList.remove('calendar-creating');
+      document.body.classList.remove('calendar-creating');
+    };
+
+    col.addEventListener('pointerdown',e=>{
+      if(e.target.closest('.event')||selectMode)return;
+      if(e.pointerType==='mouse'&&e.button!==0)return;
+      pid=e.pointerId;
+      startX=lastX=e.clientX; startY=lastY=e.clientY;
+      scrolling=false;
+      const m=clamp(minAt(e,col),0);
+
+      timer=setTimeout(()=>{
+        timer=null;
+        scrolling=false;
+        creating={start:m,end:m+60};
+        document.documentElement.classList.add('calendar-creating');
+        document.body.classList.add('calendar-creating');
+        drawCreating(col,creating,startHour,rowH);
+      },450);
+    },{passive:false});
+
+    col.addEventListener('pointermove',e=>{
+      if(e.pointerId!==pid)return;
+
+      const dx=e.clientX-lastX,dy=e.clientY-lastY;
+      const dist=Math.hypot(e.clientX-startX,e.clientY-startY);
+
+      // Before long-press activates: normal finger movement means calendar scrolling.
+      if(timer && dist>10){
+        clear();
+        scrolling=true;
+      }
+      if(scrolling && !creating){
+        const w=wrap();
+        if(w){
+          w.scrollLeft-=dx;
+          w.scrollTop-=dy;
+        }
+        lastX=e.clientX; lastY=e.clientY;
+        e.preventDefault();
+        return;
+      }
+
+      // After long-press activates: movement creates/resizes the new event.
+      if(creating){
+        e.preventDefault();
+        const m=clamp(minAt(e,col),0);
+        creating.end=Math.max(creating.start+15,m);
+        drawCreating(col,creating,startHour,rowH);
+        return;
+      }
+
+      lastX=e.clientX; lastY=e.clientY;
+    },{passive:false});
+
+    col.addEventListener('pointerup',e=>{
+      if(e.pointerId!==pid)return;
+      if(creating){
+        e.preventDefault();
+        const c=creating;
+        reset();
+        newTask(col.dataset.date,timeStr(c.start),timeStr(c.end));
+      }else{
+        reset();
+      }
+    },{passive:false});
+
+    col.addEventListener('pointercancel',reset,{passive:false});
+  });
+
+  /* 事项手势：短按=编辑；普通滑动=滚动日历；长按静止=选择；长按后移动=拖动。 */
+  document.querySelectorAll('.event').forEach(ev=>{
+    let timer=null,press=null,ready=false,drag=null,moved=false,suppressClick=false,lastX=0,lastY=0;
+    const clearTimer=()=>{if(timer){clearTimeout(timer);timer=null}};
+    const removeGhost=()=>{if(drag?.ghost){drag.ghost.remove();drag.ghost=null}};
+    const reset=()=>{clearTimer();removeGhost();press=null;ready=false;drag=null;moved=false;suppressClick=false;ev.classList.remove('dragging');ev.style.visibility='';ev.style.opacity=''};
+    const autoScroll=e=>{const w=document.querySelector('.timeline-wrap');if(!w||!drag)return;const r=w.getBoundingClientRect(),edge=42,speed=14;let dx=0;if(e.clientX<r.left+edge)dx=-speed;else if(e.clientX>r.right-edge)dx=speed;if(dx)w.scrollLeft=Math.max(0,Math.min(w.scrollWidth-w.clientWidth,w.scrollLeft+dx));};
+    const startDrag=(e,t)=>{const source=ev.closest('.daycol');if(!source)return;const rect=ev.getBoundingClientRect();const origMin=timeMin(t.start);const duration=Math.max(15,(timeMin(t.end)||origMin+60)-origMin);const ghost=document.createElement('div');ghost.className='event-ghost priority-'+priority(t);ghost.innerHTML='<b>'+esc(t.title)+'</b><div class="etime">'+(t.start+(t.end?'–'+t.end:''))+'</div>';ghost.style.position='absolute';ghost.style.left='3px';ghost.style.right='3px';ghost.style.height=Math.max(28,duration/60*rowH)+'px';ghost.style.opacity='1';ghost.style.pointerEvents='none';ghost.style.zIndex='100';source.appendChild(ghost);drag={t,source,duration,grabOffset:e.clientY-rect.top,pointerId:e.pointerId,ghost};ev.classList.add('dragging');ev.style.visibility='visible';ev.style.opacity='.42';suppressClick=true;try{ev.setPointerCapture(e.pointerId)}catch{}};
+    const updateGhost=(target,nm)=>{if(!drag?.ghost||!target)return;if(drag.ghost.parentElement!==target)target.appendChild(drag.ghost);drag.ghost.style.top=((nm-startHour*60)/60*rowH)+'px';drag.ghost.style.height=Math.max(28,drag.duration/60*rowH)+'px';drag.ghost.style.left='3px';drag.ghost.style.right='3px';};
+    const update=e=>{if(!drag)return;autoScroll(e);const target=colAtX(e.clientX)||drag.source;const raw=minAt(e,target)-(drag.grabOffset/rowH*60);updateGhost(target,clamp(raw,drag.duration));};
+    ev.addEventListener('pointerdown',e=>{e.stopPropagation();if(e.pointerType==='mouse'&&e.button!==0)return;const t=tasks.find(x=>x.id===ev.dataset.id);if(!t)return;clearTimer();press={x:e.clientX,y:e.clientY,id:t.id};lastX=e.clientX;lastY=e.clientY;ready=false;drag=null;moved=false;suppressClick=false;if(selectMode){suppressClick=true;return}timer=setTimeout(()=>{timer=null;ready=true},600);},{passive:false});
+    ev.addEventListener('pointermove',e=>{if(!press)return;const dist=Math.hypot(e.clientX-press.x,e.clientY-press.y);const w=document.querySelector('.timeline-wrap');if(selectMode){if(dist>8){moved=true;suppressClick=true;if(w){w.scrollLeft-=e.clientX-lastX;w.scrollTop-=e.clientY-lastY;}lastX=e.clientX;lastY=e.clientY;e.preventDefault();}return;}if(!ready&&!drag){if(dist>10){moved=true;suppressClick=true;clearTimer();if(w){w.scrollLeft-=e.clientX-lastX;w.scrollTop-=e.clientY-lastY;}lastX=e.clientX;lastY=e.clientY;e.preventDefault();}return;}if(ready&&!drag&&dist>10){const t=tasks.find(x=>x.id===press.id);if(t)startDrag(e,t);}if(!drag)return;e.preventDefault();update(e);},{passive:false});
+    ev.addEventListener('pointerup',e=>{const p=press;if(!p){reset();return}clearTimer();if(selectMode){if(!moved)toggleCalendarSelect(p.id);reset();return}if(drag){const t=tasks.find(x=>x.id===p.id);if(t){const target=colAtX(e.clientX)||drag.source;const raw=minAt(e,target)-(drag.grabOffset/rowH*60);const nm=clamp(raw,drag.duration);t.date=target.dataset.date;t.start=timeStr(nm);t.end=timeStr(nm+drag.duration);save()}reset();render();return}if(ready){toggleCalendarSelect(p.id);reset();return}if(moved||suppressClick){reset();return}reset();editTask(p.id);});
+    ev.addEventListener('pointercancel',()=>reset());
+  });
+}
 function toggleCalendarSelect(i){selectMode=true;selected.has(i)?selected.delete(i):selected.add(i);renderCalendar()}
 function drawCreating(col,c,startHour,rowH){let old=col.querySelector('.creating');if(old)old.remove();let el=document.createElement('div');el.className='creating';let top=(c.start-startHour*60)/60*rowH,h=(c.end-c.start)/60*rowH;el.style.top=top+'px';el.style.height=Math.max(24,h)+'px';el.textContent=timeStr(c.start)+'–'+timeStr(c.end);col.appendChild(el)}
 
@@ -997,7 +1090,17 @@ function copyOne(i){let f=findInstance(i),t=f?.instance;if(t){clipboard=[{...clo
 function removeTask(i){const f=findInstance(i);if(f)openOccurrenceDelete(f.master,f.instance._occurrenceDate);}
 
 /* Replace calendar event gestures so recurring instances can be moved without mutating the whole series. */
-
+function attachTimelineGestures(dates,startHour,rowH){
+  const cols=[...document.querySelectorAll('.daycol')],snap=m=>Math.round(m/15)*15,clamp=(m,d)=>Math.max(startHour*60,Math.min(1439-d,snap(m))),colAtX=x=>{for(const c of cols){const r=c.getBoundingClientRect();if(x>=r.left&&x<=r.right)return c}let best=cols[0],bd=Infinity;cols.forEach(c=>{const r=c.getBoundingClientRect(),dd=x<r.left?r.left-x:x>r.right?x-r.right:0;if(dd<bd){bd=dd;best=c}});return best},minAt=(e,c)=>{const r=c.getBoundingClientRect();return(e.clientY-r.top)/rowH*60+startHour*60;
+  };
+  cols.forEach(col=>{let timer=null,creating=null,pid=null,sx=0,sy=0,lx=0,ly=0,scrolling=false;const wrap=()=>document.querySelector('.timeline-wrap'),clear=()=>{if(timer){clearTimeout(timer);timer=null}},rm=()=>col.querySelector('.creating')?.remove(),reset=()=>{clear();creating=null;scrolling=false;pid=null;rm();document.documentElement.classList.remove('calendar-creating');document.body.classList.remove('calendar-creating')};col.addEventListener('pointerdown',e=>{if(e.target.closest('.event')||selectMode)return;if(e.pointerType==='mouse'&&e.button!==0)return;pid=e.pointerId;sx=lx=e.clientX;sy=ly=e.clientY;const m=clamp(minAt(e,col),0);timer=setTimeout(()=>{timer=null;creating={start:m,end:m+60};document.documentElement.classList.add('calendar-creating');document.body.classList.add('calendar-creating');drawCreating(col,creating,startHour,rowH)},450)},{passive:false});col.addEventListener('pointermove',e=>{if(e.pointerId!==pid)return;const dx=e.clientX-lx,dy=e.clientY-ly,dist=Math.hypot(e.clientX-sx,e.clientY-sy);if(timer&&dist>10){clear();scrolling=true}if(scrolling&&!creating){const w=wrap();if(w){w.scrollLeft-=dx;w.scrollTop-=dy}lx=e.clientX;ly=e.clientY;e.preventDefault();return}if(creating){e.preventDefault();const m=clamp(minAt(e,col),0);creating.end=Math.max(creating.start+15,m);drawCreating(col,creating,startHour,rowH)}lx=e.clientX;ly=e.clientY},{passive:false});col.addEventListener('pointerup',e=>{if(e.pointerId!==pid)return;if(creating){const c=creating;reset();newTask(col.dataset.date,timeStr(c.start),timeStr(c.end))}else reset()},{passive:false});col.addEventListener('pointercancel',reset,{passive:false})});
+  document.querySelectorAll('.event').forEach(ev=>{let timer=null,press=null,ready=false,drag=null,moved=false,suppress=false,lx=0,ly=0;const clear=()=>{if(timer){clearTimeout(timer);timer=null}},ghostRm=()=>{if(drag?.ghost){drag.ghost.remove();drag.ghost=null}},reset=()=>{clear();ghostRm();press=null;ready=false;drag=null;moved=false;suppress=false;ev.classList.remove('dragging');ev.style.visibility='';ev.style.opacity=''};const auto=e=>{const w=document.querySelector('.timeline-wrap');if(!w||!drag)return;const r=w.getBoundingClientRect(),edge=42,s=14;let dx=0;if(e.clientX<r.left+edge)dx=-s;else if(e.clientX>r.right-edge)dx=s;if(dx)w.scrollLeft=Math.max(0,Math.min(w.scrollWidth-w.clientWidth,w.scrollLeft+dx))};const startDrag=(e,x)=>{const source=ev.closest('.daycol'),rect=ev.getBoundingClientRect();if(!source)return;const om=timeMin(x.start),dur=Math.max(15,(timeMin(x.end)||om+60)-om),g=document.createElement('div');g.className='event-ghost priority-'+priority(x);g.innerHTML='<b>'+esc(x.title)+'</b><div class="etime">'+x.start+(x.end?'–'+x.end:'')+'</div>';Object.assign(g.style,{position:'absolute',left:'3px',right:'3px',height:Math.max(28,dur/60*rowH)+'px',opacity:'1',pointerEvents:'none',zIndex:'100'});source.appendChild(g);drag={x,source,duration:dur,grabOffset:e.clientY-rect.top,pointerId:e.pointerId,ghost:g};ev.classList.add('dragging');ev.style.visibility='visible';ev.style.opacity='.42';suppress=true;try{ev.setPointerCapture(e.pointerId)}catch{}};const update=e=>{if(!drag)return;auto(e);const target=colAtX(e.clientX)||drag.source,raw=minAt(e,target)-(drag.grabOffset/rowH*60),nm=clamp(raw,drag.duration);if(drag.ghost.parentElement!==target)target.appendChild(drag.ghost);drag.ghost.style.top=((nm-startHour*60)/60*rowH)+'px'};
+    ev.addEventListener('pointerdown',e=>{e.stopPropagation();if(e.pointerType==='mouse'&&e.button!==0)return;const f=findInstance(ev.dataset.key||ev.dataset.id+'@@'+ev.dataset.occ);if(!f)return;press={x:e.clientX,y:e.clientY,key:ev.dataset.key||f.instance._key};lx=e.clientX;ly=e.clientY;ready=false;drag=null;moved=false;suppress=false;if(selectMode){suppress=true;return}timer=setTimeout(()=>{timer=null;ready=true},600)},{passive:false});
+    ev.addEventListener('pointermove',e=>{if(!press)return;const dist=Math.hypot(e.clientX-press.x,e.clientY-press.y),w=document.querySelector('.timeline-wrap');if(selectMode){if(dist>8){moved=true;suppress=true;if(w){w.scrollLeft-=e.clientX-lx;w.scrollTop-=e.clientY-ly}lx=e.clientX;ly=e.clientY;e.preventDefault()}return}if(!ready&&!drag&&dist>10){moved=true;suppress=true;clear();if(w){w.scrollLeft-=e.clientX-lx;w.scrollTop-=e.clientY-ly}lx=e.clientX;ly=e.clientY;e.preventDefault();return}if(ready&&!drag&&dist>10){const f=findInstance(press.key);if(f)startDrag(e,f.instance)}if(drag){e.preventDefault();update(e)}},{passive:false});
+    ev.addEventListener('pointerup',e=>{const p=press;if(!p){reset();return}clear();if(selectMode){if(!moved)toggleCalendarSelect(p.key);reset();return}if(drag){const f=findInstance(p.key);if(f){const target=colAtX(e.clientX)||drag.source,raw=minAt(e,target)-(drag.grabOffset/rowH*60),nm=clamp(raw,drag.duration);moveOccurrence(f.master,f.instance,target.dataset.date,timeStr(nm),timeStr(nm+drag.duration))}reset();render();return}if(ready){toggleCalendarSelect(p.key);reset();return}if(moved||suppress){reset();return}reset();openOccurrenceEditor(fallbackMaster(p.key),p.key.split('@@')[1]||findInstance(p.key)?.instance._occurrenceDate)});
+    ev.addEventListener('pointercancel',reset);
+  });
+}
 function fallbackMaster(key){return findInstance(key)?.master||null}
 function moveOccurrence(master,occDate,newDate,newStart,newEnd){
   if(!master)return;
@@ -1050,7 +1153,75 @@ function expandRange(from,to){
 }
 function eventHtml(t,startHour,rowH){let s=timeMin(t.start),e=timeMin(t.end)||Math.min(s+60,1439),top=(s-startHour*60)/60*rowH,height=Math.max(28,(e-s)/60*rowH),k=instanceKey(t);return `<div class="event bulkable priority-${priority(t)} ${t.completed?'done':''} ${selected.has(k)?'selected':''}" data-id="${esc(t._masterId||t.id)}" data-occ="${esc(t._occurrenceDate||t.date||'')}" data-key="${esc(k)}" style="top:${top}px;height:${height}px"><b>${esc(t.title)}${recurring(t)?' 🔁':''}</b><div class="etime">${t.start}${t.end?'–'+t.end:''}</div></div>`}
 function dayColumn(d,total,startHour,rowH){let ds=fmt(d),events=calendarEventsForDate(ds);return `<div class="daycol ${selected.size?'select-mode':''}" data-date="${ds}" style="height:${total}px">${events.map(t=>eventHtml(t,startHour,rowH)).join('')}${ds===today()?nowLine(startHour,rowH):''}</div>`}
+function attachTimelineGestures(dates,startHour,rowH){
+ const cols=[...document.querySelectorAll('.daycol')];
+ const snap=m=>Math.round(m/15)*15;
+ const clamp=(m,d)=>Math.max(startHour*60,Math.min(1439-d,snap(m)));
+ const wrap=()=>document.querySelector('.timeline-wrap');
+ const colAtX=x=>{for(const c of cols){const r=c.getBoundingClientRect();if(x>=r.left&&x<=r.right)return c}return cols[0]};
+ const minAt=(e,c)=>{const r=c.getBoundingClientRect();return (e.clientY-r.top)/rowH*60+startHour*60};
 
+ cols.forEach(col=>{
+  let timer=null,creating=null,pid=null,sx=0,sy=0,lx=0,ly=0;
+  const stop=()=>{if(timer){clearTimeout(timer);timer=null}};
+  const reset=()=>{stop();creating=null;pid=null;col.querySelector('.creating')?.remove();document.documentElement.classList.remove('calendar-creating');document.body.classList.remove('calendar-creating')};
+  col.addEventListener('pointerdown',e=>{
+   if(e.target.closest('.event')||selectMode)return;
+   if(e.pointerType==='mouse'&&e.button!==0)return;
+   pid=e.pointerId;sx=lx=e.clientX;sy=ly=e.clientY;
+   const m=clamp(minAt(e,col),0);
+   timer=setTimeout(()=>{timer=null;creating={start:m,end:m+60};document.documentElement.classList.add('calendar-creating');document.body.classList.add('calendar-creating');drawCreating(col,creating,startHour,rowH)},450);
+  },{passive:false});
+  col.addEventListener('pointermove',e=>{
+   if(e.pointerId!==pid)return;
+   const dx=e.clientX-lx,dy=e.clientY-ly,dist=Math.hypot(e.clientX-sx,e.clientY-sy);
+   if(timer&&dist>10){stop();return;}
+   if(creating){e.preventDefault();const m=clamp(minAt(e,col),0);creating.end=Math.max(creating.start+15,m);drawCreating(col,creating,startHour,rowH)}
+   lx=e.clientX;ly=e.clientY;
+  },{passive:false});
+  col.addEventListener('pointerup',e=>{if(e.pointerId!==pid)return;if(creating){const c={...creating};reset();newTask(col.dataset.date,timeStr(c.start),timeStr(c.end))}else reset()},{passive:false});
+  col.addEventListener('pointercancel',reset,{passive:false});
+ });
+
+ document.querySelectorAll('.event').forEach(ev=>{
+  let press=null,drag=null,moved=false,timer=null;
+  const clear=()=>{if(timer){clearTimeout(timer);timer=null}};
+  const cleanup=()=>{clear();if(drag?.ghost)drag.ghost.remove();drag=null;press=null;moved=false;ev.classList.remove('dragging');ev.style.opacity='';ev.style.visibility=''};
+  const startDrag=(e,x)=>{
+   const source=ev.closest('.daycol');if(!source)return false;
+   const rect=ev.getBoundingClientRect(),om=timeMin(x.start),dur=Math.max(15,(timeMin(x.end)||om+60)-om);
+   const g=document.createElement('div');g.className='event-ghost priority-'+priority(x);g.innerHTML='<b>'+esc(x.title)+'</b><div class="etime">'+x.start+(x.end?'–'+x.end:'')+'</div>';
+   Object.assign(g.style,{position:'absolute',left:'3px',right:'3px',height:Math.max(28,dur/60*rowH)+'px',top:((om-startHour*60)/60*rowH)+'px',pointerEvents:'none',zIndex:100});source.appendChild(g);
+   drag={source,duration:dur,grabOffset:e.clientY-rect.top,ghost:g,pointerId:e.pointerId};ev.classList.add('dragging');ev.style.opacity='.42';
+   try{ev.setPointerCapture(e.pointerId)}catch{}
+   return true;
+  };
+  const update=(e)=>{if(!drag)return;const target=colAtX(e.clientX)||drag.source,raw=minAt(e,target)-(drag.grabOffset/rowH*60),nm=clamp(raw,drag.duration);if(drag.ghost.parentElement!==target)target.appendChild(drag.ghost);drag.ghost.style.top=((nm-startHour*60)/60*rowH)+'px'};
+  ev.addEventListener('pointerdown',e=>{
+   e.stopPropagation();if(e.pointerType==='mouse'&&e.button!==0)return;
+   const key=ev.dataset.key||ev.dataset.id;const f=findInstance(key);if(!f)return;
+   press={key,x:e.clientX,y:e.clientY};moved=false;drag=null;
+   if(selectMode)return;
+   timer=setTimeout(()=>{timer=null;if(press&&!moved){toggleCalendarSelect(press.key);press=null}},550);
+   try{ev.setPointerCapture(e.pointerId)}catch{}
+  },{passive:false});
+  ev.addEventListener('pointermove',e=>{
+   if(!press||e.pointerId!==ev.getPointerId?.()&&drag?.pointerId!==e.pointerId&&e.pointerType!=='mouse')return;
+   const dist=Math.hypot(e.clientX-press.x,e.clientY-press.y);
+   if(dist>8)moved=true;
+   if(!drag&&moved&&!selectMode){clear();const f=findInstance(press.key);if(f&&startDrag(e,f.instance))update(e);e.preventDefault();return;}
+   if(drag){e.preventDefault();update(e)}
+  },{passive:false});
+  ev.addEventListener('pointerup',e=>{
+   if(!press){cleanup();return}clear();
+   if(drag){const key=press.key,f=findInstance(key),target=colAtX(e.clientX)||drag.source,raw=minAt(e,target)-(drag.grabOffset/rowH*60),nm=clamp(raw,drag.duration);cleanup();if(f)moveOccurrence(f.master,f.instance._occurrenceDate,target.dataset.date,timeStr(nm),timeStr(nm+drag.duration));render();return;}
+   const key=press.key;const wasMoved=moved;cleanup();
+   if(!wasMoved&&!selectMode)openOccurrenceEditor(fallbackMaster(key),key.split('@@')[1]||findInstance(key)?.instance._occurrenceDate);
+   else if(!wasMoved&&selectMode)toggleCalendarSelect(key);
+  },{passive:false});
+  ev.addEventListener('pointercancel',cleanup);
+ });
+}
 function bulkShiftTime(){let s=prompt('整体移动多少分钟？例如 30 或 -30','30');if(s===null)return;let delta=Number(s);if(!Number.isFinite(delta))return;selected.forEach(k=>mutateInstance(k,(m,x)=>{if(!x.start)return;let os=timeMin(x.start),oe=x.end?timeMin(x.end):os+60,d=Math.max(15,oe-os),ns=Math.max(0,Math.min(1439-d,os+delta));if(recurring(m)){let ex=ensureRec(m);ex.overrides[x._occurrenceDate]={...(ex.overrides[x._occurrenceDate]||{}),start:timeStr(ns),end:timeStr(ns+d)};}else{m.start=timeStr(ns);m.end=timeStr(ns+d)}}));selectMode=false;selected.clear();save();render()}
 function bulkDate(){let d=prompt('请输入日期（YYYY-MM-DD）',today());if(!/^\d{4}-\d{2}-\d{2}$/.test(d||''))return;selected.forEach(k=>mutateInstance(k,(m,x)=>{if(recurring(m)){let ex=ensureRec(m);ex.overrides[x._occurrenceDate]={...(ex.overrides[x._occurrenceDate]||{}),date:d};}else m.date=d}));selectMode=false;selected.clear();save();render()}
 function bulk(a){let keys=[...selected];if(!keys.length)return;if(a==='delete'&&!confirm(`删除 ${keys.length} 个事项？`))return;if(a==='copy'){clipboard=keys.map(k=>findInstance(k)?.instance).filter(Boolean).map(x=>{let n=cloneObj(x);delete n._key;delete n._masterId;delete n._occurrenceDate;delete n._series;n.id=id();return n});selectMode=false;selected.clear();save();render();return}keys.forEach(k=>mutateInstance(k,(m,x)=>{if(a==='done'){if(recurring(m)){let ex=ensureRec(m);if(!ex.completed.includes(x._occurrenceDate))ex.completed.push(x._occurrenceDate)}else{m.completed=true;m.completedAt=new Date().toISOString()}}else if(a==='today'||a==='tomorrow'){let d=a==='today'?today():addDays(today(),1);if(recurring(m)){let ex=ensureRec(m);ex.overrides[x._occurrenceDate]={...(ex.overrides[x._occurrenceDate]||{}),date:d};}else m.date=d}else if(a==='important'){if(recurring(m)){let ex=ensureRec(m);ex.overrides[x._occurrenceDate]={...(ex.overrides[x._occurrenceDate]||{}),important:!x.important};}else m.important=!m.important}else if(a==='urgent'){if(recurring(m)){let ex=ensureRec(m);ex.overrides[x._occurrenceDate]={...(ex.overrides[x._occurrenceDate]||{}),urgent:!x.urgent};}else m.urgent=!m.urgent}else if(a==='delete'){if(recurring(m)){let ex=ensureRec(m);if(!ex.deleted.includes(x._occurrenceDate))ex.deleted.push(x._occurrenceDate)}else tasks=tasks.filter(z=>z.id!==m.id)}}));selectMode=false;selected.clear();save();render()}
@@ -1097,10 +1268,8 @@ function commit(old,newid){
 function attachTimelineGestures(dates,startHour,rowH){
   const wrap=document.querySelector('.timeline-wrap');
   const cols=[...document.querySelectorAll('.daycol')];
-  if(!wrap||!cols.length)return;
   const snap=m=>Math.round(m/15)*15;
-  const clamp=(m,dur=0)=>Math.max(startHour*60,Math.min(1439-dur,snap(m)));
-  const minAt=(e,col)=>{const r=col.getBoundingClientRect();return (e.clientY-r.top)/rowH*60+startHour*60};
+  const clamp=(m,d)=>Math.max(startHour*60,Math.min(1439-d,snap(m)));
   const colAtX=x=>{
     let hit=cols.find(c=>{const r=c.getBoundingClientRect();return x>=r.left&&x<=r.right});
     if(hit)return hit;
@@ -1108,121 +1277,126 @@ function attachTimelineGestures(dates,startHour,rowH){
     for(const c of cols){const r=c.getBoundingClientRect(),dd=x<r.left?r.left-x:x>r.right?x-r.right:0;if(dd<bd){bd=dd;best=c}}
     return best;
   };
+  const minAt=(e,c)=>{const r=c.getBoundingClientRect();return (e.clientY-r.top)/rowH*60+startHour*60};
 
-  // IMPORTANT: do not use pointer capture on initial touch. It can break native
-  // scrolling on iOS Safari. Capture is replaced by document-level drag listeners.
-  let active=null;
-  const finishDrag=(commit)=>{
-    if(!active)return;
-    const a=active;
-    active=null;
-    clearTimeout(a.longTimer);
-    document.removeEventListener('pointermove',onDocMove,true);
-    document.removeEventListener('pointerup',onDocUp,true);
-    document.removeEventListener('pointercancel',onDocCancel,true);
-    if(a.ghost)a.ghost.remove();
-    if(a.col)a.col.querySelector('.creating')?.remove();
-    document.documentElement.classList.remove('calendar-creating');document.body.classList.remove('calendar-creating');
-    a.ev?.classList.remove('dragging');
-    if(commit&&a.dragging){
-      const f=findInstance(a.key);
-      if(f){
-        const target=colAtX(a.lastX);
-        const raw=minAt({clientY:a.lastY},target)-(a.grabOffset/rowH*60);
-        const nm=clamp(raw,a.duration);
-        moveOccurrence(f.master,f.instance._occurrenceDate,target.dataset.date,timeStr(nm),timeStr(nm+a.duration));
-        render();
-      }
-    }
-  };
-  const onDocMove=e=>{
-    if(!active||e.pointerId!==active.pointerId)return;
-    active.lastX=e.clientX;active.lastY=e.clientY;
-    const dist=Math.hypot(e.clientX-active.startX,e.clientY-active.startY);
-    if(active.type==='event'){
-      if(!active.dragging&&dist>7){
-        clearTimeout(active.longTimer); active.dragging=true;
-        const f=findInstance(active.key); if(!f){finishDrag(false);return;}
-        const source=active.ev.closest('.daycol');
-        const st=timeMin(f.instance.start),en=timeMin(f.instance.end)||st+60;
-        active.duration=Math.max(15,en-st);
-        const g=document.createElement('div');
-        g.className='event-ghost priority-'+priority(f.instance);
-        g.innerHTML='<b>'+esc(f.instance.title)+'</b><div class="etime">'+f.instance.start+(f.instance.end?'–'+f.instance.end:'')+'</div>';
-        Object.assign(g.style,{position:'absolute',left:'3px',right:'3px',height:Math.max(28,active.duration/60*rowH)+'px',top:'0px',pointerEvents:'none',zIndex:100});
-        source.appendChild(g); active.ghost=g; active.ev.classList.add('dragging'); active.ev.style.opacity='.42';
-        if(e.cancelable)e.preventDefault();
-      }
-      if(active.dragging){
-        const target=colAtX(e.clientX); const raw=minAt(e,target)-(active.grabOffset/rowH*60); const nm=clamp(raw,active.duration);
-        if(active.ghost.parentElement!==target)target.appendChild(active.ghost);
-        active.ghost.style.top=((nm-startHour*60)/60*rowH)+'px';
-        if(e.cancelable)e.preventDefault();
-      }
-      return;
-    }
-    if(active.type==='create'){
-      if(e.cancelable)e.preventDefault();
-      const m=clamp(minAt(e,active.col),0);
-      active.end=Math.max(active.start+15,m);
-      drawCreating(active.col,{start:active.start,end:active.end},startHour,rowH);
-    }
-  };
-  const onDocUp=e=>{
-    if(!active||e.pointerId!==active.pointerId)return;
-    const a=active;
-    if(a.type==='event'){
-      if(a.dragging){a.lastX=e.clientX;a.lastY=e.clientY;finishDrag(true);return;}
-      const key=a.key, selecting=selectMode, wasTap=Math.hypot(e.clientX-a.startX,e.clientY-a.startY)<=7;
-      const f=findInstance(key); finishDrag(false);
-      if(wasTap){
-        if(selecting)toggleCalendarSelect(key); else if(f)openOccurrenceEditor(f.master,f.instance._occurrenceDate);
-      }
-      return;
-    }
-    if(a.type==='create'){
-      if(a.creating){const c={start:a.start,end:a.end};finishDrag(false);a.col.querySelector('.creating')?.remove();document.documentElement.classList.remove('calendar-creating');document.body.classList.remove('calendar-creating');newTask(a.col.dataset.date,timeStr(c.start),timeStr(c.end));}
-      else finishDrag(false);
-      return;
-    }
-    finishDrag(false);
-  };
-  const onDocCancel=e=>{if(active&&e.pointerId===active.pointerId)finishDrag(false)};
-
+  /* Replace event nodes so stale gesture listeners from previous patch layers are removed. */
   document.querySelectorAll('.event').forEach(oldEv=>{
-    const ev=oldEv.cloneNode(true); oldEv.replaceWith(ev);
+    const ev=oldEv.cloneNode(true);
+    oldEv.replaceWith(ev);
+    let press=null,drag=null,timer=null,moved=false;
+    const clear=()=>{if(timer){clearTimeout(timer);timer=null}};
+    const cleanup=()=>{
+      clear();
+      if(drag?.ghost)drag.ghost.remove();
+      try{if(drag?.pointerId!=null)ev.releasePointerCapture(drag.pointerId)}catch{}
+      drag=null;press=null;moved=false;
+      ev.classList.remove('dragging');ev.style.opacity='';
+    };
+    const startDrag=(e,x)=>{
+      const source=ev.closest('.daycol');if(!source)return false;
+      const rect=ev.getBoundingClientRect();
+      const start=timeMin(x.start),end=timeMin(x.end)||start+60,dur=Math.max(15,end-start);
+      const g=document.createElement('div');
+      g.className='event-ghost priority-'+priority(x);
+      g.innerHTML='<b>'+esc(x.title)+'</b><div class="etime">'+x.start+(x.end?'–'+x.end:'')+'</div>';
+      Object.assign(g.style,{position:'absolute',left:'3px',right:'3px',height:Math.max(28,dur/60*rowH)+'px',top:((start-startHour*60)/60*rowH)+'px',pointerEvents:'none',zIndex:100});
+      source.appendChild(g);
+      drag={source,duration:dur,grabOffset:e.clientY-rect.top,pointerId:e.pointerId,ghost:g};
+      ev.classList.add('dragging');ev.style.opacity='.42';
+      try{ev.setPointerCapture(e.pointerId)}catch{}
+      return true;
+    };
+    const update=e=>{
+      if(!drag)return;
+      const target=colAtX(e.clientX)||drag.source;
+      const raw=minAt(e,target)-(drag.grabOffset/rowH*60);
+      const nm=clamp(raw,drag.duration);
+      if(drag.ghost.parentElement!==target)target.appendChild(drag.ghost);
+      drag.ghost.style.top=((nm-startHour*60)/60*rowH)+'px';
+    };
     ev.addEventListener('pointerdown',e=>{
       if(e.pointerType==='mouse'&&e.button!==0)return;
       e.stopPropagation();
-      const key=ev.dataset.key||ev.dataset.id, f=findInstance(key); if(!f)return;
-      const r=ev.getBoundingClientRect();
-      active={type:'event',ev,key,pointerId:e.pointerId,startX:e.clientX,startY:e.clientY,lastX:e.clientX,lastY:e.clientY,grabOffset:e.clientY-r.top,duration:0,dragging:false,ghost:null,longTimer:null};
+      const key=ev.dataset.key||ev.dataset.id;
+      if(!findInstance(key))return;
+      press={key,x:e.clientX,y:e.clientY};moved=false;drag=null;
       if(selectMode)return;
-      active.longTimer=setTimeout(()=>{if(active&&!active.dragging&&Math.hypot(active.lastX-active.startX,active.lastY-active.startY)<=7){const k=active.key;finishDrag(false);toggleCalendarSelect(k)}},550);
-      document.addEventListener('pointermove',onDocMove,true);
-      document.addEventListener('pointerup',onDocUp,true);
-      document.addEventListener('pointercancel',onDocCancel,true);
+      timer=setTimeout(()=>{
+        timer=null;
+        if(press&&!moved){toggleCalendarSelect(press.key);press=null;}
+      },550);
+      try{ev.setPointerCapture(e.pointerId)}catch{}
     },{passive:false});
+    ev.addEventListener('pointermove',e=>{
+      if(!press||e.pointerId!==press.pointerId&&press.pointerId!=null)return;
+      const dist=Math.hypot(e.clientX-press.x,e.clientY-press.y);
+      if(dist>8)moved=true;
+      if(!drag&&moved&&!selectMode){
+        clear();
+        const f=findInstance(press.key);
+        if(f&&startDrag(e,f.instance))update(e);
+        e.preventDefault();
+        return;
+      }
+      if(drag){e.preventDefault();update(e)}
+    },{passive:false});
+    ev.addEventListener('pointerup',e=>{
+      if(!press){cleanup();return}
+      clear();
+      if(drag){
+        const key=press.key,f=findInstance(key),target=colAtX(e.clientX)||drag.source;
+        const raw=minAt(e,target)-(drag.grabOffset/rowH*60),nm=clamp(raw,drag.duration);
+        cleanup();
+        if(f)moveOccurrence(f.master,f.instance._occurrenceDate,target.dataset.date,timeStr(nm),timeStr(nm+drag.duration));
+        render();
+        return;
+      }
+      const key=press.key,wasMoved=moved,inSelect=selectMode;
+      cleanup();
+      if(!wasMoved){
+        if(inSelect)toggleCalendarSelect(key);
+        else {const f=findInstance(key);if(f)openOccurrenceEditor(f.master,f.instance._occurrenceDate);}
+      }
+    },{passive:false});
+    ev.addEventListener('pointercancel',cleanup,{passive:false});
   });
 
+  /* Blank-area creation: long press, then vertical drag. After activation, document-level tracking prevents iOS Safari from losing the gesture. */
   cols.forEach(col=>{
+    let state=null;
+    const stop=()=>{if(state?.timer){clearTimeout(state.timer);state.timer=null}};
+    const cleanup=()=>{stop();if(state?.move)document.removeEventListener('pointermove',state.move,true);if(state?.up)document.removeEventListener('pointerup',state.up,true);if(state?.cancel)document.removeEventListener('pointercancel',state.cancel,true);col.querySelector('.creating')?.remove();document.documentElement.classList.remove('calendar-creating');document.body.classList.remove('calendar-creating');state=null};
     col.addEventListener('pointerdown',e=>{
       if(e.target.closest('.event')||selectMode)return;
       if(e.pointerType==='mouse'&&e.button!==0)return;
-      const pid=e.pointerId;
-      const m=clamp(minAt(e,col),0);
-      active={type:'blank',pointerId:pid,startX:e.clientX,startY:e.clientY,lastX:e.clientX,lastY:e.clientY,col,longTimer:null};
-      active.longTimer=setTimeout(()=>{
-        if(!active||active.pointerId!==pid)return;
-        if(Math.hypot(active.lastX-active.startX,active.lastY-active.startY)>10)return;
-        active.type='create';active.start=m;active.end=m+60;active.creating=true;
+      cleanup();
+      const base=clamp(minAt(e,col),0);
+      state={pid:e.pointerId,x:e.clientX,y:e.clientY,start:base,end:base+60,timer:null,active:false,move:null,up:null,cancel:null};
+      state.timer=setTimeout(()=>{
+        if(!state||state.pid!==e.pointerId)return;
+        state.timer=null;state.active=true;
         document.documentElement.classList.add('calendar-creating');document.body.classList.add('calendar-creating');
-        drawCreating(col,{start:m,end:m+60},startHour,rowH);
+        drawCreating(col,state,startHour,rowH);
+        state.move=ev=>{
+          if(!state||!state.active||ev.pointerId!==state.pid)return;
+          ev.preventDefault();
+          const m=clamp(minAt(ev,col),0);
+          state.end=Math.max(state.start+15,m);
+          drawCreating(col,state,startHour,rowH);
+        };
+        state.up=ev=>{
+          if(!state||ev.pointerId!==state.pid)return;
+          const c={start:state.start,end:state.end};cleanup();newTask(col.dataset.date,timeStr(c.start),timeStr(c.end));
+        };
+        state.cancel=ev=>{if(state&&ev.pointerId===state.pid)cleanup()};
+        document.addEventListener('pointermove',state.move,{passive:false,capture:true});
+        document.addEventListener('pointerup',state.up,{passive:false,capture:true});
+        document.addEventListener('pointercancel',state.cancel,{passive:false,capture:true});
       },450);
-      document.addEventListener('pointermove',onDocMove,true);
-      document.addEventListener('pointerup',onDocUp,true);
-      document.addEventListener('pointercancel',onDocCancel,true);
     },{passive:false});
+    col.addEventListener('pointermove',e=>{if(!state||state.active||e.pointerId!==state.pid)return;if(Math.hypot(e.clientX-state.x,e.clientY-state.y)>8)cleanup()},{passive:true});
+    col.addEventListener('pointerup',e=>{if(state&&state.pid===e.pointerId&&!state.active)cleanup()},{passive:true});
+    col.addEventListener('pointercancel',e=>{if(state&&state.pid===e.pointerId)cleanup()},{passive:true});
   });
 }
 </script>
