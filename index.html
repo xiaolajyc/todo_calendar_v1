@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"><meta name="theme-color" content="#ffffff"><title>Todo Calendar V2.42</title>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"><meta name="theme-color" content="#ffffff"><title>Todo Calendar V2.43</title>
 <style>
 :root{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#171717;background:#f5f5f7;--line:#e7e7eb;--muted:#777;--accent:#111}*{box-sizing:border-box}body{margin:0;background:#f5f5f7;overscroll-behavior:none}.app{max-width:1100px;margin:auto;min-height:100vh;background:#fff;padding-bottom:68px}.head{position:sticky;top:0;background:rgba(255,255,255,.96);backdrop-filter:blur(12px);padding:12px 14px;border-bottom:1px solid var(--line);z-index:30}.headtop{display:flex;align-items:center;justify-content:space-between;gap:8px}.head h1{margin:0;font-size:21px}.tabs,.seg{display:flex;gap:6px;margin-top:10px;overflow:auto}.tabs button,.seg button,.chip{border:0;border-radius:10px;padding:8px 11px;background:#eee;white-space:nowrap}.active{background:#111!important;color:#fff}.content{padding:12px}.group{margin:18px 0}.group h3{font-size:14px;margin:0 0 6px}.task{display:flex;align-items:center;gap:10px;padding:13px 7px;border-bottom:1px solid #eee;touch-action:pan-y}.check{width:23px;height:23px;border:2px solid #aaa;border-radius:50%;flex:none}.done .check{background:#111}.done .title{text-decoration:line-through;opacity:.45}.taskmain{flex:1;min-width:0}.title{font-weight:600}.meta{font-size:12px;color:#777;margin-top:3px}.badge{font-size:12px}.fab{position:fixed;right:18px;bottom:88px;width:56px;height:56px;border-radius:50%;border:0;background:#111;color:#fff;font-size:30px;z-index:20;box-shadow:0 5px 20px #0002}.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(1100px,100%);height:70px;background:#fff;border-top:1px solid #ddd;display:flex;z-index:40;padding-bottom:env(safe-area-inset-bottom)}.nav button{flex:1;border:0;background:white;font-size:13px}.nav .active{color:#111;background:#eee!important}.card{background:#f5f5f7;border-radius:16px;padding:14px;margin-bottom:12px}.row{display:flex;gap:10px;align-items:center}.row>*{flex:1}.field{margin:12px 0}.field label{display:block;font-size:12px;color:#666;margin-bottom:5px}.field input,.field textarea,.field select{width:100%;padding:12px;border:1px solid #ddd;border-radius:12px;background:#fff}.primary,.danger{border:0;border-radius:12px;padding:12px 16px}.primary{background:#111;color:#fff}.danger{background:#eee}.hidden{display:none!important}.empty{text-align:center;color:#888;padding:35px 10px}
 /* Google Calendar-like week/day timeline */
@@ -362,7 +362,7 @@ input, textarea, select, option {
 }
 
 
-/* V2.42: calendar occupies the remaining viewport; only its internal timeline scrolls */
+/* V2.43: calendar occupies the remaining viewport; only its internal timeline scrolls */
 html,body{height:100%;overflow:hidden}
 .app{height:100dvh;min-height:100dvh;display:flex;flex-direction:column;overflow:hidden;padding-bottom:68px}
 .app>.head{flex:none}
@@ -418,6 +418,30 @@ html,body{height:100%;overflow:hidden}
 .timecell{font-size:10px}
 .event{font-size:11px}
 .event .etime{font-size:10px}
+
+
+/* V2.43: fixed time axis in week view */
+.timeline-wrap.week-timeline{
+  display:flex!important;
+  overflow:hidden!important;
+}
+.timeline-wrap.week-timeline .time-axis{
+  position:sticky!important;
+  left:0!important;
+  z-index:30!important;
+  flex:0 0 52px!important;
+  width:52px!important;
+  min-width:52px!important;
+  background:rgba(248,250,253,.98)!important;
+  box-shadow:2px 0 5px rgba(45,65,90,.08);
+}
+.timeline-wrap.week-timeline .week-scroll{
+  flex:1 1 auto!important;
+  min-width:0!important;
+  overflow-x:auto!important;
+  overflow-y:hidden!important;
+  -webkit-overflow-scrolling:touch;
+}
 
 </style></head><body><div class="app"><header class="head"><div class="headtop"><h1 id="heading">Todo</h1><div id="headActions"></div></div><div id="subtabs" class="tabs"></div></header><main id="main" class="content"></main><button id="fab" class="fab">+</button><div id="bulk" class="bulk hidden"></div><nav class="nav">
 <button data-page="todo" class="active"><span class="navicon todoicon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 8l1.5 1.5L12 7"/><path d="M13.5 8H17"/><path d="M8 13l1.5 1.5L12 12"/><path d="M13.5 13H17"/></svg></span><span>Todo</span></button>
@@ -706,7 +730,7 @@ function renderTimeline(){
   let title=calMode==='week'?`${dates[0].getMonth()+1}月${dates[0].getDate()}日 – ${dates[6].getMonth()+1}月${dates[6].getDate()}日`:`${dates[0].getFullYear()}年${dates[0].getMonth()+1}月${dates[0].getDate()}日`;
   let gridClass=calMode==='day'?'day-grid':'week-grid';
   let dayHeads=dates.map(d=>`<div class="dayhead ${fmt(d)===today()?'today':''}" data-date="${fmt(d)}">${['一','二','三','四','五','六','日'][(d.getDay()+6)%7]}<strong>${d.getDate()}</strong></div>`).join('');
-  let timeColumn=`<div class="timecol">${Array.from({length:24},(_,i)=>`<div class="timecell" style="height:${rowH}px">${String(i+startHour).padStart(2,'0')}:00</div>`).join('')}</div>`;
+  let timeColumn=`<div class="timecol time-axis">${Array.from({length:24},(_,i)=>`<div class="timecell" style="height:${rowH}px">${String(i+startHour).padStart(2,'0')}:00</div>`).join('')}</div>`;
   let cols=dates.map(d=>dayColumn(d,total,startHour,rowH)).join('');
   let header=calMode==='day'
     ? `<div class="dayhead"></div>${dayHeads}`
@@ -916,4 +940,283 @@ document.addEventListener('contextmenu', function(e){
 });
 </script>
 
+<script>
+/* v2.45 recurrence integration: master series + generated instances + exceptions */
+function cloneObj(o){return JSON.parse(JSON.stringify(o));}
+function repeatType(t){return typeof t.repeat==='string'?t.repeat:(t.repeat?.type||'none');}
+function recurring(t){return !!(t&&t.date&&repeatType(t)!=='none');}
+function isoDow(ds){return (parseDate(ds).getDay()+6)%7;}
+function monthDays(y,m){return new Date(y,m+1,0).getDate();}
+function ensureRec(t){
+  if(!t.exceptions)t.exceptions={deleted:[],completed:[],overrides:{}};
+  if(!Array.isArray(t.exceptions.deleted))t.exceptions.deleted=[];
+  if(!Array.isArray(t.exceptions.completed))t.exceptions.completed=[];
+  if(!t.exceptions.overrides)t.exceptions.overrides={};
+  return t.exceptions;
+}
+function sameDay(a,b){return a===b;}
+function diffDays(a,b){return Math.round((parseDate(a)-parseDate(b))/86400000);}
+function weeksFrom(a,b){return Math.floor(diffDays(a,b)/7);}
+function recurrenceOrdinal(t,ds){
+  if(!recurring(t)||ds<t.date)return 0;
+  let n=0,cur=t.date,guard=0;
+  while(cur<=ds&&guard++<5000){if(occursRaw(t,cur))n++;cur=addDays(cur,1);}
+  return n;
+}
+function endAllows(t,ds){
+  const r=typeof t.repeat==='object'?t.repeat:null;if(!r)return true;
+  if(r.endType==='date'&&r.endValue&&ds>r.endValue)return false;
+  if(r.endType==='count'&&r.endValue){const n=recurrenceOrdinal(t,ds);if(n>Number(r.endValue))return false;}
+  return true;
+}
+function occursRaw(t,ds){
+  if(!t.date||ds<t.date)return false;
+  const r=typeof t.repeat==='string'?{type:t.repeat}:t.repeat||{type:'none'};
+  const type=r.type||'none';
+  if(type==='none')return ds===t.date;
+  const dd=diffDays(ds,t.date);
+  if(type==='daily')return dd%1===0;
+  if(type==='weekdays'){const w=isoDow(ds);return w>=0&&w<=4;}
+  if(type==='weekly'){return isoDow(ds)===isoDow(t.date);}
+  if(type==='monthly'){
+    const a=parseDate(t.date),b=parseDate(ds);
+    const months=(b.getFullYear()-a.getFullYear())*12+(b.getMonth()-a.getMonth());
+    return months>=0&&months%1===0&&b.getDate()===a.getDate();
+  }
+  if(type==='custom'){
+    const interval=Math.max(1,Number(r.interval)||1),unit=r.unit||'day';
+    if(unit==='day')return dd>=0&&dd%interval===0;
+    if(unit==='week'){
+      const w=isoDow(ds), days=Array.isArray(r.weekdays)&&r.weekdays.length?r.weekdays:[isoDow(t.date)];
+      return days.includes(w)&&Math.floor(dd/7)%interval===0;
+    }
+    if(unit==='month'){
+      const a=parseDate(t.date),b=parseDate(ds),months=(b.getFullYear()-a.getFullYear())*12+(b.getMonth()-a.getMonth());
+      return months>=0&&months%interval===0&&b.getDate()===a.getDate();
+    }
+  }
+  return false;
+}
+function occursOn(t,ds){return occursRaw(t,ds)&&endAllows(t,ds)&&!ensureRec(t).deleted.includes(ds);}
+function occurrenceData(master,occDate){
+  if(!recurring(master))return {...master,_key:master.id,_masterId:master.id,_occurrenceDate:master.date};
+  if(!occursOn(master,occDate))return null;
+  const ex=ensureRec(master), ov=ex.overrides[occDate]||{};
+  const x={...cloneObj(master),...cloneObj(ov),_key:master.id+'@@'+occDate,_masterId:master.id,_occurrenceDate:occDate,_series:true};
+  x.id=x._key;
+  if(ex.completed.includes(occDate))x.completed=true;
+  else if(ov.completed!=null)x.completed=!!ov.completed;
+  else x.completed=false;
+  x._originalDate=occDate;
+  return x;
+}
+function expandRange(from,to){
+  const out=[];
+  for(const t of tasks){
+    if(!recurring(t)){if(t.date&&t.date>=from&&t.date<=to)out.push({...t,_key:t.id,_masterId:t.id,_occurrenceDate:t.date});else if(!t.date&&from<=today()&&to>=today())out.push({...t,_key:t.id,_masterId:t.id});continue;}
+    let d=from;let guard=0;while(d<=to&&guard++<2000){if(occursOn(t,d)){const x=occurrenceData(t,d);if(x)out.push(x)}d=addDays(d,1);}
+  }
+  return out;
+}
+function todoInstances(tab){
+  const base=today();let from=addDays(base,-365),to=addDays(base,365);
+  if(tab==='today')from=to=base;
+  if(tab==='overdue'){from=addDays(base,-365);to=addDays(base,-1);}
+  if(tab==='done'){from=addDays(base,-365);to=addDays(base,365);}
+  let a=expandRange(from,to);
+  return a.filter(t=>{
+    if(tab==='all')return !t.completed;
+    if(tab==='today')return t.date===base&&!t.completed;
+    if(tab==='overdue')return t.date&&t.date<base&&!t.completed;
+    if(tab==='inbox')return !t.date&&!t.completed;
+    return !!t.completed;
+  });
+}
+function recurrenceLabel(t){return recurring(t)?' · 🔁':'';}
+function instanceKey(t){return t._key||t.id;}
+function taskRow(t){return `<div class="task ${t.completed?'done':''} ${selected.has(instanceKey(t))?'selected':''}" data-id="${esc(instanceKey(t))}" onclick="taskClick(event,'${esc(instanceKey(t))}')" oncontextmenu="event.preventDefault();toggleSelect('${esc(instanceKey(t))}')"><span class="${selected.size?'selectbox':'check'}"></span><div class="taskmain"><div class="title">${esc(t.title)}${recurrenceLabel(t)}</div><div class="meta">${t.date||'无日期'} ${t.start||''}${t.end?'–'+t.end:''}</div></div><span class="badge">${t.important?'⭐':''}${t.urgent?'⚡':''}</span></div>`}
+function renderTodo(){
+  const list=todoInstances(todoTab);
+  const counts={all:todoInstances('all').length,today:todoInstances('today').length,overdue:todoInstances('overdue').length,inbox:todoInstances('inbox').length,done:todoInstances('done').length};
+  $('#subtabs').innerHTML=['all:全部','today:今天','overdue:逾期','inbox:无日期','done:已完成'].map(x=>{const[a,b]=x.split(':');return `<button class="${todoTab===a?'active':''}" onclick="todoTab='${a}';selectMode=false;selected.clear();render()">${b}${counts[a]?` ${counts[a]}`:''}</button>`}).join('');
+  const allSelected=list.length>0&&list.every(t=>selected.has(instanceKey(t)));
+  $('#headActions').innerHTML=`<button class="tabsbtn" style="min-height:38px;padding:8px 12px;background:#edf2f8;border-radius:11px;border:0;color:#34435a;font-weight:700" onclick="toggleSelectAllTodo()">${allSelected?'取消全选':'全选'}</button>`;
+  const dateLabel=ds=>{if(ds==='__none__')return'无日期';const d=parseDate(ds),base=today(),diff=Math.round((d-parseDate(base))/86400000),wd=['日','一','二','三','四','五','六'][d.getDay()];if(ds===base)return`今天 · ${ds} · 周${wd}`;if(diff===-1)return`昨天 · ${ds} · 周${wd}`;if(diff===1)return`明天 · ${ds} · 周${wd}`;return`${ds} · 周${wd}`};
+  const groups=new Map();[...list].sort((a,b)=>(a.date||'9999').localeCompare(b.date||'9999')||priority(a)-priority(b)||(a.start||'').localeCompare(b.start||'')||a.title.localeCompare(b.title)).forEach(t=>{const k=t.date||'__none__';if(!groups.has(k))groups.set(k,[]);groups.get(k).push(t)});
+  let html='';for(const[ds,items]of groups)html+=`<section class="group"><h3>${esc(dateLabel(ds))}<span style="float:right;font-weight:600;color:#8290a2">${items.length}</span></h3>${items.map(taskRow).join('')}</section>`;
+  $('#main').innerHTML=html||'<div class="empty">暂无事项</div>';attachTaskGestures();renderBulk();
+}
+function toggleSelectAllTodo(){const current=todoInstances(todoTab),keys=current.map(instanceKey),all=keys.length&&keys.every(k=>selected.has(k));keys.forEach(k=>all?selected.delete(k):selected.add(k));selectMode=selected.size>0;render();}
+function findInstance(key){if(!key)return null;const pos=String(key).indexOf('@@');if(pos<0){const t=tasks.find(x=>x.id===key);return t?{master:t,instance:{...t,_key:t.id,_masterId:t.id,_occurrenceDate:t.date}:null};}const mid=key.slice(0,pos),ds=key.slice(pos+2),m=tasks.find(x=>x.id===mid);if(!m)return null;const inst=occurrenceData(m,ds);return inst?{master:m,instance:inst}:null;}
+function taskClick(e,key){if(taskGesture.suppressClick||taskGesture.moved||taskGesture.long){e.preventDefault();return}const f=findInstance(key);if(!f)return;if(e.target.classList.contains('check')){toggleInstanceComplete(f.master,f.instance);return}if(selectMode){toggleSelect(key);return}openOccurrenceEditor(f.master,f.instance._occurrenceDate);}
+function toggleSelect(i){selectMode=true;selected.has(i)?selected.delete(i):selected.add(i);render()}
+function toggleInstanceComplete(master,ds){if(!recurring(master)){master.completed=!master.completed;master.completedAt=master.completed?new Date().toISOString():null;}else{const ex=ensureRec(master),idx=ex.completed.indexOf(ds);if(idx>=0)ex.completed.splice(idx,1);else ex.completed.push(ds);}save();render();}
+function renderBulk(){let b=$('#bulk');if(!selectMode){b.classList.add('hidden');return}b.classList.remove('hidden');b.innerHTML=`<span style="padding:8px;font-weight:700;position:sticky;left:0;background:#111">已选 ${selected.size}</span><button onclick="bulk('done')">✓完成</button><button onclick="bulk('today')">今天</button><button onclick="bulk('tomorrow')">明天</button><button onclick="bulkDate()">📅日期</button><button onclick="bulkShiftTime()">🕐时间</button><button onclick="bulk('important')">⭐重要</button><button onclick="bulk('urgent')">⚡紧急</button><button onclick="bulk('copy')">📋复制</button><button onclick="bulk('delete')">🗑删除</button><button onclick="selectMode=false;selected.clear();render()">取消</button>`}
+function mutateInstance(key,fn){const f=findInstance(key);if(f)fn(f.master,f.instance);}
+function bulkShiftTime(){let s=prompt('整体移动多少分钟？例如 30 或 -30','30');if(s===null)return;let delta=Number(s);if(!Number.isFinite(delta))return alert('请输入数字，例如 30 或 -30');selected.forEach(k=>mutateInstance(k,(m,x)=>{if(!x.start)return;let os=timeMin(x.start),oe=x.end?timeMin(x.end):os+60,d=Math.max(15,oe-os),ns=Math.max(0,Math.min(1439-d,os+delta));if(recurring(m)){const ex=ensureRec(m);ex.overrides[x._occurrenceDate]={...(ex.overrides[x._occurrenceDate]||{}),start:timeStr(ns),end:timeStr(ns+d)};}else{m.start=timeStr(ns);m.end=timeStr(ns+d)}}));selectMode=false;selected.clear();save();render();}
+function bulkDate(){let d=prompt('请输入日期（YYYY-MM-DD）',today());if(!/^\d{4}-\d{2}-\d{2}$/.test(d||''))return;selected.forEach(k=>mutateInstance(k,(m,x)=>{if(recurring(m)){const ex=ensureRec(m);ex.overrides[x._occurrenceDate]={...(ex.overrides[x._occurrenceDate]||{}),date:d};}else m.date=d}));selectMode=false;selected.clear();save();render();}
+function bulk(a){const keys=[...selected];if(a==='delete'&&!confirm(`删除 ${keys.length} 个事项？`))return;if(a==='copy'){clipboard=keys.map(k=>findInstance(k)?.instance).filter(Boolean).map(x=>({...cloneObj(x),id:id(),_key:undefined,_masterId:undefined,_occurrenceDate:undefined,_series:undefined}));selectMode=false;selected.clear();save();render();return}keys.forEach(k=>mutateInstance(k,(m,x)=>{if(a==='done'){if(recurring(m)){const ex=ensureRec(m);if(!ex.completed.includes(x._occurrenceDate))ex.completed.push(x._occurrenceDate)}else{m.completed=true;m.completedAt=new Date().toISOString()}}if(a==='today'){if(recurring(m)){const ex=ensureRec(m);ex.overrides[x._occurrenceDate]={...(ex.overrides[x._occurrenceDate]||{}),date:today()};}else m.date=today()}if(a==='tomorrow'){if(recurring(m)){const ex=ensureRec(m);ex.overrides[x._occurrenceDate]={...(ex.overrides[x._occurrenceDate]||{}),date:addDays(today(),1)};}else m.date=addDays(today(),1)}if(a==='important'){if(recurring(m)){const ex=ensureRec(m);ex.overrides[x._occurrenceDate]={...(ex.overrides[x._occurrenceDate]||{}),important:!x.important};}else m.important=!m.important}if(a==='urgent'){if(recurring(m)){const ex=ensureRec(m);ex.overrides[x._occurrenceDate]={...(ex.overrides[x._occurrenceDate]||{}),urgent:!x.urgent};}else m.urgent=!m.urgent}if(a==='delete'){if(recurring(m))ensureRec(m).deleted.push(x._occurrenceDate);else tasks=tasks.filter(z=>z.id!==m.id)}}));selectMode=false;selected.clear();save();render();}
+
+function calendarEventsForDate(ds){
+  let a=[];
+  for(const t of tasks){
+    if(!recurring(t)){
+      if(t.date===ds&&t.start)a.push({...t,_key:t.id,_masterId:t.id,_occurrenceDate:t.date});
+      continue;
+    }
+    // Render an occurrence in the ORIGINAL date or in its override date.
+    const r=ensureRec(t);
+    const candidates=new Set();
+    if(occursOn(t,ds))candidates.add(ds);
+    Object.keys(r.overrides||{}).forEach(od=>{
+      const ov=r.overrides[od]||{};
+      if(occursOn(t,od)&&(ov.date||od)===ds)candidates.add(od);
+    });
+    candidates.forEach(od=>{const x=occurrenceData(t,od);if(x&&x.start&&x.date===ds)a.push(x);});
+  }
+  return a.sort((a,b)=>timeMin(a.start)-timeMin(b.start));
+}
+function eventHtml(t,startHour,rowH){let s=timeMin(t.start),e=timeMin(t.end)||Math.min(s+60,1439),top=(s-startHour*60)/60*rowH,height=Math.max(28,(e-s)/60*rowH),k=instanceKey(t);return `<div class="event bulkable priority-${priority(t)} ${t.completed?'done':''} ${selected.has(k)?'selected':''}" data-id="${esc(t._masterId||t.id)}" data-occ="${esc(t._occurrenceDate||t.date||'')}" data-key="${esc(k)}" style="top:${top}px;height:${height}px"><b>${esc(t.title)}${recurring(t)?' 🔁':''}</b><div class="etime">${t.start}${t.end?'–'+t.end:''}</div></div>`}
+function dayColumn(d,total,startHour,rowH){let ds=fmt(d),events=calendarEventsForDate(ds);return `<div class="daycol ${selected.size?'select-mode':''}" data-date="${ds}" style="height:${total}px">${events.map(t=>eventHtml(t,startHour,rowH)).join('')}${ds===today()?nowLine(startHour,rowH):''}</div>`}
+
+function openOccurrenceEditor(master,occDate){if(!recurring(master))return editTask(master.id);const choice=prompt('这是重复事项，请选择操作：\n1 = 仅此事项\n2 = 此事项及以后\n3 = 整个系列','1');if(choice==='1'||choice==='2'||choice==='3'){editingOccurrence={masterId:master.id,date:occDate,mode:Number(choice)};editTask(master.id);} }
+function openOccurrenceDelete(master,occDate){if(!recurring(master)){if(confirm('删除此事项？')){tasks=tasks.filter(x=>x.id!==master.id);save();render()}return}const c=prompt('删除重复事项：\n1 = 仅此事项\n2 = 此事项及以后\n3 = 整个系列','1');if(!['1','2','3'].includes(c))return;if(c==='1'){const ex=ensureRec(master);if(!ex.deleted.includes(occDate))ex.deleted.push(occDate);}else if(c==='2'){truncateSeries(master,occDate);}else tasks=tasks.filter(x=>x.id!==master.id);save();render();}
+function occurrencesBefore(t,ds){let n=0,d=t.date,guard=0;while(d<ds&&guard++<100000){if(occursRaw(t,d)&&endAllows(t,d))n++;d=addDays(d,1)}return n;}
+function truncateSeries(master,fromDate){const before=addDays(fromDate,-1),r=typeof master.repeat==='object'?cloneObj(master.repeat):{type:master.repeat};if(r.type==='none')return;if(r.endType==='date')r.endValue=before;else if(r.endType==='count')r.endValue=Math.max(0,occurrencesBefore(master,fromDate));else{r.endType='date';r.endValue=before;}master.repeat=r;ensureRec(master).deleted=ensureRec(master).deleted.filter(d=>d<fromDate);}
+let editingOccurrence=null;
+function editTask(i,p={}){rememberCalendarScroll();let master=i?tasks.find(x=>x.id===i):null;let t=master?cloneObj(master):{id:id(),title:'',date:p.date??today(),start:p.start||'',end:p.end||'',important:false,urgent:false,completed:false,notes:'',repeat:'none'};const eo=editingOccurrence;if(eo&&master&&eo.masterId===master.id){const inst=occurrenceData(master,eo.date);if(inst)t={...t,...cloneObj(inst),date:inst.date,start:inst.start,end:inst.end,important:inst.important,urgent:inst.urgent,notes:inst.notes||''};}$('#subtabs').innerHTML='';$('#headActions').innerHTML='';$('#heading').textContent=i?'编辑事项':'新事项';$('#main').innerHTML=`<div class="field"><label>事项</label><input id="fTitle" value="${esc(t.title)}" autofocus></div><div class="field"><label>日期</label><input id="fDate" type="date" value="${t.date||''}"></div><div class="row"><div class="field"><label>开始</label><input id="fStart" type="time" value="${t.start||''}"></div><div class="field"><label>结束</label><input id="fEnd" type="time" value="${t.end||''}"></div></div><div class="row"><button id="imp" class="chip ${t.important?'active':''}" onclick="this.classList.toggle('active')">⭐ 重要</button><button id="urg" class="chip ${t.urgent?'active':''}" onclick="this.classList.toggle('active')">⚡ 紧急</button></div><div class="field"><label>重复</label><select id="fRepeat" onchange="toggleCustomRepeat()"><option value="none">不重复</option><option value="daily">每天</option><option value="weekdays">工作日</option><option value="weekly">每周</option><option value="monthly">每月</option><option value="custom">自定义</option></select></div><div id="customRepeat" class="card hidden" style="padding:12px;margin-top:-4px"><div class="row"><div class="field"><label>每隔</label><input id="rInterval" type="number" min="1" max="99" value="1"></div><div class="field"><label>单位</label><select id="rUnit"><option value="day">天</option><option value="week">周</option><option value="month">月</option></select></div></div><div class="field"><label>每周重复日</label><div id="rWeekdays" class="tabs" style="margin-top:0">${['一','二','三','四','五','六','日'].map((d,i)=>`<button type="button" class="chip" data-wd="${i}" onclick="this.classList.toggle('active')">周${d}</button>`).join('')}</div></div><div class="field"><label>结束方式</label><select id="rEndType" onchange="updateRepeatEndField()"><option value="forever">一直重复</option><option value="count">重复次数</option><option value="date">结束日期</option></select></div><div class="field" id="rEndValueWrap"></div></div><div class="field"><label>备注</label><textarea id="fNotes">${esc(t.notes||'')}</textarea></div><div class="row"><button class="primary" onclick="commit('${i||''}','${t.id}')">保存</button>${i?`<button class="danger" onclick="copyOne('${i}')">📋复制</button><button class="danger" onclick="removeTask('${i}')">删除</button>`:''}<button class="danger" onclick="editingOccurrence=null;render()">取消</button></div>`;$('#fRepeat').value=(typeof t.repeat==='string'?t.repeat:(t.repeat?.type||'none'));if(typeof t.repeat==='object'&&t.repeat?.type==='custom'){$('#rInterval').value=t.repeat.interval||1;$('#rUnit').value=t.repeat.unit||'day';$('#rEndType').value=t.repeat.endType||'forever';toggleCustomRepeat();updateRepeatEndField();if(t.repeat.weekdays)t.repeat.weekdays.forEach(i=>document.querySelector(`#rWeekdays [data-wd="${i}"]`)?.classList.add('active'));}else toggleCustomRepeat();}
+function commit(old,newid){const x={id:newid,title:$('#fTitle').value.trim(),date:$('#fDate').value||null,start:$('#fStart').value,end:$('#fEnd').value,important:$('#imp').classList.contains('active'),urgent:$('#urg').classList.contains('active'),completed:false,notes:$('#fNotes').value,repeat:getRepeatValue()};if(!x.title)return alert('请输入事项名称');const eo=editingOccurrence;if(old&&eo&&eo.masterId===old){const m=tasks.find(t=>t.id===old);if(eo.mode===1){const ex=ensureRec(m);const patch={title:x.title,start:x.start,end:x.end,important:x.important,urgent:x.urgent,notes:x.notes,date:x.date};if(repeatType(m)!=='none'&&x.repeat!=='none')patch.repeat=x.repeat;ex.overrides[eo.date]=patch;}else if(eo.mode===2){truncateSeries(m,eo.date);x.id=id();x.date=eo.date;x.completed=false;x.exceptions={deleted:[],completed:[],overrides:{}};tasks.push(x);}else{Object.assign(m,x,{id:m.id,completed:m.completed,completedAt:m.completedAt,exceptions:m.exceptions});}editingOccurrence=null;save();render();return;}if(old){let o=tasks.find(t=>t.id===old);Object.assign(o,x,{id:o.id,completed:o.completed,completedAt:o.completedAt,exceptions:o.exceptions});}else tasks.push(x);editingOccurrence=null;save();render();}
+function copyOne(i){let f=findInstance(i),t=f?.instance;if(t){clipboard=[{...cloneObj(t),id:id(),_key:undefined,_masterId:undefined,_occurrenceDate:undefined,_series:undefined}];alert('已复制，可粘贴。');render()}}
+function removeTask(i){const f=findInstance(i);if(f)openOccurrenceDelete(f.master,f.instance._occurrenceDate);}
+
+/* Replace calendar event gestures so recurring instances can be moved without mutating the whole series. */
+function attachTimelineGestures(dates,startHour,rowH){
+  const cols=[...document.querySelectorAll('.daycol')],snap=m=>Math.round(m/15)*15,clamp=(m,d)=>Math.max(startHour*60,Math.min(1439-d,snap(m))),colAtX=x=>{for(const c of cols){const r=c.getBoundingClientRect();if(x>=r.left&&x<=r.right)return c}let best=cols[0],bd=Infinity;cols.forEach(c=>{const r=c.getBoundingClientRect(),dd=x<r.left?r.left-x:x>r.right?x-r.right:0;if(dd<bd){bd=dd;best=c}});return best},minAt=(e,c)=>{const r=c.getBoundingClientRect();return(e.clientY-r.top)/rowH*60+startHour*60;
+  };
+  cols.forEach(col=>{let timer=null,creating=null,pid=null,sx=0,sy=0,lx=0,ly=0,scrolling=false;const wrap=()=>document.querySelector('.timeline-wrap'),clear=()=>{if(timer){clearTimeout(timer);timer=null}},rm=()=>col.querySelector('.creating')?.remove(),reset=()=>{clear();creating=null;scrolling=false;pid=null;rm();document.documentElement.classList.remove('calendar-creating');document.body.classList.remove('calendar-creating')};col.addEventListener('pointerdown',e=>{if(e.target.closest('.event')||selectMode)return;if(e.pointerType==='mouse'&&e.button!==0)return;pid=e.pointerId;sx=lx=e.clientX;sy=ly=e.clientY;const m=clamp(minAt(e,col),0);timer=setTimeout(()=>{timer=null;creating={start:m,end:m+60};document.documentElement.classList.add('calendar-creating');document.body.classList.add('calendar-creating');drawCreating(col,creating,startHour,rowH)},450)},{passive:false});col.addEventListener('pointermove',e=>{if(e.pointerId!==pid)return;const dx=e.clientX-lx,dy=e.clientY-ly,dist=Math.hypot(e.clientX-sx,e.clientY-sy);if(timer&&dist>10){clear();scrolling=true}if(scrolling&&!creating){const w=wrap();if(w){w.scrollLeft-=dx;w.scrollTop-=dy}lx=e.clientX;ly=e.clientY;e.preventDefault();return}if(creating){e.preventDefault();const m=clamp(minAt(e,col),0);creating.end=Math.max(creating.start+15,m);drawCreating(col,creating,startHour,rowH)}lx=e.clientX;ly=e.clientY},{passive:false});col.addEventListener('pointerup',e=>{if(e.pointerId!==pid)return;if(creating){const c=creating;reset();newTask(col.dataset.date,timeStr(c.start),timeStr(c.end))}else reset()},{passive:false});col.addEventListener('pointercancel',reset,{passive:false})});
+  document.querySelectorAll('.event').forEach(ev=>{let timer=null,press=null,ready=false,drag=null,moved=false,suppress=false,lx=0,ly=0;const clear=()=>{if(timer){clearTimeout(timer);timer=null}},ghostRm=()=>{if(drag?.ghost){drag.ghost.remove();drag.ghost=null}},reset=()=>{clear();ghostRm();press=null;ready=false;drag=null;moved=false;suppress=false;ev.classList.remove('dragging');ev.style.visibility='';ev.style.opacity=''};const auto=e=>{const w=document.querySelector('.timeline-wrap');if(!w||!drag)return;const r=w.getBoundingClientRect(),edge=42,s=14;let dx=0;if(e.clientX<r.left+edge)dx=-s;else if(e.clientX>r.right-edge)dx=s;if(dx)w.scrollLeft=Math.max(0,Math.min(w.scrollWidth-w.clientWidth,w.scrollLeft+dx))};const startDrag=(e,x)=>{const source=ev.closest('.daycol'),rect=ev.getBoundingClientRect();if(!source)return;const om=timeMin(x.start),dur=Math.max(15,(timeMin(x.end)||om+60)-om),g=document.createElement('div');g.className='event-ghost priority-'+priority(x);g.innerHTML='<b>'+esc(x.title)+'</b><div class="etime">'+x.start+(x.end?'–'+x.end:'')+'</div>';Object.assign(g.style,{position:'absolute',left:'3px',right:'3px',height:Math.max(28,dur/60*rowH)+'px',opacity:'1',pointerEvents:'none',zIndex:'100'});source.appendChild(g);drag={x,source,duration:dur,grabOffset:e.clientY-rect.top,pointerId:e.pointerId,ghost:g};ev.classList.add('dragging');ev.style.visibility='visible';ev.style.opacity='.42';suppress=true;try{ev.setPointerCapture(e.pointerId)}catch{}};const update=e=>{if(!drag)return;auto(e);const target=colAtX(e.clientX)||drag.source,raw=minAt(e,target)-(drag.grabOffset/rowH*60),nm=clamp(raw,drag.duration);if(drag.ghost.parentElement!==target)target.appendChild(drag.ghost);drag.ghost.style.top=((nm-startHour*60)/60*rowH)+'px'};
+    ev.addEventListener('pointerdown',e=>{e.stopPropagation();if(e.pointerType==='mouse'&&e.button!==0)return;const f=findInstance(ev.dataset.key||ev.dataset.id+'@@'+ev.dataset.occ);if(!f)return;press={x:e.clientX,y:e.clientY,key:ev.dataset.key||f.instance._key};lx=e.clientX;ly=e.clientY;ready=false;drag=null;moved=false;suppress=false;if(selectMode){suppress=true;return}timer=setTimeout(()=>{timer=null;ready=true},600)},{passive:false});
+    ev.addEventListener('pointermove',e=>{if(!press)return;const dist=Math.hypot(e.clientX-press.x,e.clientY-press.y),w=document.querySelector('.timeline-wrap');if(selectMode){if(dist>8){moved=true;suppress=true;if(w){w.scrollLeft-=e.clientX-lx;w.scrollTop-=e.clientY-ly}lx=e.clientX;ly=e.clientY;e.preventDefault()}return}if(!ready&&!drag&&dist>10){moved=true;suppress=true;clear();if(w){w.scrollLeft-=e.clientX-lx;w.scrollTop-=e.clientY-ly}lx=e.clientX;ly=e.clientY;e.preventDefault();return}if(ready&&!drag&&dist>10){const f=findInstance(press.key);if(f)startDrag(e,f.instance)}if(drag){e.preventDefault();update(e)}},{passive:false});
+    ev.addEventListener('pointerup',e=>{const p=press;if(!p){reset();return}clear();if(selectMode){if(!moved)toggleCalendarSelect(p.key);reset();return}if(drag){const f=findInstance(p.key);if(f){const target=colAtX(e.clientX)||drag.source,raw=minAt(e,target)-(drag.grabOffset/rowH*60),nm=clamp(raw,drag.duration);moveOccurrence(f.master,f.instance,target.dataset.date,timeStr(nm),timeStr(nm+drag.duration))}reset();render();return}if(ready){toggleCalendarSelect(p.key);reset();return}if(moved||suppress){reset();return}reset();openOccurrenceEditor(fallbackMaster(p.key),p.key.split('@@')[1]||findInstance(p.key)?.instance._occurrenceDate)});
+    ev.addEventListener('pointercancel',reset);
+  });
+}
+function fallbackMaster(key){return findInstance(key)?.master||null}
+function moveOccurrence(master,occDate,newDate,newStart,newEnd){
+  if(!master)return;
+  if(!recurring(master)){master.date=newDate;master.start=newStart;master.end=newEnd;save();return;}
+  const c=prompt('这是重复事项，请选择拖动范围：\n1 = 仅此事项\n2 = 此事项及以后\n3 = 整个系列','1');
+  if(!['1','2','3'].includes(c))return;
+  if(c==='1'){
+    const ex=ensureRec(master);
+    ex.overrides[occDate]={...(ex.overrides[occDate]||{}),date:newDate,start:newStart,end:newEnd};
+  }else if(c==='2'){
+    const originalRepeat=cloneObj(master.repeat);
+    const originalExceptions=cloneObj(ensureRec(master));
+    truncateSeries(master,occDate);
+    const n=cloneObj(master);
+    n.id=id(); n.date=newDate; n.start=newStart; n.end=newEnd; n.repeat=originalRepeat;
+    n.exceptions={deleted:[],completed:[],overrides:{}};
+    tasks.push(n);
+  }else{
+    master.date=newDate;master.start=newStart;master.end=newEnd;
+    // A whole-series move starts from the new date/time and clears stale instance overrides.
+    ensureRec(master).deleted=[];ensureRec(master).completed=[];ensureRec(master).overrides={};
+  }
+  save();
+}
+function toggleCalendarSelect(i){selectMode=true;selected.has(i)?selected.delete(i):selected.add(i);renderCalendar()}
+function renderMonth(){let y=calDate.getFullYear(),m=calDate.getMonth(),first=new Date(y,m,1),start=(first.getDay()+6)%7,days=new Date(y,m+1,0).getDate(),html=`<div class="calbar"><button class="navbtn" onclick="copyMonth()">📋 复制本月</button><div class="caltitle">${y}年${m+1}月</div><button class="navbtn" onclick="pasteCalendar()" ${clipboard.length?'':'disabled'}>📌 粘贴${clipboard.length?` ${clipboard.length}`:''}</button></div><div class="hint">点击日期进入日视图；重复事项可单独编辑、删除或拖动</div><div class="month">`;for(let i=0;i<start;i++)html+='<div></div>';for(let n=1;n<=days;n++){let ds=fmt(new Date(y,m,n)),a=calendarEventsForDate(ds);html+=`<div class="day" onclick="calDate=parseDate('${ds}');calMode='day';selectMode=false;selected.clear();render()"><b>${n}</b>${a.slice(0,4).map(t=>`<div class="mini ${selected.has(instanceKey(t))?'selected':''}" onclick="if(selected.size){event.stopPropagation();toggleCalendarSelect('${esc(instanceKey(t))}')};else{event.stopPropagation();openOccurrenceEditor(tasks.find(x=>x.id==='${esc(t._masterId||t.id)}'),'${esc(t._occurrenceDate||t.date)}') }" oncontextmenu="event.preventDefault();toggleCalendarSelect('${esc(instanceKey(t))}')">${t.completed?'✓ ':''}${esc(t.title)}</div>`).join('')}</div>`}$('#main').innerHTML=html+'</div>';renderBulk()}
+</script>
+
+
+<script>
+/* V2.46 fix: recurring occurrence date/time overrides must render at the overridden date. */
+function occurrenceData(master,occDate){
+  if(!recurring(master)) return {...master,_key:master.id,_masterId:master.id,_occurrenceDate:master.date};
+  if(!occursOn(master,occDate)) return null;
+  const ex=ensureRec(master), ov=ex.overrides[occDate]||{};
+  const x={...cloneObj(master),...cloneObj(ov),_key:master.id+'@@'+occDate,_masterId:master.id,_occurrenceDate:occDate,_series:true};
+  x.id=x._key;
+  if(ex.completed.includes(occDate)) x.completed=true;
+  else if(ov.completed!=null) x.completed=!!ov.completed;
+  else x.completed=false;
+  x._originalDate=occDate;
+  return x;
+}
+function calendarEventsForDate(ds){
+  const out=[];
+  for(const t of tasks){
+    if(!recurring(t)){
+      if(t.date===ds&&t.start) out.push({...t,_key:t.id,_masterId:t.id,_occurrenceDate:t.date});
+      continue;
+    }
+    const ex=ensureRec(t);
+    /* Normal occurrences, unless a single-instance override moved them away. */
+    for(const od of [ds]){
+      if(occursOn(t,od)){
+        const ov=ex.overrides[od]||{};
+        if((ov.date||od)===ds){ const x=occurrenceData(t,od); if(x&&x.start) out.push(x); }
+      }
+    }
+    /* A moved override is rendered on its new date while retaining its original key. */
+    Object.keys(ex.overrides).forEach(od=>{
+      const ov=ex.overrides[od]||{};
+      if(ov.date===ds && od!==ds && occursOn(t,od)){
+        const x=occurrenceData(t,od); if(x&&x.start) out.push(x);
+      }
+    });
+  }
+  return out.sort((a,b)=>timeMin(a.start)-timeMin(b.start));
+}
+function expandRange(from,to){
+  const out=[];
+  for(const t of tasks){
+    if(!recurring(t)){
+      if(t.date&&t.date>=from&&t.date<=to) out.push({...t,_key:t.id,_masterId:t.id,_occurrenceDate:t.date});
+      else if(!t.date&&from<=today()&&to>=today()) out.push({...t,_key:t.id,_masterId:t.id});
+      continue;
+    }
+    let d=from,guard=0;
+    while(d<=to&&guard++<2000){
+      if(occursOn(t,d)){
+        const ov=ensureRec(t).overrides[d]||{};
+        if((ov.date||d)===d){const x=occurrenceData(t,d);if(x)out.push(x);}
+      }
+      d=addDays(d,1);
+    }
+    /* Include moved single-instance overrides whose destination is inside the requested range. */
+    const ex=ensureRec(t);
+    Object.keys(ex.overrides).forEach(od=>{
+      const ov=ex.overrides[od]||{}, nd=ov.date;
+      if(nd&&nd>=from&&nd<=to&&nd!==od&&occursOn(t,od)){
+        const x=occurrenceData(t,od);if(x)out.push(x);
+      }
+    });
+  }
+  return out;
+}
+function moveOccurrence(master,occDate,newDate,newStart,newEnd){
+  if(!master)return;
+  if(!recurring(master)){master.date=newDate;master.start=newStart;master.end=newEnd;save();return;}
+  const c=prompt('这是重复事项，请选择拖动范围：\n1 = 仅此事项\n2 = 此事项及以后\n3 = 整个系列','1');
+  if(!['1','2','3'].includes(c))return;
+  if(c==='1'){
+    const ex=ensureRec(master);
+    ex.overrides[occDate]={...(ex.overrides[occDate]||{}),date:newDate,start:newStart,end:newEnd};
+  }else if(c==='2'){
+    /* Clone BEFORE truncating, so the new series keeps the original recurrence rule. */
+    const n=cloneObj(master);
+    const originalRepeat=cloneObj(master.repeat);
+    truncateSeries(master,occDate);
+    n.id=id();
+    n.date=newDate;n.start=newStart;n.end=newEnd;n.repeat=originalRepeat;
+    n.exceptions={deleted:[],completed:[],overrides:{}};
+    tasks.push(n);
+  }else{
+    master.date=newDate;master.start=newStart;master.end=newEnd;
+  }
+  save();
+}
+</script>
 </body></html>
