@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"><meta name="theme-color" content="#ffffff"><title>Todo Calendar V2.11</title>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"><meta name="theme-color" content="#ffffff"><title>Todo Calendar V2.18</title>
 <style>
 :root{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#171717;background:#f5f5f7;--line:#e7e7eb;--muted:#777;--accent:#111}*{box-sizing:border-box}body{margin:0;background:#f5f5f7;overscroll-behavior:none}.app{max-width:1100px;margin:auto;min-height:100vh;background:#fff;padding-bottom:76px}.head{position:sticky;top:0;background:rgba(255,255,255,.96);backdrop-filter:blur(12px);padding:12px 14px;border-bottom:1px solid var(--line);z-index:30}.headtop{display:flex;align-items:center;justify-content:space-between;gap:8px}.head h1{margin:0;font-size:21px}.tabs,.seg{display:flex;gap:6px;margin-top:10px;overflow:auto}.tabs button,.seg button,.chip{border:0;border-radius:10px;padding:8px 11px;background:#eee;white-space:nowrap}.active{background:#111!important;color:#fff}.content{padding:12px}.group{margin:18px 0}.group h3{font-size:14px;margin:0 0 6px}.task{display:flex;align-items:center;gap:10px;padding:13px 7px;border-bottom:1px solid #eee;touch-action:pan-y}.check{width:23px;height:23px;border:2px solid #aaa;border-radius:50%;flex:none}.done .check{background:#111}.done .title{text-decoration:line-through;opacity:.45}.taskmain{flex:1;min-width:0}.title{font-weight:600}.meta{font-size:12px;color:#777;margin-top:3px}.badge{font-size:12px}.fab{position:fixed;right:18px;bottom:88px;width:56px;height:56px;border-radius:50%;border:0;background:#111;color:#fff;font-size:30px;z-index:20;box-shadow:0 5px 20px #0002}.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(1100px,100%);height:70px;background:#fff;border-top:1px solid #ddd;display:flex;z-index:40;padding-bottom:env(safe-area-inset-bottom)}.nav button{flex:1;border:0;background:white;font-size:13px}.nav .active{color:#111;background:#eee!important}.card{background:#f5f5f7;border-radius:16px;padding:14px;margin-bottom:12px}.row{display:flex;gap:10px;align-items:center}.row>*{flex:1}.field{margin:12px 0}.field label{display:block;font-size:12px;color:#666;margin-bottom:5px}.field input,.field textarea,.field select{width:100%;padding:12px;border:1px solid #ddd;border-radius:12px;background:#fff}.primary,.danger{border:0;border-radius:12px;padding:12px 16px}.primary{background:#111;color:#fff}.danger{background:#eee}.hidden{display:none!important}.empty{text-align:center;color:#888;padding:35px 10px}
 /* Google Calendar-like week/day timeline */
@@ -391,7 +391,15 @@ function changeWeekZoom(dir){
     }
   });
 }
-function render(){document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===page));$('#fab').classList.toggle('hidden',page==='settings');$('#heading').textContent=page==='todo'?'Todo':page==='calendar'?'日历':'设置';page==='todo'?renderTodo():page==='calendar'?renderCalendar():renderSettings()}
+function render(){
+  // Capture the live calendar viewport BEFORE replacing #main. This is the key
+  // invariant: leaving the calendar (edit/new/settings/todo) must not lose view.
+  rememberCalendarScroll();
+  document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===page));
+  $('#fab').classList.toggle('hidden',page==='settings');
+  $('#heading').textContent=page==='todo'?'Todo':page==='calendar'?'日历':'设置';
+  page==='todo'?renderTodo():page==='calendar'?renderCalendar():renderSettings()
+}
 function renderTodo(){
  $('#subtabs').innerHTML=['today:今天','overdue:逾期','inbox:无日期','done:已完成'].map(x=>{let[a,b]=x.split(':');return `<button class="${todoTab===a?'active':''}" onclick="todoTab='${a}';selectMode=false;selected.clear();render()">${b}${a==='overdue'?` ${tasks.filter(t=>t.date&&t.date<today()&&!t.completed).length||''}`:''}</button>`}).join('');
  let t=tasks.filter(x=>todoTab==='today'?x.date===today()&&!x.completed:todoTab==='overdue'?x.date&&x.date<today()&&!x.completed:todoTab==='inbox'?!x.date&&!x.completed:x.completed).sort((a,b)=>priority(a)-priority(b)||(a.date||'').localeCompare(b.date||'')||(a.start||'').localeCompare(b.start||''));
@@ -424,19 +432,29 @@ function centerWeekToday(){
   const w=document.querySelector('.timeline-wrap');
   if(calMode!=='week'||!w)return;
   const c=w.querySelector('.daycol[data-date="'+today()+'"]');
-  if(!c)return;
-  // Horizontal: center today's column using scroll-content coordinates.
+  const noonCell=w.querySelector('.timecol .timecell:nth-child(13)');
+  if(!c||!noonCell)return;
+  // Center today's column from the actual scroll-content coordinates.
   const left=c.offsetLeft + c.offsetWidth/2 - w.clientWidth/2;
-  w.scrollLeft=Math.max(0,Math.min(left,w.scrollWidth-w.clientWidth));
-  // Vertical: put 12:00 exactly at the visual center of the scroll viewport.
-  // The timeline header is part of the scroll content, so use its actual offset.
-  const rowH=64*weekZoom/100;
-  const grid=c.closest('.week-grid');
-  const timeAxisTop=grid ? (grid.querySelector('.timecol')?.offsetTop||52) : 52;
-  const noonY=timeAxisTop + 12*rowH;
+  // The 12:00 line is the TOP edge of the 12:00 cell (13th cell).
+  const noonY=noonCell.offsetTop;
   const top=noonY - w.clientHeight/2;
-  w.scrollTop=Math.max(0,Math.min(top,w.scrollHeight-w.clientHeight));
+  const maxLeft=Math.max(0,w.scrollWidth-w.clientWidth);
+  const maxTop=Math.max(0,w.scrollHeight-w.clientHeight);
+  w.scrollLeft=Math.max(0,Math.min(left,maxLeft));
+  w.scrollTop=Math.max(0,Math.min(top,maxTop));
   calScroll={left:w.scrollLeft,top:w.scrollTop};
+  requestAnimationFrame(()=>{
+    const ww=document.querySelector('.timeline-wrap');
+    const cc=ww?.querySelector('.daycol[data-date="'+today()+'"]');
+    const nc=ww?.querySelector('.timecol .timecell:nth-child(13)');
+    if(!ww||!cc||!nc)return;
+    const l=cc.offsetLeft+cc.offsetWidth/2-ww.clientWidth/2;
+    const t=nc.offsetTop-ww.clientHeight/2;
+    ww.scrollLeft=Math.max(0,Math.min(l,Math.max(0,ww.scrollWidth-ww.clientWidth)));
+    ww.scrollTop=Math.max(0,Math.min(t,Math.max(0,ww.scrollHeight-ww.clientHeight)));
+    calScroll={left:ww.scrollLeft,top:ww.scrollTop};
+  });
 }
 function rememberCalendarScroll(){
   const w=document.querySelector('.timeline-wrap');
