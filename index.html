@@ -405,18 +405,20 @@ function captureCalendarView(){
 function render(){captureCalendarView();document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===page));$('#fab').classList.toggle('hidden',page==='settings');$('#heading').textContent=page==='todo'?'Todo':page==='calendar'?'日历':'设置';page==='todo'?renderTodo():page==='calendar'?renderCalendar():renderSettings()}
 function renderTodo(){
   const counts={
+    all:tasks.length,
     today:tasks.filter(t=>t.date===today()&&!t.completed).length,
     overdue:tasks.filter(t=>t.date&&t.date<today()&&!t.completed).length,
     inbox:tasks.filter(t=>!t.date&&!t.completed).length,
     done:tasks.filter(t=>t.completed).length
   };
-  $('#subtabs').innerHTML=['today:今天','overdue:逾期','inbox:无日期','done:已完成'].map(x=>{
+  $('#subtabs').innerHTML=['all:全部','today:今天','overdue:逾期','inbox:无日期','done:已完成'].map(x=>{
     const [a,b]=x.split(':');
     return `<button class="${todoTab===a?'active':''}" onclick="todoTab='${a}';selectMode=false;selected.clear();render()">${b}${counts[a]?` ${counts[a]}`:''}</button>`;
   }).join('');
 
   let list;
-  if(todoTab==='today') list=tasks.filter(t=>t.date===today()&&!t.completed);
+  if(todoTab==='all') list=tasks.filter(t=>!t.completed);
+  else if(todoTab==='today') list=tasks.filter(t=>t.date===today()&&!t.completed);
   else if(todoTab==='overdue') list=tasks.filter(t=>t.date&&t.date<today()&&!t.completed);
   else if(todoTab==='inbox') list=tasks.filter(t=>!t.date&&!t.completed);
   else list=tasks.filter(t=>t.completed);
