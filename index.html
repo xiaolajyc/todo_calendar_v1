@@ -1131,92 +1131,55 @@ function renderMonth(){let y=calDate.getFullYear(),m=calDate.getMonth(),first=ne
 
 
 <script>
-/* V2.46 fix: recurring occurrence date/time overrides must render at the overridden date. */
-function occurrenceData(master,occDate){
-  if(!recurring(master)) return {...master,_key:master.id,_masterId:master.id,_occurrenceDate:master.date};
-  if(!occursOn(master,occDate)) return null;
-  const ex=ensureRec(master), ov=ex.overrides[occDate]||{};
-  const x={...cloneObj(master),...cloneObj(ov),_key:master.id+'@@'+occDate,_masterId:master.id,_occurrenceDate:occDate,_series:true};
-  x.id=x._key;
-  if(ex.completed.includes(occDate)) x.completed=true;
-  else if(ov.completed!=null) x.completed=!!ov.completed;
-  else x.completed=false;
-  x._originalDate=occDate;
-  return x;
-}
+/* v2.49 unified recurring + gesture integration */
 function calendarEventsForDate(ds){
-  const out=[];
-  for(const t of tasks){
-    if(!recurring(t)){
-      if(t.date===ds&&t.start) out.push({...t,_key:t.id,_masterId:t.id,_occurrenceDate:t.date});
-      continue;
-    }
-    const ex=ensureRec(t);
-    /* Normal occurrences, unless a single-instance override moved them away. */
-    for(const od of [ds]){
-      if(occursOn(t,od)){
-        const ov=ex.overrides[od]||{};
-        if((ov.date||od)===ds){ const x=occurrenceData(t,od); if(x&&x.start) out.push(x); }
-      }
-    }
-    /* A moved override is rendered on its new date while retaining its original key. */
-    Object.keys(ex.overrides).forEach(od=>{
-      const ov=ex.overrides[od]||{};
-      if(ov.date===ds && od!==ds && occursOn(t,od)){
-        const x=occurrenceData(t,od); if(x&&x.start) out.push(x);
-      }
-    });
-  }
-  return out.sort((a,b)=>timeMin(a.start)-timeMin(b.start));
+ const out=[];
+ for(const t of tasks){
+  if(!recurring(t)){if(t.date===ds&&t.start)out.push({...t,_key:t.id,_masterId:t.id,_occurrenceDate:t.date});continue}
+  const ex=ensureRec(t);
+  if(occursOn(t,ds)){const ov=ex.overrides[ds]||{};if((ov.date||ds)===ds){const x=occurrenceData(t,ds);if(x&&x.start)out.push(x)}}
+  Object.keys(ex.overrides||{}).forEach(od=>{const ov=ex.overrides[od]||{};if(ov.date===ds&&od!==ds&&occursOn(t,od)){const x=occurrenceData(t,od);if(x&&x.start&&x.date===ds)out.push(x)}});
+ }
+ return out.sort((a,b)=>timeMin(a.start)-timeMin(b.start));
 }
 function expandRange(from,to){
-  const out=[];
-  for(const t of tasks){
-    if(!recurring(t)){
-      if(t.date&&t.date>=from&&t.date<=to) out.push({...t,_key:t.id,_masterId:t.id,_occurrenceDate:t.date});
-      else if(!t.date&&from<=today()&&to>=today()) out.push({...t,_key:t.id,_masterId:t.id});
-      continue;
-    }
-    let d=from,guard=0;
-    while(d<=to&&guard++<2000){
-      if(occursOn(t,d)){
-        const ov=ensureRec(t).overrides[d]||{};
-        if((ov.date||d)===d){const x=occurrenceData(t,d);if(x)out.push(x);}
-      }
-      d=addDays(d,1);
-    }
-    /* Include moved single-instance overrides whose destination is inside the requested range. */
-    const ex=ensureRec(t);
-    Object.keys(ex.overrides).forEach(od=>{
-      const ov=ex.overrides[od]||{}, nd=ov.date;
-      if(nd&&nd>=from&&nd<=to&&nd!==od&&occursOn(t,od)){
-        const x=occurrenceData(t,od);if(x)out.push(x);
-      }
-    });
-  }
-  return out;
+ const out=[];
+ for(const t of tasks){
+  if(!recurring(t)){if(t.date&&t.date>=from&&t.date<=to)out.push({...t,_key:t.id,_masterId:t.id,_occurrenceDate:t.date});else if(!t.date&&from<=today()&&to>=today())out.push({...t,_key:t.id,_masterId:t.id});continue}
+  for(let d=from,guard=0;d<=to&&guard++<2000;d=addDays(d,1)){if(occursOn(t,d)){const ov=ensureRec(t).overrides[d]||{};if((ov.date||d)===d){const x=occurrenceData(t,d);if(x)out.push(x)}}}
+  Object.keys(ensureRec(t).overrides||{}).forEach(od=>{const ov=ensureRec(t).overrides[od]||{};if(ov.date&&ov.date>=from&&ov.date<=to&&ov.date!==od&&occursOn(t,od)){const x=occurrenceData(t,od);if(x)out.push(x)}});
+ }
+ return out;
 }
-function moveOccurrence(master,occDate,newDate,newStart,newEnd){
-  if(!master)return;
-  if(!recurring(master)){master.date=newDate;master.start=newStart;master.end=newEnd;save();return;}
-  const c=prompt('这是重复事项，请选择拖动范围：\n1 = 仅此事项\n2 = 此事项及以后\n3 = 整个系列','1');
-  if(!['1','2','3'].includes(c))return;
-  if(c==='1'){
-    const ex=ensureRec(master);
-    ex.overrides[occDate]={...(ex.overrides[occDate]||{}),date:newDate,start:newStart,end:newEnd};
-  }else if(c==='2'){
-    /* Clone BEFORE truncating, so the new series keeps the original recurrence rule. */
-    const n=cloneObj(master);
-    const originalRepeat=cloneObj(master.repeat);
-    truncateSeries(master,occDate);
-    n.id=id();
-    n.date=newDate;n.start=newStart;n.end=newEnd;n.repeat=originalRepeat;
-    n.exceptions={deleted:[],completed:[],overrides:{}};
-    tasks.push(n);
-  }else{
-    master.date=newDate;master.start=newStart;master.end=newEnd;
-  }
-  save();
+function eventHtml(t,startHour,rowH){let s=timeMin(t.start),e=timeMin(t.end)||Math.min(s+60,1439),top=(s-startHour*60)/60*rowH,height=Math.max(28,(e-s)/60*rowH),k=instanceKey(t);return `<div class="event bulkable priority-${priority(t)} ${t.completed?'done':''} ${selected.has(k)?'selected':''}" data-id="${esc(t._masterId||t.id)}" data-occ="${esc(t._occurrenceDate||t.date||'')}" data-key="${esc(k)}" style="top:${top}px;height:${height}px"><b>${esc(t.title)}${recurring(t)?' 🔁':''}</b><div class="etime">${t.start}${t.end?'–'+t.end:''}</div></div>`}
+function dayColumn(d,total,startHour,rowH){let ds=fmt(d),events=calendarEventsForDate(ds);return `<div class="daycol ${selected.size?'select-mode':''}" data-date="${ds}" style="height:${total}px">${events.map(t=>eventHtml(t,startHour,rowH)).join('')}${ds===today()?nowLine(startHour,rowH):''}</div>`}
+function attachTimelineGestures(dates,startHour,rowH){
+ const cols=[...document.querySelectorAll('.daycol')], snap=m=>Math.round(m/15)*15;
+ const clamp=(m,d)=>Math.max(startHour*60,Math.min(1439-d,snap(m)));
+ const wrap=()=>document.querySelector('.timeline-wrap');
+ const colAtX=x=>{let hit=cols.find(c=>{let r=c.getBoundingClientRect();return x>=r.left&&x<=r.right});if(hit)return hit;let best=cols[0],bd=1e9;cols.forEach(c=>{let r=c.getBoundingClientRect(),dd=x<r.left?r.left-x:x>r.right?x-r.right:0;if(dd<bd){bd=dd;best=c}});return best};
+ const minAt=(e,c)=>{let r=c.getBoundingClientRect();return (e.clientY-r.top)/rowH*60+startHour*60};
+ cols.forEach(col=>{
+  let timer=null,creating=null,pid=null,sx=0,sy=0,lx=0,ly=0,scrolling=false;
+  const clear=()=>{if(timer){clearTimeout(timer);timer=null}};
+  const reset=()=>{clear();creating=null;scrolling=false;pid=null;col.querySelector('.creating')?.remove();document.documentElement.classList.remove('calendar-creating');document.body.classList.remove('calendar-creating')};
+  col.addEventListener('pointerdown',e=>{if(e.target.closest('.event')||selectMode)return;if(e.pointerType==='mouse'&&e.button!==0)return;pid=e.pointerId;sx=lx=e.clientX;sy=ly=e.clientY;timer=setTimeout(()=>{timer=null;creating={start:clamp(minAt(e,col),0),end:clamp(minAt(e,col),0)+60};document.documentElement.classList.add('calendar-creating');document.body.classList.add('calendar-creating');drawCreating(col,creating,startHour,rowH)},450)},{passive:false});
+  col.addEventListener('pointermove',e=>{if(e.pointerId!==pid)return;let dx=e.clientX-lx,dy=e.clientY-ly,dist=Math.hypot(e.clientX-sx,e.clientY-sy);if(timer&&dist>10){clear();scrolling=true}if(scrolling&&!creating){let w=wrap();if(w){w.scrollLeft-=dx;w.scrollTop-=dy}lx=e.clientX;ly=e.clientY;e.preventDefault();return}if(creating){e.preventDefault();creating.end=Math.max(creating.start+15,clamp(minAt(e,col),0));drawCreating(col,creating,startHour,rowH)}lx=e.clientX;ly=e.clientY},{passive:false});
+  col.addEventListener('pointerup',e=>{if(e.pointerId!==pid)return;if(creating){let c={...creating};reset();newTask(col.dataset.date,timeStr(c.start),timeStr(c.end))}else reset()},{passive:false});col.addEventListener('pointercancel',reset);
+ });
+ document.querySelectorAll('.event').forEach(ev=>{
+  let timer=null,press=null,drag=null,moved=false,lx=0,ly=0;
+  const clear=()=>{if(timer){clearTimeout(timer);timer=null}};
+  const cleanup=()=>{clear();if(drag?.ghost)drag.ghost.remove();drag=null;press=null;moved=false;ev.classList.remove('dragging');ev.style.opacity='';ev.style.visibility=''};
+  ev.addEventListener('pointerdown',e=>{e.stopPropagation();if(e.pointerType==='mouse'&&e.button!==0)return;const key=ev.dataset.key||ev.dataset.id;const f=findInstance(key);if(!f)return;press={key,x:e.clientX,y:e.clientY};lx=e.clientX;ly=e.clientY;moved=false;timer=setTimeout(()=>{timer=null;if(!moved){toggleCalendarSelect(key);press=null}},550)},{passive:false});
+  ev.addEventListener('pointermove',e=>{if(!press)return;let dist=Math.hypot(e.clientX-press.x,e.clientY-press.y);if(dist>8){moved=true;clear();if(selectMode){let w=wrap();if(w){w.scrollLeft-=e.clientX-lx;w.scrollTop-=e.clientY-ly}lx=e.clientX;ly=e.clientY;e.preventDefault();return}if(!drag&&dist>12){let f=findInstance(press.key);if(!f){cleanup();return}let rect=ev.getBoundingClientRect(),source=ev.closest('.daycol'),dur=Math.max(15,(timeMin(f.instance.end)||timeMin(f.instance.start)+60)-timeMin(f.instance.start)),g=document.createElement('div');g.className='event-ghost priority-'+priority(f.instance);g.innerHTML='<b>'+esc(f.instance.title)+'</b><div class="etime">'+f.instance.start+(f.instance.end?'–'+f.instance.end:'')+'</div>';Object.assign(g.style,{position:'absolute',left:'3px',right:'3px',height:Math.max(28,dur/60*rowH)+'px',pointerEvents:'none',zIndex:100});source.appendChild(g);drag={f,source,duration:dur,offset:e.clientY-rect.top,ghost:g};ev.classList.add('dragging');ev.style.opacity='.42';try{ev.setPointerCapture(e.pointerId)}catch{}}if(drag){let target=colAtX(e.clientX),raw=minAt(e,target)-(drag.offset/rowH*60),nm=clamp(raw,drag.duration);if(drag.ghost.parentElement!==target)target.appendChild(drag.ghost);drag.ghost.style.top=((nm-startHour*60)/60*rowH)+'px';e.preventDefault()} }},{passive:false});
+  ev.addEventListener('pointerup',e=>{if(!press){cleanup();return}clear();let key=press.key;if(drag){let target=colAtX(e.clientX),raw=minAt(e,target)-(drag.offset/rowH*60),nm=clamp(raw,drag.duration);let f=findInstance(key);cleanup();if(f)moveOccurrence(f.master,f.instance._occurrenceDate,target.dataset.date,timeStr(nm),timeStr(nm+drag.duration));render();return}if(!moved&&selectMode){toggleCalendarSelect(key)}else if(!moved){openOccurrenceEditor(findInstance(key)?.master,key.split('@@')[1]||findInstance(key)?.instance._occurrenceDate)}cleanup()},{passive:false});
+  ev.addEventListener('pointercancel',cleanup);
+ });
 }
+function bulkShiftTime(){let s=prompt('整体移动多少分钟？例如 30 或 -30','30');if(s===null)return;let delta=Number(s);if(!Number.isFinite(delta))return;selected.forEach(k=>mutateInstance(k,(m,x)=>{if(!x.start)return;let os=timeMin(x.start),oe=x.end?timeMin(x.end):os+60,d=Math.max(15,oe-os),ns=Math.max(0,Math.min(1439-d,os+delta));if(recurring(m)){let ex=ensureRec(m);ex.overrides[x._occurrenceDate]={...(ex.overrides[x._occurrenceDate]||{}),start:timeStr(ns),end:timeStr(ns+d)};}else{m.start=timeStr(ns);m.end=timeStr(ns+d)}}));selectMode=false;selected.clear();save();render()}
+function bulkDate(){let d=prompt('请输入日期（YYYY-MM-DD）',today());if(!/^\d{4}-\d{2}-\d{2}$/.test(d||''))return;selected.forEach(k=>mutateInstance(k,(m,x)=>{if(recurring(m)){let ex=ensureRec(m);ex.overrides[x._occurrenceDate]={...(ex.overrides[x._occurrenceDate]||{}),date:d};}else m.date=d}));selectMode=false;selected.clear();save();render()}
+function bulk(a){let keys=[...selected];if(!keys.length)return;if(a==='delete'&&!confirm(`删除 ${keys.length} 个事项？`))return;if(a==='copy'){clipboard=keys.map(k=>findInstance(k)?.instance).filter(Boolean).map(x=>{let n=cloneObj(x);delete n._key;delete n._masterId;delete n._occurrenceDate;delete n._series;n.id=id();return n});selectMode=false;selected.clear();save();render();return}keys.forEach(k=>mutateInstance(k,(m,x)=>{if(a==='done'){if(recurring(m)){let ex=ensureRec(m);if(!ex.completed.includes(x._occurrenceDate))ex.completed.push(x._occurrenceDate)}else{m.completed=true;m.completedAt=new Date().toISOString()}}else if(a==='today'||a==='tomorrow'){let d=a==='today'?today():addDays(today(),1);if(recurring(m)){let ex=ensureRec(m);ex.overrides[x._occurrenceDate]={...(ex.overrides[x._occurrenceDate]||{}),date:d};}else m.date=d}else if(a==='important'){if(recurring(m)){let ex=ensureRec(m);ex.overrides[x._occurrenceDate]={...(ex.overrides[x._occurrenceDate]||{}),important:!x.important};}else m.important=!m.important}else if(a==='urgent'){if(recurring(m)){let ex=ensureRec(m);ex.overrides[x._occurrenceDate]={...(ex.overrides[x._occurrenceDate]||{}),urgent:!x.urgent};}else m.urgent=!m.urgent}else if(a==='delete'){if(recurring(m)){let ex=ensureRec(m);if(!ex.deleted.includes(x._occurrenceDate))ex.deleted.push(x._occurrenceDate)}else tasks=tasks.filter(z=>z.id!==m.id)}}));selectMode=false;selected.clear();save();render()}
+function toggleCalendarSelect(i){selectMode=true;selected.has(i)?selected.delete(i):selected.add(i);renderCalendar()}
 </script>
 </body></html>
