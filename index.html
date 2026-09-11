@@ -1270,4 +1270,98 @@ function attachTimelineGestures(dates,startHour,rowH){
 
 </script>
 
+
+<script>
+/* v2.60 recurrence date-instance fix
+   A recurring master keeps its anchor date, while every generated occurrence
+   must use its actual occurrence date for Todo grouping/display. */
+function occurrenceData(master, occDate){
+  if(!recurring(master)) return {...master,_key:master.id,_masterId:master.id,_occurrenceDate:master.date};
+  if(!occursOn(master,occDate)) return null;
+  const ex=ensureRec(master), ov=ex.overrides[occDate]||{};
+  const x={...cloneObj(master),...cloneObj(ov),
+    _key:master.id+'@@'+occDate,_masterId:master.id,_occurrenceDate:occDate,_series:true};
+  /* Critical: without an override, date is the occurrence date, not master.date. */
+  x.date=ov.date||occDate;
+  x.id=x._key;
+  if(ex.completed.includes(occDate)) x.completed=true;
+  else if(ov.completed!=null) x.completed=!!ov.completed;
+  else x.completed=false;
+  x._originalDate=occDate;
+  return x;
+}
+
+function expandRange(from,to){
+  const out=[];
+  for(const t of tasks){
+    if(!recurring(t)){
+      if(t.date&&t.date>=from&&t.date<=to) out.push({...t,_key:t.id,_masterId:t.id,_occurrenceDate:t.date});
+      else if(!t.date&&from<=today()&&to>=today()) out.push({...t,_key:t.id,_masterId:t.id});
+      continue;
+    }
+    const ex=ensureRec(t);
+    /* Normal occurrences.  Use the rendered occurrence date as the Todo date. */
+    for(let d=from,guard=0;d<=to&&guard++<2000;d=addDays(d,1)){
+      if(!occursOn(t,d)) continue;
+      const x=occurrenceData(t,d);
+      if(x && x.date>=from && x.date<=to) out.push(x);
+    }
+    /* Moved single occurrences must appear on their NEW date, not their original date. */
+    for(const od of Object.keys(ex.overrides||{})){
+      const ov=ex.overrides[od]||{};
+      if(!ov.date || ov.date===od || ov.date<from || ov.date>to || !occursOn(t,od)) continue;
+      const x=occurrenceData(t,od);
+      if(x && x.date===ov.date) out.push(x);
+    }
+  }
+  /* Defensive deduplication: one occurrence can never occupy two Todo rows. */
+  const seen=new Set(),clean=[];
+  for(const x of out){const k=instanceKey(x);if(seen.has(k))continue;seen.add(k);clean.push(x)}
+  return clean;
+}
+
+function todoInstances(tab){
+  const base=today();
+  let from=addDays(base,-365),to=addDays(base,365);
+  if(tab==='today') from=to=base;
+  else if(tab==='overdue'){from=addDays(base,-365);to=addDays(base,-1)}
+  const a=expandRange(from,to);
+  return a.filter(t=>{
+    if(tab==='all') return !t.completed;
+    if(tab==='today') return t.date===base&&!t.completed;
+    if(tab==='overdue') return !!t.date&&t.date<base&&!t.completed;
+    if(tab==='inbox') return !t.date&&!t.completed;
+    if(tab==='done') return !!t.completed;
+    return false;
+  });
+}
+
+function renderTodo(){
+  const list=todoInstances(todoTab);
+  const counts={all:todoInstances('all').length,today:todoInstances('today').length,
+    overdue:todoInstances('overdue').length,inbox:todoInstances('inbox').length,done:todoInstances('done').length};
+  $('#subtabs').innerHTML=['all:全部','today:今天','overdue:逾期','inbox:无日期','done:已完成'].map(x=>{
+    const[a,b]=x.split(':');
+    return `<button class="${todoTab===a?'active':''}" onclick="todoTab='${a}';selectMode=false;selected.clear();render()">${b}${counts[a]?` ${counts[a]}`:''}</button>`;
+  }).join('');
+  const allSelected=list.length>0&&list.every(t=>selected.has(instanceKey(t)));
+  $('#headActions').innerHTML=`<button class="tabsbtn" style="min-height:38px;padding:8px 12px;background:#edf2f8;border-radius:11px;border:0;color:#34435a;font-weight:700" onclick="toggleSelectAllTodo()">${allSelected?'取消全选':'全选'}</button>`;
+  const dateLabel=ds=>{
+    if(ds==='__none__')return'无日期';
+    const d=parseDate(ds),base=today(),diff=Math.round((d-parseDate(base))/86400000),wd=['日','一','二','三','四','五','六'][d.getDay()];
+    if(ds===base)return`今天 · ${ds} · 周${wd}`;
+    if(diff===-1)return`昨天 · ${ds} · 周${wd}`;
+    if(diff===1)return`明天 · ${ds} · 周${wd}`;
+    return`${ds} · 周${wd}`;
+  };
+  const groups=new Map();
+  [...list].sort((a,b)=>(a.date||'9999').localeCompare(b.date||'9999')||priority(a)-priority(b)||(a.start||'').localeCompare(b.start||'')||a.title.localeCompare(b.title))
+    .forEach(t=>{const k=t.date||'__none__';if(!groups.has(k))groups.set(k,[]);groups.get(k).push(t)});
+  let html='';
+  for(const[ds,items]of groups) html+=`<section class="group"><h3>${esc(dateLabel(ds))}<span style="float:right;font-weight:600;color:#8290a2">${items.length}</span></h3>${items.map(taskRow).join('')}</section>`;
+  $('#main').innerHTML=html||'<div class="empty">暂无事项</div>';
+  attachTaskGestures();renderBulk();
+}
+</script>
+
 </body></html>
