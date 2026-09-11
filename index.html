@@ -345,6 +345,7 @@ body{
 .zoomctl{display:inline-flex;align-items:center;gap:3px;margin-left:auto;padding:3px;background:#eef3f9;border:1px solid #dfe7f0;border-radius:12px;flex:none}
 .zoomctl button{width:34px!important;height:34px!important;min-height:34px!important;padding:0!important;border:0!important;border-radius:9px!important;background:#fff!important;color:#24354c!important;font-size:20px!important;line-height:1!important}
 .zoomctl b{min-width:45px;text-align:center;font-size:12px;color:#53647a}
+.task{touch-action:pan-y;user-select:none;-webkit-user-select:none}.event{touch-action:pan-x pan-y;user-select:none;-webkit-user-select:none}.event.dragging{touch-action:none!important}.timeline-wrap{overscroll-behavior:contain}
 .event-ghost{border-style:dashed!important;box-shadow:0 0 0 2px rgba(22,119,255,.12),0 5px 14px rgba(30,60,100,.10)!important;filter:saturate(.8);display:block!important;visibility:visible!important;background:rgba(255,255,255,.72)!important;z-index:30!important}
 @media(max-width:799px){.zoomctl{margin-left:2px}.zoomctl b{min-width:40px}}
 .timeline-wrap.calendar-scroll{height:calc(100vh - 300px);min-height:300px;max-height:calc(100vh - 230px);overflow:auto;}@supports(height:100dvh){.timeline-wrap.calendar-scroll{height:calc(100dvh - 300px);max-height:calc(100dvh - 230px)}}
@@ -376,12 +377,14 @@ function changeWeekZoom(dir){
   const wrap=document.querySelector('.timeline-wrap');
   const oldLeft=wrap?wrap.scrollLeft:calScroll.left;
   const oldTop=wrap?wrap.scrollTop:calScroll.top;
-
-  // Preserve the same clock time at the top of the viewport while changing
-  // pixels-per-hour. The 52px calendar header is not part of the time axis.
+  const viewportH=wrap?wrap.clientHeight:0;
+  const viewportW=wrap?wrap.clientWidth:0;
+  const centerX=oldLeft+viewportW/2;
+  const centerY=oldTop+viewportH/2;
   const headerH=52;
-  const timePixels=Math.max(0,oldTop-headerH);
-  const newTop=headerH + timePixels*(newRowH/oldRowH);
+  const oldTimePx=Math.max(0,centerY-headerH);
+  const newCenterY=headerH+oldTimePx*(newRowH/oldRowH);
+  const newTop=Math.max(0,newCenterY-viewportH/2);
 
   document.documentElement.style.setProperty('--timeline-row-height',newRowH+'px');
   renderCalendar();
@@ -389,9 +392,11 @@ function changeWeekZoom(dir){
   requestAnimationFrame(()=>{
     const w=document.querySelector('.timeline-wrap');
     if(w){
-      w.scrollLeft=oldLeft;
-      w.scrollTop=newTop;
-      calScroll={left:oldLeft,top:newTop};
+      const maxX=Math.max(0,w.scrollWidth-w.clientWidth);
+      const maxY=Math.max(0,w.scrollHeight-w.clientHeight);
+      w.scrollLeft=Math.max(0,Math.min(oldLeft,maxX));
+      w.scrollTop=Math.max(0,Math.min(newTop,maxY));
+      calScroll={left:w.scrollLeft,top:w.scrollTop};
     }
   });
 }
@@ -405,13 +410,28 @@ function render(){captureCalendarView();document.querySelectorAll('.nav button')
 function renderTodo(){
  $('#subtabs').innerHTML=['today:今天','overdue:逾期','inbox:无日期','done:已完成'].map(x=>{let[a,b]=x.split(':');return `<button class="${todoTab===a?'active':''}" onclick="todoTab='${a}';selectMode=false;selected.clear();render()">${b}${a==='overdue'?` ${tasks.filter(t=>t.date&&t.date<today()&&!t.completed).length||''}`:''}</button>`}).join('');
  let t=tasks.filter(x=>todoTab==='today'?x.date===today()&&!x.completed:todoTab==='overdue'?x.date&&x.date<today()&&!x.completed:todoTab==='inbox'?!x.date&&!x.completed:x.completed).sort((a,b)=>priority(a)-priority(b)||(a.date||'').localeCompare(b.date||'')||(a.start||'').localeCompare(b.start||''));
- let html='';labels.forEach((lab,p)=>{let a=t.filter(x=>priority(x)===p);if(a.length)html+=`<section class="group"><h3>${lab}</h3>${a.map(taskRow).join('')}</section>`});$('#main').innerHTML=html||'<div class="empty">暂无事项</div>';renderBulk();
+ let html='';labels.forEach((lab,p)=>{let a=t.filter(x=>priority(x)===p);if(a.length)html+=`<section class="group"><h3>${lab}</h3>${a.map(taskRow).join('')}</section>`});$('#main').innerHTML=html||'<div class="empty">暂无事项</div>';attachTaskGestures();renderBulk();
 }
-function taskRow(t){return `<div class="task ${t.completed?'done':''} ${selected.has(t.id)?'selected':''}" data-id="${t.id}" onclick="taskClick(event,'${t.id}')" oncontextmenu="event.preventDefault();toggleSelect('${t.id}')" ontouchstart="startTaskLongPress(event,'${t.id}')" ontouchend="clearTaskLongPress()" ontouchmove="clearTaskLongPress()"><span class="${selected.size?'selectbox':'check'}"></span><div class="taskmain"><div class="title">${esc(t.title)}</div><div class="meta">${t.date||'无日期'} ${t.start||''}${t.end?'–'+t.end:''}</div></div><span class="badge">${t.important?'⭐':''}${t.urgent?'⚡':''}</span></div>`}
-let taskLongTimer=null,taskLongPressed=false;
-function startTaskLongPress(e,i){clearTaskLongPress();taskLongPressed=false;taskLongTimer=setTimeout(()=>{taskLongPressed=true;toggleSelect(i)},450)}
-function clearTaskLongPress(){if(taskLongTimer){clearTimeout(taskLongTimer);taskLongTimer=null}}
-function taskClick(e,i){if(taskLongPressed){taskLongPressed=false;return}if(selectMode){toggleSelect(i);return}let t=tasks.find(x=>x.id===i);if(e.target.classList.contains('check')){t.completed=!t.completed;t.completedAt=t.completed?new Date().toISOString():null;save();render()}else editTask(i)}
+function taskRow(t){return `<div class="task ${t.completed?'done':''} ${selected.has(t.id)?'selected':''}" data-id="${t.id}" onclick="taskClick(event,'${t.id}')" oncontextmenu="event.preventDefault();toggleSelect('${t.id}')"><span class="${selected.size?'selectbox':'check'}"></span><div class="taskmain"><div class="title">${esc(t.title)}</div><div class="meta">${t.date||'无日期'} ${t.start||''}${t.end?'–'+t.end:''}</div></div><span class="badge">${t.important?'⭐':''}${t.urgent?'⚡':''}</span></div>`}
+let taskGesture={timer:null,id:null,x:0,y:0,moved:false,long:false,suppressClick:false};
+function attachTaskGestures(){
+  document.querySelectorAll('.task').forEach(row=>{
+    row.addEventListener('pointerdown',e=>{
+      if(e.pointerType==='mouse'&&e.button!==0)return;
+      const id=row.dataset.id; taskGesture={timer:null,id,x:e.clientX,y:e.clientY,moved:false,long:false,suppressClick:false};
+      taskGesture.timer=setTimeout(()=>{taskGesture.timer=null;taskGesture.long=true;taskGesture.suppressClick=true;toggleSelect(id)},500);
+    });
+    row.addEventListener('pointermove',e=>{
+      if(taskGesture.id!==row.dataset.id)return;
+      const d=Math.hypot(e.clientX-taskGesture.x,e.clientY-taskGesture.y);
+      if(d>10&&!taskGesture.long){taskGesture.moved=true;if(taskGesture.timer){clearTimeout(taskGesture.timer);taskGesture.timer=null}taskGesture.suppressClick=true;}
+      if(taskGesture.long)e.preventDefault();
+    },{passive:false});
+    const end=()=>{if(taskGesture.id!==row.dataset.id)return;if(taskGesture.timer){clearTimeout(taskGesture.timer);taskGesture.timer=null}setTimeout(()=>{taskGesture={timer:null,id:null,x:0,y:0,moved:false,long:false,suppressClick:false}},0)};
+    row.addEventListener('pointerup',end);row.addEventListener('pointercancel',end);
+  });
+}
+function taskClick(e,i){if(taskGesture.suppressClick||taskGesture.moved||taskGesture.long){e.preventDefault();return}if(selectMode){toggleSelect(i);return}let t=tasks.find(x=>x.id===i);if(e.target.classList.contains('check')){t.completed=!t.completed;t.completedAt=t.completed?new Date().toISOString():null;save();render()}else editTask(i)}
 function toggleSelect(i){selectMode=true;selected.has(i)?selected.delete(i):selected.add(i);render()}
 function renderBulk(){let b=$('#bulk');if(!selectMode){b.classList.add('hidden');return}b.classList.remove('hidden');b.innerHTML=`<span style="padding:8px;font-weight:700;position:sticky;left:0;background:#111">已选 ${selected.size}</span><button onclick="bulk('done')">✓完成</button><button onclick="bulk('today')">今天</button><button onclick="bulk('tomorrow')">明天</button><button onclick="bulkDate()">📅日期</button><button onclick="bulkShiftTime()">🕐时间</button><button onclick="bulk('important')">⭐重要</button><button onclick="bulk('urgent')">⚡紧急</button><button onclick="bulk('copy')">📋复制</button><button onclick="bulk('paste')" ${clipboard.length?'':'disabled'}>📌粘贴</button><button onclick="bulk('delete')">🗑删除</button><button onclick="selectMode=false;selected.clear();render()">取消</button>`}
 function bulkShiftTime(){
@@ -594,13 +614,20 @@ function attachTimelineGestures(dates,startHour,rowH){
     col.addEventListener('pointercancel',()=>{clear();creating=null;col.querySelector('.creating')?.remove()});
   });
 
-  /* 事项手势：长按后移动 = 拖动；长按后松手 = 批量选择。
-     拖动时原事件不跟着跑，目标位置显示虚影，释放后才真正写入数据。 */
+  /* 事项手势：短按=编辑；长按静止=选择；长按后移动=拖动。
+     在手势尚未确认前不阻止浏览器滚动，避免“滑动=点按”。 */
   document.querySelectorAll('.event').forEach(ev=>{
-    let timer=null,press=null,ready=false,drag=null,moved=false;
+    let timer=null,press=null,ready=false,drag=null,moved=false,suppressClick=false,raf=0;
     const clearTimer=()=>{if(timer){clearTimeout(timer);timer=null}};
     const removeGhost=()=>{if(drag?.ghost){drag.ghost.remove();drag.ghost=null}};
-    const reset=()=>{clearTimer();removeGhost();press=null;ready=false;drag=null;moved=false;ev.classList.remove('dragging');ev.style.visibility='';};
+    const reset=()=>{clearTimer();removeGhost();press=null;ready=false;drag=null;moved=false;suppressClick=false;ev.classList.remove('dragging');ev.style.visibility='';if(raf){cancelAnimationFrame(raf);raf=0}};
+    const autoScroll=(e)=>{
+      const w=document.querySelector('.timeline-wrap');if(!w||!drag)return;
+      const r=w.getBoundingClientRect(),edge=42,speed=14;
+      let dx=0;
+      if(e.clientX<r.left+edge)dx=-speed; else if(e.clientX>r.right-edge)dx=speed;
+      if(dx){w.scrollLeft=Math.max(0,Math.min(w.scrollWidth-w.clientWidth,w.scrollLeft+dx));}
+    };
     const startDrag=(e,t)=>{
       const source=ev.closest('.daycol'); if(!source)return;
       const rect=ev.getBoundingClientRect();
@@ -609,61 +636,44 @@ function attachTimelineGestures(dates,startHour,rowH){
       const ghost=document.createElement('div');
       ghost.className='event-ghost priority-'+priority(t);
       ghost.innerHTML='<b>'+esc(t.title)+'</b><div class="etime">'+(t.start+(t.end?'–'+t.end:''))+'</div>';
-      ghost.style.position='absolute';
-      ghost.style.left='3px';
-      ghost.style.right='3px';
-      ghost.style.height=Math.max(28,duration/60*rowH)+'px';
-      ghost.style.opacity='.34';
-      ghost.style.pointerEvents='none';
-      ghost.style.zIndex='30';
+      ghost.style.position='absolute';ghost.style.left='3px';ghost.style.right='3px';ghost.style.height=Math.max(28,duration/60*rowH)+'px';ghost.style.opacity='.34';ghost.style.pointerEvents='none';ghost.style.zIndex='30';
       source.appendChild(ghost);
       drag={t,source,duration,grabOffset:e.clientY-rect.top,pointerId:e.pointerId,ghost};
-      ev.classList.add('dragging');
-      ev.style.visibility='hidden';
+      ev.classList.add('dragging');ev.style.visibility='hidden';suppressClick=true;
       try{ev.setPointerCapture(e.pointerId)}catch{}
     };
-    const updateGhost=(target,nm)=>{
-      if(!drag?.ghost)return;
-      if(drag.ghost.parentElement!==target)target.appendChild(drag.ghost);
-      drag.ghost.style.top=((nm-startHour*60)/60*rowH)+'px';
-      drag.ghost.style.height=Math.max(28,drag.duration/60*rowH)+'px';
-      const label=drag.ghost.querySelector('.etime');
-      if(label)label.textContent=timeStr(nm)+'–'+timeStr(nm+drag.duration);
-      drag.ghost.dataset.previewDate=target.dataset.date;
-      drag.ghost.dataset.previewMin=String(nm);
-    };
-    ev.addEventListener('pointerdown',e=>{
-      e.stopPropagation();
-      if(e.pointerType==='mouse'&&e.button!==0)return;
-      const t=tasks.find(x=>x.id===ev.dataset.id);if(!t)return;
-      clearTimer();press={x:e.clientX,y:e.clientY,id:t.id};ready=false;drag=null;moved=false;
-      if(selectMode){e.preventDefault();return}
-      if(e.pointerType==='touch')e.preventDefault();
-      timer=setTimeout(()=>{timer=null;ready=true},650);
-    },{passive:false});
-    ev.addEventListener('pointermove',e=>{
-      if(!press)return;
-      const dist=Math.hypot(e.clientX-press.x,e.clientY-press.y);
-      if(!ready&&!drag){if(dist>10){moved=true;clearTimer();}return}
-      if(ready&&!drag&&dist>10){const t=tasks.find(x=>x.id===press.id);if(t)startDrag(e,t)}
+    const update=(e)=>{
       if(!drag)return;
-      e.preventDefault();
+      autoScroll(e);
       const target=colAtX(e.clientX)||drag.source;
       const raw=minAt(e,target)-(drag.grabOffset/rowH*60);
       const nm=clamp(raw,drag.duration);
       updateGhost(target,nm);
-      ev.style.visibility='hidden';
+    };
+    ev.addEventListener('pointerdown',e=>{
+      e.stopPropagation();if(e.pointerType==='mouse'&&e.button!==0)return;
+      const t=tasks.find(x=>x.id===ev.dataset.id);if(!t)return;
+      clearTimer();press={x:e.clientX,y:e.clientY,id:t.id};ready=false;drag=null;moved=false;suppressClick=false;
+      if(selectMode){suppressClick=true;return}
+      timer=setTimeout(()=>{timer=null;ready=true},600);
+    },{passive:true});
+    ev.addEventListener('pointermove',e=>{
+      if(!press)return;
+      const dist=Math.hypot(e.clientX-press.x,e.clientY-press.y);
+      if(!ready&&!drag){if(dist>10){moved=true;suppressClick=true;clearTimer();}return;}
+      if(ready&&!drag&&dist>10){const t=tasks.find(x=>x.id===press.id);if(t)startDrag(e,t);}
+      if(!drag)return;
+      e.preventDefault();update(e);
     },{passive:false});
     ev.addEventListener('pointerup',e=>{
       const p=press;if(!p){reset();return}clearTimer();
       if(selectMode){toggleCalendarSelect(p.id);reset();return}
       if(drag){
-        const t=tasks.find(x=>x.id===p.id);
-        if(t){const target=colAtX(e.clientX)||drag.source;const raw=minAt(e,target)-(drag.grabOffset/rowH*60);const nm=clamp(raw,drag.duration);t.date=target.dataset.date;t.start=timeStr(nm);t.end=timeStr(nm+drag.duration);save()}
+        const t=tasks.find(x=>x.id===p.id);if(t){const target=colAtX(e.clientX)||drag.source;const raw=minAt(e,target)-(drag.grabOffset/rowH*60);const nm=clamp(raw,drag.duration);t.date=target.dataset.date;t.start=timeStr(nm);t.end=timeStr(nm+drag.duration);save()}
         reset();render();return;
       }
       if(ready){toggleCalendarSelect(p.id);reset();return}
-      if(moved){reset();return}
+      if(moved||suppressClick){reset();return}
       reset();editTask(p.id);
     });
     ev.addEventListener('pointercancel',()=>reset());
