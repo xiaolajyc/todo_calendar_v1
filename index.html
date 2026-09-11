@@ -1,0 +1,786 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"><meta name="theme-color" content="#ffffff"><title>Todo Calendar V2.37</title>
+<style>
+:root{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#171717;background:#f5f5f7;--line:#e7e7eb;--muted:#777;--accent:#111}*{box-sizing:border-box}body{margin:0;background:#f5f5f7;overscroll-behavior:none}.app{max-width:1100px;margin:auto;min-height:100vh;background:#fff;padding-bottom:76px}.head{position:sticky;top:0;background:rgba(255,255,255,.96);backdrop-filter:blur(12px);padding:12px 14px;border-bottom:1px solid var(--line);z-index:30}.headtop{display:flex;align-items:center;justify-content:space-between;gap:8px}.head h1{margin:0;font-size:21px}.tabs,.seg{display:flex;gap:6px;margin-top:10px;overflow:auto}.tabs button,.seg button,.chip{border:0;border-radius:10px;padding:8px 11px;background:#eee;white-space:nowrap}.active{background:#111!important;color:#fff}.content{padding:12px}.group{margin:18px 0}.group h3{font-size:14px;margin:0 0 6px}.task{display:flex;align-items:center;gap:10px;padding:13px 7px;border-bottom:1px solid #eee;touch-action:pan-y}.check{width:23px;height:23px;border:2px solid #aaa;border-radius:50%;flex:none}.done .check{background:#111}.done .title{text-decoration:line-through;opacity:.45}.taskmain{flex:1;min-width:0}.title{font-weight:600}.meta{font-size:12px;color:#777;margin-top:3px}.badge{font-size:12px}.fab{position:fixed;right:18px;bottom:88px;width:56px;height:56px;border-radius:50%;border:0;background:#111;color:#fff;font-size:30px;z-index:20;box-shadow:0 5px 20px #0002}.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(1100px,100%);height:70px;background:#fff;border-top:1px solid #ddd;display:flex;z-index:40;padding-bottom:env(safe-area-inset-bottom)}.nav button{flex:1;border:0;background:white;font-size:13px}.nav .active{color:#111;background:#eee!important}.card{background:#f5f5f7;border-radius:16px;padding:14px;margin-bottom:12px}.row{display:flex;gap:10px;align-items:center}.row>*{flex:1}.field{margin:12px 0}.field label{display:block;font-size:12px;color:#666;margin-bottom:5px}.field input,.field textarea,.field select{width:100%;padding:12px;border:1px solid #ddd;border-radius:12px;background:#fff}.primary,.danger{border:0;border-radius:12px;padding:12px 16px}.primary{background:#111;color:#fff}.danger{background:#eee}.hidden{display:none!important}.empty{text-align:center;color:#888;padding:35px 10px}
+/* Google Calendar-like week/day timeline */
+.calbar{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:8px}.calbar .navbtn{border:0;background:#eee;border-radius:10px;padding:8px 12px}.caltitle{font-weight:700;flex:1;text-align:center}.timeline-wrap{border:1px solid var(--line);border-radius:12px;overflow-x:auto;overflow-y:auto;background:#fff;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;touch-action:pan-x pan-y;scrollbar-width:thin}
+@media(max-width:799px){.timeline-wrap{height:calc(100vh - 300px);min-height:360px;max-height:680px}}
+@media(min-width:800px){.timeline-wrap{height:620px}}.week-grid{display:grid;grid-template-columns:54px repeat(7,var(--week-day-width,120px))!important;width:calc(54px + 7 * var(--week-day-width,120px))!important;min-width:calc(54px + 7 * var(--week-day-width,120px))!important}.day-grid{display:grid;grid-template-columns:54px minmax(0,1fr);min-width:0}.dayhead{position:sticky;top:0;background:#fff;z-index:12;border-bottom:1px solid var(--line);height:52px;text-align:center;padding-top:7px;font-size:12px}.dayhead strong{display:block;font-size:16px;margin-top:2px}.dayhead.today strong{background:#111;color:#fff;border-radius:50%;width:28px;height:28px;line-height:28px;margin:2px auto 0}.timecol{background:#fafafa}.timecell{height:64px;border-top:1px solid var(--line);font-size:10px;color:#888;text-align:right;padding:4px 6px 0 0}.daycol{position:relative;height:1152px;border-left:1px solid var(--line);background:repeating-linear-gradient(to bottom,transparent 0,transparent 31px,#f0f0f2 32px,transparent 33px,transparent 63px,#e7e7eb 64px)}.slotline{position:absolute;left:0;right:0;height:1px;background:#ececf0}.event{position:absolute;left:3px;right:3px;border-radius:7px;background:#e8e8ed;border-left:3px solid #111;padding:5px 6px;font-size:11px;line-height:1.25;overflow:hidden;z-index:5;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}.event.done{opacity:.48;text-decoration:line-through}.event .etime{font-size:10px;color:#555}.creating{position:absolute;left:3px;right:3px;border-radius:7px;background:#111;color:#fff;opacity:.78;z-index:15;pointer-events:none;padding:5px;font-size:11px}.nowline{position:absolute;height:2px;background:#111;left:0;right:0;z-index:8}.month{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}.day{min-height:80px;border:1px solid #eee;border-radius:9px;padding:5px;font-size:11px}.day b{display:block}.mini{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:#eee;border-radius:4px;padding:2px;margin-top:3px}.mini.selected{outline:2px solid #111}.copybar{background:#f0f0f3;border-radius:10px;padding:8px 10px;margin-bottom:8px;display:flex;align-items:center;gap:8px;font-size:12px}.copybar button{border:0;background:#111;color:#fff;border-radius:8px;padding:7px 10px}.bulk{position:fixed;left:50%;transform:translateX(-50%);bottom:70px;width:min(1100px,100%);background:#111;color:#fff;padding:9px;display:flex;gap:6px;overflow:auto;z-index:35}.bulk button{white-space:nowrap;border:0;border-radius:9px;padding:8px}.bulk button:disabled{opacity:.45}.event.selected{outline:3px solid #111;outline-offset:1px}.event.bulkable{cursor:grab}.event.dragging{opacity:.55;z-index:50;box-shadow:0 6px 18px #0003}.timeline-wrap{overscroll-behavior:contain}.week-grid{touch-action:auto}.daycol{touch-action:pan-y}.week-grid .daycol{touch-action:auto}.event{touch-action:none}.daycol.select-mode{touch-action:auto}.daycol.select-mode .event{pointer-events:auto}.selectbox{width:22px;height:22px;border:2px solid #aaa;border-radius:5px;flex:none}.selected .selectbox{background:#111;box-shadow:inset 0 0 0 4px #fff}.hint{font-size:12px;color:#777;margin:6px 0 10px}
+@media(min-width:800px){.content{padding:16px 20px}.week-grid{grid-template-columns:58px repeat(7,var(--week-day-width,120px))!important;width:calc(58px + 7 * var(--week-day-width,120px))!important;min-width:calc(58px + 7 * var(--week-day-width,120px))!important}.day-grid{grid-template-columns:58px minmax(0,1fr)}}
+
+/* ===== V2 professional iOS-inspired visual system ===== */
+:root{
+  --bg:#f4f7fb;
+  --surface:#ffffff;
+  --surface2:#f7f9fc;
+  --line:#e6ebf2;
+  --text:#182235;
+  --muted:#718096;
+  --blue:#1677ff;
+  --blue2:#0b6cff;
+  --red:#ff5b67;
+  --orange:#f5a623;
+  --green:#34c98b;
+  --purple:#8d72e8;
+  --shadow:0 8px 28px rgba(35,55,85,.08);
+  --shadow2:0 3px 12px rgba(35,55,85,.07);
+}
+html{background:var(--bg)}
+body{
+  background:linear-gradient(180deg,#f8fbff 0,#f4f7fb 48%,#f1f5fa 100%);
+  color:var(--text);
+  -webkit-font-smoothing:antialiased;
+}
+.app{
+  background:transparent;
+  max-width:1120px;
+  padding-bottom:92px;
+}
+.head{
+  padding:18px 16px 12px;
+  background:rgba(248,251,255,.9);
+  border-bottom:1px solid rgba(220,228,239,.85);
+}
+.head h1{
+  font-size:30px;
+  letter-spacing:-.7px;
+  font-weight:800;
+  color:#172033;
+}
+.tabs{
+  margin-top:14px;
+  gap:8px;
+  padding-bottom:2px;
+  scrollbar-width:none;
+}
+.tabs::-webkit-scrollbar{display:none}
+.tabs button,.seg button,.chip,.tabsbtn{
+  border:1px solid transparent;
+  border-radius:13px;
+  min-height:42px;
+  padding:9px 15px;
+  background:#edf2f8;
+  color:#34435a;
+  font-size:14px;
+  font-weight:650;
+  box-shadow:none;
+}
+.tabs button:active,.seg button:active,.chip:active,.nav button:active,.navbtn:active{transform:scale(.97)}
+.tabs button.active,.seg button.active{
+  background:linear-gradient(135deg,#1680ff,#0869ef)!important;
+  color:#fff!important;
+  box-shadow:0 5px 14px rgba(22,119,255,.22);
+}
+.content{padding:14px 14px 18px}
+.group{
+  margin:16px 0 20px;
+  background:var(--surface);
+  border-radius:18px;
+  box-shadow:var(--shadow2);
+  overflow:hidden;
+  border:1px solid rgba(225,232,241,.9);
+}
+.group h3{
+  margin:0;
+  padding:13px 15px 10px;
+  font-size:14px;
+  font-weight:800;
+  background:linear-gradient(90deg,#fdf7f8,#fff);
+  color:#d94855;
+}
+.group:nth-child(2) h3{color:#a66a13;background:linear-gradient(90deg,#fff9ee,#fff)}
+.group:nth-child(3) h3{color:#b45b1d;background:linear-gradient(90deg,#fff7ef,#fff)}
+.group:nth-child(4) h3{color:#667085;background:linear-gradient(90deg,#f7f8fa,#fff)}
+.task{
+  padding:14px 14px;
+  min-height:70px;
+  background:#fff;
+  border-bottom:1px solid #edf1f5;
+  gap:11px;
+  touch-action:pan-y;
+}
+.task:last-child{border-bottom:0}
+.task.selected{
+  background:#edf5ff;
+  box-shadow:inset 3px 0 0 var(--blue);
+}
+.check{
+  width:23px;height:23px;
+  border:1.8px solid #9aa7b8;
+  background:#fff;
+  box-shadow:inset 0 0 0 3px #fff;
+}
+.done .check{
+  background:var(--blue);
+  border-color:var(--blue);
+}
+.title{
+  font-size:15px;
+  font-weight:720;
+  letter-spacing:-.15px;
+}
+.meta{
+  color:#7a8799;
+  font-size:12px;
+  margin-top:5px;
+}
+.badge{font-size:12px}
+.fab{
+  width:58px;height:58px;
+  right:18px;bottom:92px;
+  background:linear-gradient(145deg,#1883ff,#0868ed);
+  box-shadow:0 10px 24px rgba(15,105,239,.28);
+  font-size:31px;
+}
+.nav{
+  height:76px;
+  background:rgba(255,255,255,.94);
+  border-top:1px solid #dfe6ef;
+  box-shadow:0 -6px 24px rgba(36,55,84,.07);
+  backdrop-filter:blur(18px);
+}
+.nav button{
+  color:#748196;
+  background:transparent;
+  font-size:12px;
+  font-weight:650;
+  transition:.15s;
+}
+.nav button.active{
+  color:var(--blue);
+  background:linear-gradient(180deg,#f5f9ff,#eef5ff)!important;
+}
+.card{
+  background:#fff;
+  border:1px solid #e5ebf2;
+  border-radius:18px;
+  box-shadow:var(--shadow2);
+}
+.field label{font-weight:650;color:#68768a}
+.field input,.field textarea,.field select{
+  border:1px solid #dce4ee;
+  border-radius:13px;
+  min-height:44px;
+  color:var(--text);
+  box-shadow:inset 0 1px 2px rgba(30,50,80,.03);
+}
+.primary{
+  background:linear-gradient(135deg,#1680ff,#0869ef);
+  box-shadow:0 6px 15px rgba(22,119,255,.2);
+  font-weight:700;
+}
+.danger{background:#eef2f6;color:#45546a;font-weight:650}
+.empty{
+  background:#fff;
+  border:1px dashed #dce4ee;
+  border-radius:18px;
+  box-shadow:var(--shadow2);
+}
+.calbar{margin:2px 0 10px}
+.calbar .navbtn{
+  min-width:44px;
+  min-height:42px;
+  border:1px solid #dce5ef;
+  background:#fff;
+  color:#3a4a60;
+  box-shadow:0 3px 10px rgba(35,55,85,.05);
+  font-weight:700;
+}
+.caltitle{
+  color:#172033;
+  font-size:16px;
+  letter-spacing:-.2px;
+}
+.hint{
+  color:#77869a;
+  background:#f1f6fd;
+  border:1px solid #e1ebf7;
+  border-radius:11px;
+  padding:8px 10px;
+}
+.timeline-wrap{
+  border:1px solid #dfe6ef;
+  border-radius:16px;
+  box-shadow:var(--shadow2);
+  background:#fff;
+}
+.dayhead{
+  background:rgba(255,255,255,.96);
+  color:#66758a;
+  font-weight:650;
+}
+.dayhead strong{color:#26364d}
+.dayhead.today strong{
+  background:var(--blue);
+  color:#fff;
+  box-shadow:0 3px 8px rgba(22,119,255,.25);
+}
+.timecol{background:#fbfcfe}
+.timecell{
+  color:#8290a2;
+  border-top-color:#edf1f5;
+  font-size:10px;
+}
+.daycol{
+  border-left-color:#e7edf4;
+  background:
+    repeating-linear-gradient(to bottom,
+      transparent 0,
+      transparent calc(var(--timeline-row-height,64px) / 2 - 1px),
+      #f2f5f8 calc(var(--timeline-row-height,64px) / 2),
+      transparent calc(var(--timeline-row-height,64px) / 2 + 1px),
+      transparent calc(var(--timeline-row-height,64px) - 1px),
+      #e7ecf2 var(--timeline-row-height,64px));
+}
+.event{
+  border:0;
+  border-left:4px solid #9aa7b8;
+  border-radius:10px;
+  background:linear-gradient(135deg,#f2f5f8,#e9eef4);
+  color:#21324a;
+  box-shadow:0 3px 10px rgba(38,72,110,.09);
+  padding:6px 8px;
+  font-size:11px;
+}
+/* 日历颜色与 Todo 的「重要 × 紧急」完全一致：
+   红 = 重要且紧急；橙 = 仅紧急；黄 = 仅重要；蓝灰 = 普通 */
+.event.priority-0{
+  border-left-color:#ff4d5d;
+  background:linear-gradient(135deg,#fff0f2,#ffdfe4);
+}
+.event.priority-1{
+  /* 仅紧急：珊瑚橙，明显区别于重要的紫色 */
+  border-left-color:#ff7a45;
+  background:linear-gradient(135deg,#fff2ed,#ffe4d8);
+}
+.event.priority-2{
+  /* 仅重要：紫色 */
+  border-left-color:#8b6de8;
+  background:linear-gradient(135deg,#f5f1ff,#e9e2ff);
+}
+.event.priority-3{
+  border-left-color:#4b9cff;
+  background:linear-gradient(135deg,#edf6ff,#dceeff);
+}
+.event.done{opacity:.5}
+.event.selected{
+  outline:3px solid rgba(22,119,255,.35);
+  outline-offset:1px;
+}
+.event.dragging{
+  box-shadow:0 12px 28px rgba(24,55,100,.2);
+  opacity:.82;
+}
+.event .etime{color:#5c6f86}
+.nowline{background:#ff3344;height:2px}
+.nowline:before{
+  content:"";
+  position:absolute;
+  left:-4px;top:-4px;
+  width:10px;height:10px;
+  border-radius:50%;
+  background:#ff3344;
+}
+.creating{
+  background:linear-gradient(135deg,#1677ff,#075fe0);
+  box-shadow:0 8px 18px rgba(22,119,255,.25);
+}
+.month{gap:6px}
+.day{
+  min-height:88px;
+  border:1px solid #e5ebf2;
+  border-radius:12px;
+  background:#fff;
+  box-shadow:0 2px 6px rgba(35,55,85,.035);
+}
+.mini{
+  background:#eaf3ff;
+  color:#2c5c92;
+  border-radius:5px;
+  padding:3px 5px;
+}
+.mini.selected{
+  outline:2px solid var(--blue);
+}
+.bulk{
+  bottom:76px;
+  padding:9px 10px;
+  background:rgba(23,32,50,.96);
+  backdrop-filter:blur(15px);
+  box-shadow:0 -5px 20px rgba(20,35,55,.16);
+}
+.bulk button{
+  background:#fff;
+  color:#26364c;
+  font-weight:700;
+  min-height:38px;
+  border-radius:10px;
+}
+.bulk span{color:#fff!important}
+.selectbox{
+  border-color:#a5b1c0;
+  background:#fff;
+  border-radius:6px;
+}
+.selected .selectbox{
+  background:var(--blue);
+  border-color:var(--blue);
+  box-shadow:inset 0 0 0 4px #fff;
+}
+@media(max-width:799px){
+  .head{padding-top:16px}
+  .head h1{font-size:29px}
+  .content{padding:12px}
+  .group{border-radius:17px}
+  .week-grid{
+    grid-template-columns:54px repeat(7,120px)!important;
+    width:894px!important;
+    min-width:894px!important;
+  }
+}
+@media(min-width:800px){
+  .app{border-left:1px solid #e4eaf2;border-right:1px solid #e4eaf2}
+}
+
+.zoomctl{display:inline-flex;align-items:center;gap:3px;margin-left:auto;padding:3px;background:#eef3f9;border:1px solid #dfe7f0;border-radius:12px;flex:none}
+.zoomctl button{width:34px!important;height:34px!important;min-height:34px!important;padding:0!important;border:0!important;border-radius:9px!important;background:#fff!important;color:#24354c!important;font-size:20px!important;line-height:1!important}
+.zoomctl b{min-width:45px;text-align:center;font-size:12px;color:#53647a}
+.todo-section-title{font-size:15px;font-weight:800;color:#26364d;margin:8px 2px 10px}.completed-section-title{margin-top:24px;color:#6f7d91}
+.task{touch-action:pan-y;user-select:none;-webkit-user-select:none}.event{touch-action:none;user-select:none;-webkit-user-select:none}.event.dragging{touch-action:none!important}.timeline-wrap{overscroll-behavior:contain}
+.event-ghost{position:absolute!important;border:2px dashed #1677ff!important;border-left:4px dashed #1677ff!important;border-radius:10px!important;background:rgba(22,119,255,.14)!important;box-shadow:0 0 0 2px rgba(22,119,255,.12),0 5px 14px rgba(30,60,100,.10)!important;display:block!important;visibility:visible!important;opacity:1!important;z-index:100!important;pointer-events:none!important;color:#1459b8!important}
+@media(max-width:799px){.zoomctl{margin-left:2px}.zoomctl b{min-width:40px}}
+.timeline-wrap.calendar-scroll{height:calc(100vh - 300px);min-height:300px;max-height:calc(100vh - 230px);overflow:auto;}@supports(height:100dvh){.timeline-wrap.calendar-scroll{height:calc(100dvh - 300px);max-height:calc(100dvh - 230px)}}
+</style></head><body><div class="app"><header class="head"><div class="headtop"><h1 id="heading">Todo</h1><div id="headActions"></div></div><div id="subtabs" class="tabs"></div></header><main id="main" class="content"></main><button id="fab" class="fab">+</button><div id="bulk" class="bulk hidden"></div><nav class="nav"><button data-page="todo" class="active">📋<br>Todo</button><button data-page="calendar">📅<br>日历</button><button data-page="settings">⚙️<br>设置</button></nav></div>
+<script>
+const $=s=>document.querySelector(s), DB='todoCalendarV1';
+let tasks=JSON.parse(localStorage.getItem(DB)||'[]'), page='todo', todoTab='today', calMode='week', calDate=new Date(), selected=new Set(), selectMode=false, clipboard=[], weekZoom=Math.max(50,Math.min(170,Number(localStorage.getItem('todoCalendarWeekZoom')||100))), dayZoom=Math.max(50,Math.min(170,Number(localStorage.getItem('todoCalendarDayZoom')||100))), calScroll={left:0,top:0}, weekCenterRequested=false, calendarViewInitialized=false;
+const save=()=>localStorage.setItem(DB,JSON.stringify(tasks));
+const id=()=>crypto.randomUUID?.()||Date.now()+Math.random()+'';
+function workDate(d=new Date()){let x=new Date(d);if(x.getHours()<6||(x.getHours()===6&&x.getMinutes()<30))x.setDate(x.getDate()-1);return fmt(x)}
+const today=()=>workDate();
+const priority=t=>t.important&&t.urgent?0:t.urgent?1:t.important?2:3;
+const labels=['🔥 重要且紧急','⚡ 紧急','⭐ 重要','○ 其他'];
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function fmt(d){let z=new Date(d.getTime()-d.getTimezoneOffset()*60000);return z.toISOString().slice(0,10)}
+function parseDate(s){return new Date(s+'T12:00:00')}
+function timeMin(t){if(!t)return null;let [h,m]=t.split(':').map(Number);return h*60+m}
+function timeStr(min){min=Math.max(0,Math.min(1439,Math.round(min)));return String(Math.floor(min/60)).padStart(2,'0')+':'+String(min%60).padStart(2,'0')}
+function addDays(s,n){let d=parseDate(s);d.setDate(d.getDate()+n);return fmt(d)}
+function changeCalendarZoom(dir){
+  if(!['week','day'].includes(calMode))return;
+  const key=calMode==='week'?'todoCalendarWeekZoom':'todoCalendarDayZoom';
+  const oldZoom=calMode==='week'?weekZoom:dayZoom;
+  const oldRowH=64*oldZoom/100;
+  const newZoom=Math.max(50,Math.min(170,oldZoom+dir*10));
+  if(calMode==='week')weekZoom=newZoom;else dayZoom=newZoom;
+  localStorage.setItem(key,String(newZoom));
+
+  const wrap=document.querySelector('.timeline-wrap');
+  const oldTop=wrap?wrap.scrollTop:calScroll.top;
+  const viewportH=wrap?wrap.clientHeight:0;
+  const centerY=oldTop+viewportH/2;
+  const headerH=52;
+  const oldTimePx=Math.max(0,centerY-headerH);
+  const newCenterY=headerH+oldTimePx*(newZoom/oldZoom);
+  const newTop=Math.max(0,newCenterY-viewportH/2);
+
+  renderCalendar();
+  requestAnimationFrame(()=>{
+    const w=document.querySelector('.timeline-wrap');
+    if(w){
+      const maxY=Math.max(0,w.scrollHeight-w.clientHeight);
+      w.scrollTop=Math.max(0,Math.min(newTop,maxY));
+      calScroll={left:w.scrollLeft,top:w.scrollTop};
+    }
+  });
+}
+function changeWeekZoom(dir){changeCalendarZoom(dir)}
+
+function captureCalendarView(){
+  const w=document.querySelector('.timeline-wrap');
+  if(!w)return;
+  calScroll={left:w.scrollLeft,top:w.scrollTop};
+}
+
+function render(){captureCalendarView();document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===page));$('#fab').classList.toggle('hidden',page==='settings');$('#heading').textContent=page==='todo'?'Todo':page==='calendar'?'日历':'设置';page==='todo'?renderTodo():page==='calendar'?renderCalendar():renderSettings()}
+function renderTodo(){
+  const counts={
+    all:tasks.length,
+    today:tasks.filter(t=>t.date===today()&&!t.completed).length,
+    overdue:tasks.filter(t=>t.date&&t.date<today()&&!t.completed).length,
+    inbox:tasks.filter(t=>!t.date&&!t.completed).length,
+    done:tasks.filter(t=>t.completed).length
+  };
+  $('#subtabs').innerHTML=['all:全部','today:今天','overdue:逾期','inbox:无日期','done:已完成'].map(x=>{
+    const [a,b]=x.split(':');
+    return `<button class="${todoTab===a?'active':''}" onclick="todoTab='${a}';selectMode=false;selected.clear();render()">${b}${counts[a]?` ${counts[a]}`:''}</button>`;
+  }).join('');
+  const currentItems=tasks.filter(t=>{
+    if(todoTab==='all')return !t.completed;
+    if(todoTab==='today')return t.date===today()&&!t.completed;
+    if(todoTab==='overdue')return t.date&&t.date<today()&&!t.completed;
+    if(todoTab==='inbox')return !t.date&&!t.completed;
+    return t.completed;
+  });
+  const allSelected=currentItems.length>0&&currentItems.every(t=>selected.has(t.id));
+  $('#headActions').innerHTML=`<button class="tabsbtn" style="min-height:38px;padding:8px 12px;background:#edf2f8;border-radius:11px;border:0;color:#34435a;font-weight:700" onclick="toggleSelectAllTodo()">${allSelected?'取消全选':'全选'}</button>`;
+
+  let list;
+  if(todoTab==='all') list=tasks.filter(t=>!t.completed);
+  else if(todoTab==='today') list=tasks.filter(t=>t.date===today()&&!t.completed);
+  else if(todoTab==='overdue') list=tasks.filter(t=>t.date&&t.date<today()&&!t.completed);
+  else if(todoTab==='inbox') list=tasks.filter(t=>!t.date&&!t.completed);
+  else list=tasks.filter(t=>t.completed);
+
+  const dateKey=t=>t.date||'__none__';
+  const dateLabel=ds=>{
+    if(ds==='__none__')return '无日期';
+    const d=parseDate(ds), base=today();
+    const diff=Math.round((d-parseDate(base))/86400000);
+    const wd=['日','一','二','三','四','五','六'][d.getDay()];
+    if(ds===base)return `今天 · ${ds} · 周${wd}`;
+    if(diff===-1)return `昨天 · ${ds} · 周${wd}`;
+    if(diff===1)return `明天 · ${ds} · 周${wd}`;
+    return `${ds} · 周${wd}`;
+  };
+
+  const groups=new Map();
+  [...list].sort((a,b)=>{
+    const da=dateKey(a),db=dateKey(b);
+    if(da==='__none__'&&db!=='__none__')return 1;
+    if(da!=='__none__'&&db==='__none__')return -1;
+    return da.localeCompare(db)||(priority(a)-priority(b))||(a.start||'').localeCompare(b.start||'')||a.title.localeCompare(b.title);
+  }).forEach(t=>{const k=dateKey(t);if(!groups.has(k))groups.set(k,[]);groups.get(k).push(t)});
+
+  let html='';
+  for(const [ds,items] of groups){
+    html+=`<section class="group"><h3>${esc(dateLabel(ds))}<span style="float:right;font-weight:600;color:#8290a2">${items.length}</span></h3>${items.map(taskRow).join('')}</section>`;
+  }
+  $('#main').innerHTML=html||'<div class="empty">暂无事项</div>';
+  attachTaskGestures();renderBulk();
+}
+function toggleSelectAllTodo(){
+  const currentItems=tasks.filter(t=>{
+    if(todoTab==='all')return !t.completed;
+    if(todoTab==='today')return t.date===today()&&!t.completed;
+    if(todoTab==='overdue')return t.date&&t.date<today()&&!t.completed;
+    if(todoTab==='inbox')return !t.date&&!t.completed;
+    return t.completed;
+  });
+  if(!currentItems.length)return;
+  const allSelected=currentItems.every(t=>selected.has(t.id));
+  if(allSelected){currentItems.forEach(t=>selected.delete(t.id));}
+  else{currentItems.forEach(t=>selected.add(t.id));}
+  selectMode=selected.size>0;
+  render();
+}
+function taskRow(t){return `<div class="task ${t.completed?'done':''} ${selected.has(t.id)?'selected':''}" data-id="${t.id}" onclick="taskClick(event,'${t.id}')" oncontextmenu="event.preventDefault();toggleSelect('${t.id}')"><span class="${selected.size?'selectbox':'check'}"></span><div class="taskmain"><div class="title">${esc(t.title)}</div><div class="meta">${t.date||'无日期'} ${t.start||''}${t.end?'–'+t.end:''}</div></div><span class="badge">${t.important?'⭐':''}${t.urgent?'⚡':''}</span></div>`}
+let taskGesture={timer:null,id:null,x:0,y:0,moved:false,long:false,suppressClick:false};
+function attachTaskGestures(){
+  document.querySelectorAll('.task').forEach(row=>{
+    row.addEventListener('pointerdown',e=>{
+      if(e.pointerType==='mouse'&&e.button!==0)return;
+      const id=row.dataset.id; taskGesture={timer:null,id,x:e.clientX,y:e.clientY,moved:false,long:false,suppressClick:false};
+      taskGesture.timer=setTimeout(()=>{taskGesture.timer=null;taskGesture.long=true;taskGesture.suppressClick=true;toggleSelect(id)},500);
+    });
+    row.addEventListener('pointermove',e=>{
+      if(taskGesture.id!==row.dataset.id)return;
+      const d=Math.hypot(e.clientX-taskGesture.x,e.clientY-taskGesture.y);
+      if(d>10&&!taskGesture.long){taskGesture.moved=true;if(taskGesture.timer){clearTimeout(taskGesture.timer);taskGesture.timer=null}taskGesture.suppressClick=true;}
+      if(taskGesture.long)e.preventDefault();
+    },{passive:false});
+    const end=()=>{if(taskGesture.id!==row.dataset.id)return;if(taskGesture.timer){clearTimeout(taskGesture.timer);taskGesture.timer=null}setTimeout(()=>{taskGesture={timer:null,id:null,x:0,y:0,moved:false,long:false,suppressClick:false}},0)};
+    row.addEventListener('pointerup',end);row.addEventListener('pointercancel',end);
+  });
+}
+function taskClick(e,i){if(taskGesture.suppressClick||taskGesture.moved||taskGesture.long){e.preventDefault();return}if(selectMode){toggleSelect(i);return}let t=tasks.find(x=>x.id===i);if(e.target.classList.contains('check')){t.completed=!t.completed;t.completedAt=t.completed?new Date().toISOString():null;save();render()}else editTask(i)}
+function toggleSelect(i){selectMode=true;selected.has(i)?selected.delete(i):selected.add(i);render()}
+function renderBulk(){let b=$('#bulk');if(!selectMode){b.classList.add('hidden');return}b.classList.remove('hidden');b.innerHTML=`<span style="padding:8px;font-weight:700;position:sticky;left:0;background:#111">已选 ${selected.size}</span><button onclick="bulk('done')">✓完成</button><button onclick="bulk('today')">今天</button><button onclick="bulk('tomorrow')">明天</button><button onclick="bulkDate()">📅日期</button><button onclick="bulkShiftTime()">🕐时间</button><button onclick="bulk('important')">⭐重要</button><button onclick="bulk('urgent')">⚡紧急</button><button onclick="bulk('copy')">📋复制</button><button onclick="bulk('paste')" ${clipboard.length?'':'disabled'}>📌粘贴</button><button onclick="bulk('delete')">🗑删除</button><button onclick="selectMode=false;selected.clear();render()">取消</button>`}
+function bulkShiftTime(){
+  let s=prompt('整体移动多少分钟？例如 30 或 -30','30');
+  if(s===null)return;
+  let delta=Number(s);
+  if(!Number.isFinite(delta))return alert('请输入数字，例如 30 或 -30');
+  tasks.filter(t=>selected.has(t.id)&&t.start).forEach(t=>{
+    let oldStart=timeMin(t.start), oldEnd=t.end?timeMin(t.end):oldStart+60;
+    let duration=Math.max(15,oldEnd-oldStart);
+    let ns=Math.max(0,Math.min(1439-duration,oldStart+delta));
+    t.start=timeStr(ns); t.end=timeStr(ns+duration);
+  });
+  selectMode=false;selectMode=false;selected.clear();save();render();
+}
+function bulkDate(){let d=prompt('请输入日期（YYYY-MM-DD）',today());if(!/^\d{4}-\d{2}-\d{2}$/.test(d||''))return;tasks.filter(t=>selected.has(t.id)).forEach(t=>t.date=d);selectMode=false;selectMode=false;selected.clear();save();render()}
+function bulk(a){let arr=tasks.filter(t=>selected.has(t.id));if(a==='delete'&&!confirm(`删除 ${arr.length} 个事项？`))return;if(a==='copy'){clipboard=arr.map(x=>({...x,id:id(),completed:false,completedAt:null}));selectMode=false;selected.clear();save();render();return}if(a==='paste'){if(!clipboard.length)return;let target=today(),base=clipboard.find(x=>x.date)?.date;let copies=clipboard.map(x=>{let n={...x,id:id(),completed:false,completedAt:null};if(base&&x.date)n.date=addDays(x.date,Math.round((parseDate(target)-parseDate(base))/86400000));else n.date=target;return n});tasks.push(...copies);selectMode=false;selectMode=false;selected.clear();save();render();return}arr.forEach(t=>{if(a==='done'){t.completed=true;t.completedAt=new Date().toISOString()}if(a==='today')t.date=today();if(a==='tomorrow')t.date=addDays(today(),1);if(a==='important')t.important=!t.important;if(a==='urgent')t.urgent=!t.urgent});if(a==='delete')tasks=tasks.filter(t=>!selected.has(t.id));selectMode=false;selectMode=false;selected.clear();save();render()}
+
+function centerWeekToday(){
+  const w=document.querySelector('.timeline-wrap');
+  if(calMode!=='week'||!w)return;
+  const c=w.querySelector('.daycol[data-date="'+today()+'"]');
+  if(!c)return;
+  const set=()=>{
+    const now=new Date();
+    const minutes=now.getHours()*60+now.getMinutes()+now.getSeconds()/60;
+    const rowH=64*weekZoom/100;
+    const wr=w.getBoundingClientRect();
+    const cr=c.getBoundingClientRect();
+    const contentX=(cr.left-wr.left)+w.scrollLeft;
+    const contentY=(cr.top-wr.top)+w.scrollTop;
+    const currentY=contentY+(minutes/60)*rowH;
+    const targetX=contentX+c.offsetWidth/2-w.clientWidth/2;
+    const targetY=currentY-w.clientHeight/2;
+    const maxX=Math.max(0,w.scrollWidth-w.clientWidth);
+    const maxY=Math.max(0,w.scrollHeight-w.clientHeight);
+    w.scrollLeft=Math.max(0,Math.min(targetX,maxX));
+    w.scrollTop=Math.max(0,Math.min(targetY,maxY));
+    calScroll={left:w.scrollLeft,top:w.scrollTop};
+  };
+  set();
+  requestAnimationFrame(()=>{
+    set();
+    setTimeout(set,50);
+  });
+}
+
+function centerTimelineToday(){
+  const w=document.querySelector('.timeline-wrap');
+  if(!w||!['week','day'].includes(calMode))return;
+  const targetDate=today();
+  const c=w.querySelector('.daycol[data-date="'+targetDate+'"]');
+  if(!c)return;
+  const set=()=>{
+    const now=new Date();
+    const minutes=now.getHours()*60+now.getMinutes()+now.getSeconds()/60;
+    const rowH=64*(calMode==='week'?weekZoom:dayZoom)/100;
+    const headerH=52;
+    // 直接按时间轴内容坐标计算当前时间，日视图与周视图使用同一逻辑。
+    const currentY=headerH+(minutes/60)*rowH;
+    const targetY=currentY-w.clientHeight/2;
+    const maxY=Math.max(0,w.scrollHeight-w.clientHeight);
+    w.scrollTop=Math.max(0,Math.min(targetY,maxY));
+    if(calMode==='week'){
+      const wr=w.getBoundingClientRect(),cr=c.getBoundingClientRect();
+      const contentX=(cr.left-wr.left)+w.scrollLeft;
+      const targetX=contentX+c.offsetWidth/2-w.clientWidth/2;
+      const maxX=Math.max(0,w.scrollWidth-w.clientWidth);
+      w.scrollLeft=Math.max(0,Math.min(targetX,maxX));
+    }else{
+      w.scrollLeft=0;
+    }
+    calScroll={left:w.scrollLeft,top:w.scrollTop};
+  };
+  set();requestAnimationFrame(()=>{set();setTimeout(set,50)});
+}
+
+function rememberCalendarScroll(){
+  const w=document.querySelector('.timeline-wrap');
+  if(w) calScroll={left:w.scrollLeft,top:w.scrollTop};
+}
+function restoreCalendarScroll(){
+  requestAnimationFrame(()=>{
+    const w=document.querySelector('.timeline-wrap');
+    if(w){w.scrollLeft=calScroll.left||0;w.scrollTop=calScroll.top||0;}
+  });
+}
+
+function renderCalendar(options={}){
+  captureCalendarView();
+  const oldScrollLeft=calScroll.left||0;
+  const oldScrollTop=calScroll.top||0;
+  const centerToday=!!options.centerToday||weekCenterRequested;
+  weekCenterRequested=false;
+  $('#subtabs').innerHTML=`<button class="tabsbtn" onclick="shiftCal(-1)">‹</button><button onclick="goToday()">今天</button><button onclick="shiftCal(1)">›</button>${['day:日','week:周','month:月'].map(x=>{let[a,b]=x.split(':');return `<button type="button" class="${calMode===a?'active':''}" data-calmode="${a}">${b}</button>`}).join('')}${['week','day'].includes(calMode)?`<span class="zoomctl"><button onclick="changeCalendarZoom(-1)" aria-label="缩小">−</button><b id="zoomLabel">${calMode==='week'?weekZoom:dayZoom}%</b><button onclick="changeCalendarZoom(1)" aria-label="放大">＋</button></span>`:''}`;
+  $('#headActions').innerHTML='';
+  if(calMode==='month')renderMonth(); else renderTimeline();
+  renderBulk();
+  bindCalendarModeButtons();
+  requestAnimationFrame(()=>{
+    const w=document.querySelector('.timeline-wrap');
+    if(!w)return;
+    if(centerToday && (calMode==='week'||calMode==='day')){
+      centerTimelineToday();
+    }else{
+      w.scrollLeft=oldScrollLeft;
+      w.scrollTop=oldScrollTop;
+      calScroll={left:w.scrollLeft,top:w.scrollTop};
+    }
+    w.onscroll=()=>{calScroll={left:w.scrollLeft,top:w.scrollTop};};
+    calendarViewInitialized=true;
+  });
+}
+
+function goToday(){calDate=new Date();selectMode=false;selected.clear();weekCenterRequested=true;render();}
+function bindCalendarModeButtons(){
+  document.querySelectorAll('#subtabs [data-calmode]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const next=btn.dataset.calmode;
+      if(!['day','week','month'].includes(next))return;
+      const wasWeek=calMode==='week';
+      const wrap=document.querySelector('.timeline-wrap');
+      const keepLeft=wrap?wrap.scrollLeft:calScroll.left;
+      const keepTop=wrap?wrap.scrollTop:calScroll.top;
+      calMode=next;selectMode=false;selected.clear();
+      renderCalendar({centerToday:next==='week'||next==='day'});
+      if(next!=='week' && wrap){calScroll={left:keepLeft,top:keepTop};}
+    });
+  });
+}
+function shiftCal(n){let d=new Date(calDate);d.setDate(d.getDate()+n*(calMode==='week'?7:1));calDate=d;render()}
+function weekDates(){let base=new Date(calDate),day=(base.getDay()+6)%7;base.setDate(base.getDate()-day);return Array.from({length:7},(_,i)=>{let d=new Date(base);d.setDate(d.getDate()+i);return d})}
+
+function renderTimeline(){
+  let dates=calMode==='week'?weekDates():[new Date(calDate)];
+  let startHour=0,endHour=24,rowH=64*(calMode==='week'?weekZoom:dayZoom)/100,total=(endHour-startHour)*rowH;
+  let title=calMode==='week'?`${dates[0].getMonth()+1}月${dates[0].getDate()}日 – ${dates[6].getMonth()+1}月${dates[6].getDate()}日`:`${dates[0].getFullYear()}年${dates[0].getMonth()+1}月${dates[0].getDate()}日`;
+  let gridClass=calMode==='day'?'day-grid':'week-grid';
+  let dayHeads=dates.map(d=>`<div class="dayhead ${fmt(d)===today()?'today':''}" data-date="${fmt(d)}">${['一','二','三','四','五','六','日'][(d.getDay()+6)%7]}<strong>${d.getDate()}</strong></div>`).join('');
+  let timeColumn=`<div class="timecol">${Array.from({length:24},(_,i)=>`<div class="timecell" style="height:${rowH}px">${String(i+startHour).padStart(2,'0')}:00</div>`).join('')}</div>`;
+  let cols=dates.map(d=>dayColumn(d,total,startHour,rowH)).join('');
+  let header=calMode==='day'
+    ? `<div class="dayhead"></div>${dayHeads}`
+    : `<div class="dayhead"></div>${dayHeads}`;
+  let copyLabel=calMode==='week'?'复制本周':'复制当天';
+  let hint=selectMode
+    ? `选择模式 · 已选择 ${selected.size} 项 · 点击事项继续选择 · 底部批量操作`
+    : (calMode==='week'
+      ? `左右滑动查看完整一周（可横向拖动）；长按空白处创建；短按编辑；长按静止选择；长按后移动拖动`
+      : `长按空白处并上下滑动＝创建；短按＝编辑；长按静止＝批量选择；长按后移动＝拖动`);
+  $('#main').innerHTML=`<div class="calbar"><button class="navbtn" onclick="copyDay()">${copyLabel}</button><div class="caltitle">${title}</div><button class="navbtn" onclick="pasteCalendar()" ${clipboard.length?'':'disabled'}>📌 粘贴${clipboard.length?` ${clipboard.length}`:''}</button></div><div class="hint">${hint}</div><div class="timeline-wrap calendar-scroll"><div class="${gridClass}" style="--timeline-row-height:${rowH}px" style="grid-template-rows:52px auto">${header}${timeColumn}${cols}</div></div>`;
+  attachTimelineGestures(dates,startHour,rowH);
+}
+
+function dayColumn(d,total,startHour,rowH){
+  let ds=fmt(d),events=tasks.filter(t=>t.date===ds&&t.start).sort((a,b)=>timeMin(a.start)-timeMin(b.start));
+  return `<div class="daycol ${selected.size?'select-mode':''}" data-date="${ds}" style="height:${total}px">${events.map(t=>eventHtml(t,startHour,rowH)).join('')}${fmt(d)===today()?nowLine(startHour,rowH):''}</div>`;
+}
+function eventHtml(t,startHour,rowH){
+  let s=timeMin(t.start),e=timeMin(t.end)||Math.min(s+60,1439),top=(s-startHour*60)/60*rowH,height=Math.max(28,(e-s)/60*rowH);
+  return `<div class="event bulkable priority-${priority(t)} ${t.completed?'done':''} ${selected.has(t.id)?'selected':''}" data-id="${t.id}" style="top:${top}px;height:${height}px"><b>${esc(t.title)}</b><div class="etime">${t.start}${t.end?'–'+t.end:''}</div></div>`;
+}
+function nowLine(startHour,rowH){let d=new Date(),m=d.getHours()*60+d.getMinutes(),top=(m-startHour*60)/60*rowH;if(top<0||top>24*rowH)return '';return `<div class="nowline" style="top:${top}px"></div>`}
+
+function attachTimelineGestures(dates,startHour,rowH){
+  const cols=[...document.querySelectorAll('.daycol')];
+  const snap=m=>Math.round(m/15)*15;
+  const clamp=(m,duration)=>Math.max(startHour*60,Math.min(1439-duration,snap(m)));
+  const colAtX=x=>{
+    for(const c of cols){const r=c.getBoundingClientRect();if(x>=r.left&&x<=r.right)return c}
+    if(calMode==='week'){
+      let best=cols[0],bd=Infinity;
+      cols.forEach(c=>{const r=c.getBoundingClientRect();const d=x<r.left?r.left-x:x>r.right?x-r.right:0;if(d<bd){bd=d;best=c}});
+      return best;
+    }
+    return cols[0];
+  };
+  const minAt=(e,col)=>{const r=col.getBoundingClientRect();return (e.clientY-r.top)/rowH*60+startHour*60};
+
+  /* 空白区域：长按后拖动创建时间段 */
+  cols.forEach(col=>{
+    let timer=null,creating=null,pid=null,startY=0,startX=0;
+    const clear=()=>{if(timer){clearTimeout(timer);timer=null}};
+    col.addEventListener('pointerdown',e=>{
+      if(e.target.closest('.event')||selectMode)return;
+      if(e.pointerType==='mouse'&&e.button!==0)return;
+      pid=e.pointerId;startX=e.clientX;startY=e.clientY;
+      const m=clamp(minAt(e,col),0);
+      timer=setTimeout(()=>{
+        timer=null;creating={start:m,end:m+60};
+        drawCreating(col,creating,startHour,rowH);
+        try{col.setPointerCapture(pid)}catch{}
+      },450);
+    });
+    col.addEventListener('pointermove',e=>{
+      if(!timer&&!creating)return;
+      if(timer && Math.hypot(e.clientX-startX,e.clientY-startY)>10){clear();return}
+      if(!creating)return;
+      e.preventDefault();
+      const m=clamp(minAt(e,col),0);
+      creating.end=Math.max(creating.start+15,m);
+      drawCreating(col,creating,startHour,rowH);
+    },{passive:false});
+    col.addEventListener('pointerup',e=>{
+      clear();
+      if(!creating)return;
+      const c=creating;creating=null;col.querySelector('.creating')?.remove();
+      newTask(col.dataset.date,timeStr(c.start),timeStr(c.end));
+    });
+    col.addEventListener('pointercancel',()=>{clear();creating=null;col.querySelector('.creating')?.remove()});
+  });
+
+  /* 事项手势：短按=编辑；普通滑动=滚动日历；长按静止=选择；长按后移动=拖动。 */
+  document.querySelectorAll('.event').forEach(ev=>{
+    let timer=null,press=null,ready=false,drag=null,moved=false,suppressClick=false,lastX=0,lastY=0;
+    const clearTimer=()=>{if(timer){clearTimeout(timer);timer=null}};
+    const removeGhost=()=>{if(drag?.ghost){drag.ghost.remove();drag.ghost=null}};
+    const reset=()=>{clearTimer();removeGhost();press=null;ready=false;drag=null;moved=false;suppressClick=false;ev.classList.remove('dragging');ev.style.visibility='';ev.style.opacity=''};
+    const autoScroll=e=>{const w=document.querySelector('.timeline-wrap');if(!w||!drag)return;const r=w.getBoundingClientRect(),edge=42,speed=14;let dx=0;if(e.clientX<r.left+edge)dx=-speed;else if(e.clientX>r.right-edge)dx=speed;if(dx)w.scrollLeft=Math.max(0,Math.min(w.scrollWidth-w.clientWidth,w.scrollLeft+dx));};
+    const startDrag=(e,t)=>{const source=ev.closest('.daycol');if(!source)return;const rect=ev.getBoundingClientRect();const origMin=timeMin(t.start);const duration=Math.max(15,(timeMin(t.end)||origMin+60)-origMin);const ghost=document.createElement('div');ghost.className='event-ghost priority-'+priority(t);ghost.innerHTML='<b>'+esc(t.title)+'</b><div class="etime">'+(t.start+(t.end?'–'+t.end:''))+'</div>';ghost.style.position='absolute';ghost.style.left='3px';ghost.style.right='3px';ghost.style.height=Math.max(28,duration/60*rowH)+'px';ghost.style.opacity='1';ghost.style.pointerEvents='none';ghost.style.zIndex='100';source.appendChild(ghost);drag={t,source,duration,grabOffset:e.clientY-rect.top,pointerId:e.pointerId,ghost};ev.classList.add('dragging');ev.style.visibility='visible';ev.style.opacity='.42';suppressClick=true;try{ev.setPointerCapture(e.pointerId)}catch{}};
+    const updateGhost=(target,nm)=>{if(!drag?.ghost||!target)return;if(drag.ghost.parentElement!==target)target.appendChild(drag.ghost);drag.ghost.style.top=((nm-startHour*60)/60*rowH)+'px';drag.ghost.style.height=Math.max(28,drag.duration/60*rowH)+'px';drag.ghost.style.left='3px';drag.ghost.style.right='3px';};
+    const update=e=>{if(!drag)return;autoScroll(e);const target=colAtX(e.clientX)||drag.source;const raw=minAt(e,target)-(drag.grabOffset/rowH*60);updateGhost(target,clamp(raw,drag.duration));};
+    ev.addEventListener('pointerdown',e=>{e.stopPropagation();if(e.pointerType==='mouse'&&e.button!==0)return;const t=tasks.find(x=>x.id===ev.dataset.id);if(!t)return;clearTimer();press={x:e.clientX,y:e.clientY,id:t.id};lastX=e.clientX;lastY=e.clientY;ready=false;drag=null;moved=false;suppressClick=false;if(selectMode){suppressClick=true;return}timer=setTimeout(()=>{timer=null;ready=true},600);},{passive:false});
+    ev.addEventListener('pointermove',e=>{if(!press)return;const dist=Math.hypot(e.clientX-press.x,e.clientY-press.y);const w=document.querySelector('.timeline-wrap');if(selectMode){if(dist>8){moved=true;suppressClick=true;if(w){w.scrollLeft-=e.clientX-lastX;w.scrollTop-=e.clientY-lastY;}lastX=e.clientX;lastY=e.clientY;e.preventDefault();}return;}if(!ready&&!drag){if(dist>10){moved=true;suppressClick=true;clearTimer();if(w){w.scrollLeft-=e.clientX-lastX;w.scrollTop-=e.clientY-lastY;}lastX=e.clientX;lastY=e.clientY;e.preventDefault();}return;}if(ready&&!drag&&dist>10){const t=tasks.find(x=>x.id===press.id);if(t)startDrag(e,t);}if(!drag)return;e.preventDefault();update(e);},{passive:false});
+    ev.addEventListener('pointerup',e=>{const p=press;if(!p){reset();return}clearTimer();if(selectMode){if(!moved)toggleCalendarSelect(p.id);reset();return}if(drag){const t=tasks.find(x=>x.id===p.id);if(t){const target=colAtX(e.clientX)||drag.source;const raw=minAt(e,target)-(drag.grabOffset/rowH*60);const nm=clamp(raw,drag.duration);t.date=target.dataset.date;t.start=timeStr(nm);t.end=timeStr(nm+drag.duration);save()}reset();render();return}if(ready){toggleCalendarSelect(p.id);reset();return}if(moved||suppressClick){reset();return}reset();editTask(p.id);});
+    ev.addEventListener('pointercancel',()=>reset());
+  });
+}
+function toggleCalendarSelect(i){selectMode=true;selected.has(i)?selected.delete(i):selected.add(i);renderCalendar()}
+function drawCreating(col,c,startHour,rowH){let old=col.querySelector('.creating');if(old)old.remove();let el=document.createElement('div');el.className='creating';let top=(c.start-startHour*60)/60*rowH,h=(c.end-c.start)/60*rowH;el.style.top=top+'px';el.style.height=Math.max(24,h)+'px';el.textContent=timeStr(c.start)+'–'+timeStr(c.end);col.appendChild(el)}
+
+function renderMonth(){let y=calDate.getFullYear(),m=calDate.getMonth(),first=new Date(y,m,1),start=(first.getDay()+6)%7,days=new Date(y,m+1,0).getDate();let html=`<div class="calbar"><button class="navbtn" onclick="copyMonth()">📋 复制本月</button><div class="caltitle">${y}年${m+1}月</div><button class="navbtn" onclick="pasteCalendar()" ${clipboard.length?'':'disabled'}>📌 粘贴${clipboard.length?` ${clipboard.length}`:''}</button></div><div class="hint">点击日期进入日视图；长按事项可进入批量选择</div><div class="month">`;for(let i=0;i<start;i++)html+='<div></div>';for(let n=1;n<=days;n++){let ds=fmt(new Date(y,m,n)),a=tasks.filter(t=>t.date===ds);html+=`<div class="day" onclick="calDate=parseDate('${ds}');calMode='day';selectMode=false;selected.clear();render()"><b>${n}</b>${a.slice(0,4).map(t=>`<div class="mini ${selected.has(t.id)?'selected':''}" onclick="if(selected.size){event.stopPropagation();toggleCalendarSelect('${t.id}')}" oncontextmenu="event.preventDefault();toggleCalendarSelect('${t.id}')">${t.completed?'✓ ':''}${esc(t.title)}</div>`).join('')}</div>`}$('#main').innerHTML=html+'</div>';renderBulk()}
+
+function copyDay(){
+  let dates=calMode==='week'?weekDates():[new Date(calDate)];
+  let from=dates.map(fmt);
+  let base=from[0];
+  clipboard=tasks.filter(t=>from.includes(t.date)).map(x=>({...x,_copyOffsetDays:x.date?Math.round((parseDate(x.date)-parseDate(base))/86400000):null}));
+  render();
+}
+function copyMonth(){let y=calDate.getFullYear(),m=calDate.getMonth(),a=tasks.filter(t=>{let d=t.date&&parseDate(t.date);return d&&d.getFullYear()===y&&d.getMonth()===m});clipboard=a.map(x=>({...x}));render()}
+function pasteCalendar(){
+  if(!clipboard.length)return;
+  let target=calMode==='week'?fmt(weekDates()[0]):fmt(calDate);
+  let base=clipboard.find(x=>x.date)?._copyOffsetDays;
+  let firstBase=clipboard.find(x=>x.date)?.date;
+  let copies=clipboard.map(x=>{
+    let n={...x,id:id(),completed:false,completedAt:null};
+    delete n._copyOffsetDays;
+    if(x.date&&firstBase){
+      const offset=(x._copyOffsetDays!=null)?x._copyOffsetDays:Math.round((parseDate(x.date)-parseDate(firstBase))/86400000);
+      n.date=addDays(target,offset);
+    }else if(target)n.date=target;
+    return n;
+  });
+  tasks.push(...copies);selectMode=false;selected.clear();save();render();
+}
+
+function newTask(date=today(),start='',end=''){editTask(null,{date,start,end})}
+function editTask(i,p={}){rememberCalendarScroll();let old=i?tasks.find(x=>x.id===i):null;let t=old||{id:id(),title:'',date:p.date??today(),start:p.start||'',end:p.end||'',important:false,urgent:false,completed:false,notes:'',repeat:'none'};$('#subtabs').innerHTML='';$('#headActions').innerHTML='';$('#heading').textContent=i?'编辑事项':'新事项';$('#main').innerHTML=`<div class="field"><label>事项</label><input id="fTitle" value="${esc(t.title)}" autofocus></div><div class="field"><label>日期</label><input id="fDate" type="date" value="${t.date||''}"></div><div class="row"><div class="field"><label>开始</label><input id="fStart" type="time" value="${t.start||''}"></div><div class="field"><label>结束</label><input id="fEnd" type="time" value="${t.end||''}"></div></div><div class="row"><button id="imp" class="chip ${t.important?'active':''}" onclick="this.classList.toggle('active')">⭐ 重要</button><button id="urg" class="chip ${t.urgent?'active':''}" onclick="this.classList.toggle('active')">⚡ 紧急</button></div><div class="field"><label>重复</label><select id="fRepeat" onchange="toggleCustomRepeat()"><option value="none">不重复</option><option value="daily">每天</option><option value="weekdays">工作日</option><option value="weekly">每周</option><option value="monthly">每月</option><option value="custom">自定义</option></select></div><div id="customRepeat" class="card hidden" style="padding:12px;margin-top:-4px"><div class="row"><div class="field"><label>每隔</label><input id="rInterval" type="number" min="1" max="99" value="1"></div><div class="field"><label>单位</label><select id="rUnit"><option value="day">天</option><option value="week">周</option><option value="month">月</option></select></div></div><div class="field"><label>每周重复日</label><div id="rWeekdays" class="tabs" style="margin-top:0">${['一','二','三','四','五','六','日'].map((d,i)=>`<button type="button" class="chip" data-wd="${i}" onclick="this.classList.toggle('active')">周${d}</button>`).join('')}</div></div><div class="field"><label>结束方式</label><select id="rEndType" onchange="updateRepeatEndField()"><option value="forever">一直重复</option><option value="count">重复次数</option><option value="date">结束日期</option></select></div><div class="field" id="rEndValueWrap"></div></div><div class="field"><label>备注</label><textarea id="fNotes">${esc(t.notes||'')}</textarea></div><div class="row"><button class="primary" onclick="commit('${i||''}','${t.id}')">保存</button>${i?`<button class="danger" onclick="copyOne('${i}')">📋复制</button><button class="danger" onclick="removeTask('${i}')">删除</button>`:''}<button class="danger" onclick="render()">取消</button></div>`;$('#fRepeat').value=(typeof t.repeat==='string'?t.repeat:(t.repeat?.type==='custom'?'custom':'none'));if(typeof t.repeat==='object'&&t.repeat?.type==='custom'){$('#rInterval').value=t.repeat.interval||1;$('#rUnit').value=t.repeat.unit||'day';$('#rEndType').value=t.repeat.endType||'forever';toggleCustomRepeat();updateRepeatEndField();if(t.repeat.weekdays)t.repeat.weekdays.forEach(i=>document.querySelector(`#rWeekdays [data-wd="${i}"]`)?.classList.add('active'));}else toggleCustomRepeat();}
+function toggleCustomRepeat(){
+  const box=$('#customRepeat');if(!box)return;
+  const custom=$('#fRepeat').value==='custom';box.classList.toggle('hidden',!custom);
+  if(custom)updateRepeatEndField();
+}
+function updateRepeatEndField(){
+  const type=$('#rEndType')?.value,wrap=$('#rEndValueWrap');if(!wrap)return;
+  if(type==='count')wrap.innerHTML='<input id="rEndValue" type="number" min="1" value="10" placeholder="重复次数">';
+  else if(type==='date')wrap.innerHTML=`<input id="rEndValue" type="date" value="${addDays(today(),30)}">`;
+  else wrap.innerHTML='';
+}
+function getRepeatValue(){
+  const base=$('#fRepeat').value;if(base!=='custom')return base;
+  return {type:'custom',interval:Math.max(1,Number($('#rInterval').value)||1),unit:$('#rUnit').value,weekdays:[...document.querySelectorAll('#rWeekdays [data-wd].active')].map(x=>Number(x.dataset.wd)),endType:$('#rEndType').value,endValue:$('#rEndValue')?.value||null};
+}
+function commit(old,newid){let x={id:newid,title:$('#fTitle').value.trim(),date:$('#fDate').value||null,start:$('#fStart').value,end:$('#fEnd').value,important:$('#imp').classList.contains('active'),urgent:$('#urg').classList.contains('active'),completed:false,notes:$('#fNotes').value,repeat:getRepeatValue()};if(!x.title)return alert('请输入事项名称');if(old){let o=tasks.find(t=>t.id===old);Object.assign(o,x,{completed:o.completed,completedAt:o.completedAt})}else tasks.push(x);save();render()}
+function copyOne(i){let t=tasks.find(x=>x.id===i);if(t){clipboard=[{...t,id:id(),completed:false,completedAt:null}];alert('已复制，可在日历顶部点击“粘贴”或在 Todo 批量模式粘贴。');render()}}
+function removeTask(i){if(confirm('删除此事项？')){tasks=tasks.filter(t=>t.id!==i);save();render()}}
+function renderSettings(){$('#subtabs').innerHTML='';$('#headActions').innerHTML='';$('#main').innerHTML=`<div class="card"><b>每日开始时间</b><p>06:30（今天/逾期和每日刷新边界）</p></div><div class="card"><b>默认事件时长</b><p>60 分钟</p></div><div class="card"><button class="primary" onclick="exportData()">导出 JSON</button> <button class="danger" onclick="clipboard=[];render()">清空复制板</button> <label class="danger">导入 JSON<input type="file" accept="application/json" hidden onchange="importData(this)"></label></div><div class="card"><b>本地数据</b><p>${tasks.length} 个事项。当前数据保存在浏览器本地。</p><button class="danger" style="margin-top:8px;width:100%;color:#c62828" onclick="clearAllData()">⚠️ 清除全部数据</button></div>`}
+function clearAllData(){
+  if(!confirm('第一次确认：确定要清除全部 Todo、日历事项和本地数据吗？此操作不可撤销。'))return;
+  if(!confirm('第二次确认：再次确认要永久删除全部数据吗？'))return;
+  tasks=[];clipboard=[];selected.clear();selectMode=false;save();
+  localStorage.removeItem('todoCalendarWeekZoom');localStorage.removeItem('todoCalendarDayZoom');
+  weekZoom=100;dayZoom=100;render();
+}
+function exportData(){let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(tasks,null,2)],{type:'application/json'}));a.download='todo-calendar-backup.json';a.click()}
+function importData(el){let r=new FileReader();r.onload=()=>{try{let x=JSON.parse(r.result);if(!Array.isArray(x))throw 0;tasks=x;save();render()}catch{alert('文件格式错误')}};if(el.files[0])r.readAsText(el.files[0])}
+document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>{captureCalendarView();const next=b.dataset.page;if(next==='calendar'&&!calendarViewInitialized&&calMode==='week')weekCenterRequested=true;page=next;selectMode=false;selected.clear();render()});$('#fab').onclick=()=>newTask();render();
+</script></body></html>
