@@ -245,14 +245,14 @@ body{
   background:linear-gradient(135deg,#fff0f2,#ffdfe4);
 }
 .event.priority-1{
+  /* 仅紧急：珊瑚橙，明显区别于重要的紫色 */
+  border-left-color:#ff7a45;
+  background:linear-gradient(135deg,#fff2ed,#ffe4d8);
+}
+.event.priority-2{
   /* 仅重要：紫色 */
   border-left-color:#8b6de8;
   background:linear-gradient(135deg,#f5f1ff,#e9e2ff);
-}
-.event.priority-2{
-  /* 仅紧急：珊瑚橙 */
-  border-left-color:#ff7a45;
-  background:linear-gradient(135deg,#fff2ed,#ffe4d8);
 }
 .event.priority-3{
   border-left-color:#4b9cff;
@@ -368,7 +368,7 @@ html,body{height:100%;overflow:hidden}
 .app>.head{flex:none}
 .app>.content{flex:1;min-height:0}
 .content:has(.timeline-wrap){display:flex;flex-direction:column;overflow:hidden;padding-bottom:10px}
-#main{min-height:0}.content:not(:has(.timeline-wrap)){display:block!important;overflow-y:auto!important;overflow-x:hidden!important;-webkit-overflow-scrolling:touch;overscroll-behavior:auto;min-height:0;height:100%;touch-action:pan-y}
+#main{min-height:0}.content:not(:has(.timeline-wrap)){overflow-y:auto!important;overflow-x:hidden!important;-webkit-overflow-scrolling:touch;overscroll-behavior:auto;min-height:0;height:100%;touch-action:pan-y}
 .content:has(.timeline-wrap) .timeline-wrap{flex:1;min-height:0;height:auto!important;max-height:none!important}
 .content:has(.timeline-wrap) .week-grid,
 .content:has(.timeline-wrap) .day-grid{min-height:100%}
@@ -473,7 +473,7 @@ const save=()=>localStorage.setItem(DB,JSON.stringify(tasks));
 const id=()=>crypto.randomUUID?.()||Date.now()+Math.random()+'';
 function workDate(d=new Date()){let x=new Date(d);if(x.getHours()<6||(x.getHours()===6&&x.getMinutes()<30))x.setDate(x.getDate()-1);return fmt(x)}
 const today=()=>workDate();
-const priority=t=>t.important&&t.urgent?0:t.important?1:t.urgent?2:3;
+const priority=t=>t.important&&t.urgent?0:t.urgent?1:t.important?2:3;
 const labels=['🔥 重要且紧急','⚡ 紧急','⭐ 重要','○ 其他'];
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function fmt(d){let z=new Date(d.getTime()-d.getTimezoneOffset()*60000);return z.toISOString().slice(0,10)}
@@ -1133,7 +1133,6 @@ function attachTimelineGestures(dates,startHour,rowH){
    */
   let eventActive=null;
   let blankTouch=null;
-  let edgeRAF=0;
 
   const clearBlank=()=>{
     if(blankTouch?.timer)clearTimeout(blankTouch.timer);
@@ -1150,7 +1149,6 @@ function attachTimelineGestures(dates,startHour,rowH){
     document.removeEventListener('pointermove',moveEvent,true);
     document.removeEventListener('pointerup',upEvent,true);
     document.removeEventListener('pointercancel',cancelEvent,true);
-    if(edgeRAF){cancelAnimationFrame(edgeRAF);edgeRAF=0;}
     a.ghost?.remove(); a.ev?.classList.remove('dragging');
     if(commit&&a.dragging){
       const f=findInstance(a.key);
@@ -1164,27 +1162,11 @@ function attachTimelineGestures(dates,startHour,rowH){
     }
   };
 
-  function edgeScrollLoop(){
-    if(!eventActive||!eventActive.dragging)return;
-    const a=eventActive,r=wrap.getBoundingClientRect(),edge=52;
-    let dx=0;
-    if(a.lastX<r.left+edge) dx=-Math.max(2,Math.min(12,(r.left+edge-a.lastX)/4));
-    else if(a.lastX>r.right-edge) dx=Math.max(2,Math.min(12,(a.lastX-(r.right-edge))/4));
-    if(dx){
-      wrap.scrollLeft=Math.max(0,Math.min(wrap.scrollWidth-wrap.clientWidth,wrap.scrollLeft+dx));
-      const target=colAtX(a.lastX);
-      const nm=clamp(minAt(a.lastY,target)-(a.grabOffset/rowH*60),a.duration);
-      if(a.ghost.parentElement!==target)target.appendChild(a.ghost);
-      a.ghost.style.top=((nm-startHour*60)/60*rowH)+'px';
-    }
-    edgeRAF=requestAnimationFrame(edgeScrollLoop);
-  }
-
   function moveEvent(e){
     if(!eventActive||e.pointerId!==eventActive.pointerId)return;
     const a=eventActive; a.lastX=e.clientX;a.lastY=e.clientY;
     const dist=Math.hypot(e.clientX-a.startX,e.clientY-a.startY);
-    if(!a.dragging&&dist>10){
+    if(!a.dragging&&dist>7){
       clearTimeout(a.timer);a.dragging=true;
       const f=findInstance(a.key);if(!f){finishEvent(false,e.clientX,e.clientY);return;}
       const source=a.ev.closest('.daycol');
@@ -1195,7 +1177,6 @@ function attachTimelineGestures(dates,startHour,rowH){
       g.innerHTML='<b>'+esc(f.instance.title)+'</b><div class="etime">'+f.instance.start+(f.instance.end?'–'+f.instance.end:'')+'</div>';
       Object.assign(g.style,{position:'absolute',left:'3px',right:'3px',height:Math.max(28,a.duration/60*rowH)+'px',top:'0px',pointerEvents:'none',zIndex:100,border:'2px dashed currentColor',background:'rgba(30,100,220,.10)'});
       source.appendChild(g);a.ghost=g;a.ev.classList.add('dragging');
-      if(!edgeRAF)edgeRAF=requestAnimationFrame(edgeScrollLoop);
     }
     if(a.dragging){
       const target=colAtX(e.clientX),nm=clamp(minAt(e.clientY,target)-(a.grabOffset/rowH*60),a.duration);
@@ -1208,7 +1189,7 @@ function attachTimelineGestures(dates,startHour,rowH){
     if(!eventActive||e.pointerId!==eventActive.pointerId)return;
     const a=eventActive;
     if(a.dragging){finishEvent(true,e.clientX,e.clientY);return;}
-    const key=a.key,wasTap=Math.hypot(e.clientX-a.startX,e.clientY-a.startY)<=10;
+    const key=a.key,wasTap=Math.hypot(e.clientX-a.startX,e.clientY-a.startY)<=7;
     const f=findInstance(key);finishEvent(false,e.clientX,e.clientY);
     if(wasTap){if(selectMode)toggleCalendarSelect(key);else if(f)openOccurrenceEditor(f.master,f.instance._occurrenceDate);}
   }
@@ -1223,8 +1204,8 @@ function attachTimelineGestures(dates,startHour,rowH){
       const key=ev.dataset.key||ev.dataset.id,f=findInstance(key);if(!f)return;
       const r=ev.getBoundingClientRect();
       eventActive={key,ev,pointerId:e.pointerId,startX:e.clientX,startY:e.clientY,lastX:e.clientX,lastY:e.clientY,grabOffset:e.clientY-r.top,duration:0,dragging:false,timer:null,ghost:null};
-      if(selectMode){eventActive=null;toggleCalendarSelect(key);return;}
-      eventActive.timer=setTimeout(()=>{if(eventActive&&!eventActive.dragging){const k=eventActive.key;finishEvent(false,e.clientX,e.clientY);toggleCalendarSelect(k)}},900);
+      if(selectMode)return;
+      eventActive.timer=setTimeout(()=>{if(eventActive&&!eventActive.dragging){const k=eventActive.key;finishEvent(false,e.clientX,e.clientY);toggleCalendarSelect(k)}},550);
       document.addEventListener('pointermove',moveEvent,true);
       document.addEventListener('pointerup',upEvent,true);
       document.addEventListener('pointercancel',cancelEvent,true);
@@ -1290,238 +1271,172 @@ function attachTimelineGestures(dates,startHour,rowH){
 </script>
 
 
-<script>
-/* v2.60 recurrence date-instance fix
-   A recurring master keeps its anchor date, while every generated occurrence
-   must use its actual occurrence date for Todo grouping/display. */
-function occurrenceData(master, occDate){
-  if(!recurring(master)) return {...master,_key:master.id,_masterId:master.id,_occurrenceDate:master.date};
-  if(!occursOn(master,occDate)) return null;
-  const ex=ensureRec(master), ov=ex.overrides[occDate]||{};
-  const x={...cloneObj(master),...cloneObj(ov),
-    _key:master.id+'@@'+occDate,_masterId:master.id,_occurrenceDate:occDate,_series:true};
-  /* Critical: without an override, date is the occurrence date, not master.date. */
-  x.date=ov.date||occDate;
-  x.id=x._key;
-  if(ex.completed.includes(occDate)) x.completed=true;
-  else if(ov.completed!=null) x.completed=!!ov.completed;
-  else x.completed=false;
-  x._originalDate=occDate;
-  return x;
-}
-
-function expandRange(from,to){
-  const out=[];
-  for(const t of tasks){
-    if(!recurring(t)){
-      if(t.date&&t.date>=from&&t.date<=to) out.push({...t,_key:t.id,_masterId:t.id,_occurrenceDate:t.date});
-      else if(!t.date&&from<=today()&&to>=today()) out.push({...t,_key:t.id,_masterId:t.id});
-      continue;
-    }
-    const ex=ensureRec(t);
-    /* Normal occurrences.  Use the rendered occurrence date as the Todo date. */
-    for(let d=from,guard=0;d<=to&&guard++<2000;d=addDays(d,1)){
-      if(!occursOn(t,d)) continue;
-      const x=occurrenceData(t,d);
-      if(x && x.date>=from && x.date<=to) out.push(x);
-    }
-    /* Moved single occurrences must appear on their NEW date, not their original date. */
-    for(const od of Object.keys(ex.overrides||{})){
-      const ov=ex.overrides[od]||{};
-      if(!ov.date || ov.date===od || ov.date<from || ov.date>to || !occursOn(t,od)) continue;
-      const x=occurrenceData(t,od);
-      if(x && x.date===ov.date) out.push(x);
-    }
-  }
-  /* Defensive deduplication: one occurrence can never occupy two Todo rows. */
-  const seen=new Set(),clean=[];
-  for(const x of out){const k=instanceKey(x);if(seen.has(k))continue;seen.add(k);clean.push(x)}
-  return clean;
-}
-
-function todoInstances(tab){
-  const base=today();
-  let from=addDays(base,-365),to=addDays(base,365);
-  if(tab==='today') from=to=base;
-  else if(tab==='overdue'){from=addDays(base,-365);to=addDays(base,-1)}
-  const a=expandRange(from,to);
-  return a.filter(t=>{
-    if(tab==='all') return !t.completed;
-    if(tab==='today') return t.date===base&&!t.completed;
-    if(tab==='overdue') return !!t.date&&t.date<base&&!t.completed;
-    if(tab==='inbox') return !t.date&&!t.completed;
-    if(tab==='done') return !!t.completed;
-    return false;
-  });
-}
-
-function renderTodo(){
-  const list=todoInstances(todoTab);
-  const counts={all:todoInstances('all').length,today:todoInstances('today').length,
-    overdue:todoInstances('overdue').length,inbox:todoInstances('inbox').length,done:todoInstances('done').length};
-  $('#subtabs').innerHTML=['all:全部','today:今天','overdue:逾期','inbox:无日期','done:已完成'].map(x=>{
-    const[a,b]=x.split(':');
-    return `<button class="${todoTab===a?'active':''}" onclick="todoTab='${a}';selectMode=false;selected.clear();render()">${b}${counts[a]?` ${counts[a]}`:''}</button>`;
-  }).join('');
-  const allSelected=list.length>0&&list.every(t=>selected.has(instanceKey(t)));
-  $('#headActions').innerHTML=`<button class="tabsbtn" style="min-height:38px;padding:8px 12px;background:#edf2f8;border-radius:11px;border:0;color:#34435a;font-weight:700" onclick="toggleSelectAllTodo()">${allSelected?'取消全选':'全选'}</button>`;
-  const dateLabel=ds=>{
-    if(ds==='__none__')return'无日期';
-    const d=parseDate(ds),base=today(),diff=Math.round((d-parseDate(base))/86400000),wd=['日','一','二','三','四','五','六'][d.getDay()];
-    if(ds===base)return`今天 · ${ds} · 周${wd}`;
-    if(diff===-1)return`昨天 · ${ds} · 周${wd}`;
-    if(diff===1)return`明天 · ${ds} · 周${wd}`;
-    return`${ds} · 周${wd}`;
-  };
-  const groups=new Map();
-  [...list].sort((a,b)=>(a.date||'9999').localeCompare(b.date||'9999')||priority(a)-priority(b)||(a.start||'').localeCompare(b.start||'')||a.title.localeCompare(b.title))
-    .forEach(t=>{const k=t.date||'__none__';if(!groups.has(k))groups.set(k,[]);groups.get(k).push(t)});
-  let html='';
-  for(const[ds,items]of groups) html+=`<section class="group"><h3>${esc(dateLabel(ds))}<span style="float:right;font-weight:600;color:#8290a2">${items.length}</span></h3>${items.map(taskRow).join('')}</section>`;
-  $('#main').innerHTML=html||'<div class="empty">暂无事项</div>';
-  attachTaskGestures();renderBulk();
-}
-</script>
-
-
 <style>
-/* v2.61 final Todo + calendar interaction layer */
-.content:not(:has(.timeline-wrap)){
-  height:auto!important;
-  max-height:none!important;
-  overflow-y:auto!important;
-  overflow-x:hidden!important;
-  -webkit-overflow-scrolling:touch!important;
-  touch-action:pan-y!important;
-  overscroll-behavior-y:auto!important;
-}
-.content:not(:has(.timeline-wrap)) #main{min-height:max-content!important;padding-bottom:96px!important;}
-.group h3{color:#667085!important;background:#f7f8fa!important;}
-.group.date-overdue h3{color:#d94855!important;background:linear-gradient(90deg,#fff3f4,#fff)!important;}
-.group.date-today h3{color:#2f74da!important;background:linear-gradient(90deg,#eef6ff,#fff)!important;}
-.group.date-tomorrow h3{color:#3b8b67!important;background:linear-gradient(90deg,#effaf4,#fff)!important;}
-.group.date-other h3{color:#667085!important;background:#f7f8fa!important;}
-.group.date-none h3{color:#667085!important;background:#f7f8fa!important;}
-.bulk{border-radius:16px 16px 0 0!important;}
-.bulk .bulk-count{flex:none!important;min-width:58px!important;height:36px!important;padding:0 10px!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;border-radius:10px!important;background:#2f3745!important;color:#fff!important;position:sticky!important;left:0!important;z-index:2!important;box-shadow:none!important;}
+/* v2.61 interaction cleanup */
+.group h3.date-today{color:#1677ff!important;background:linear-gradient(90deg,#eef6ff,#fff)!important}
+.group h3.date-overdue{color:#d64545!important;background:linear-gradient(90deg,#fff0f1,#fff)!important}
+.group h3.date-tomorrow{color:#3b8f68!important;background:linear-gradient(90deg,#eefaf4,#fff)!important}
+.group h3.date-other,.group h3.date-none{color:#667085!important;background:linear-gradient(90deg,#f7f8fa,#fff)!important}
+#bulk.bulk-fixed{left:10px!important;right:10px!important;width:auto!important;transform:none!important;bottom:76px!important;border-radius:16px!important;padding:7px!important;box-shadow:0 10px 28px rgba(30,50,80,.20)!important;align-items:center!important}
+#bulk.bulk-fixed .bulk-count{flex:none!important;padding:8px 10px!important;border-radius:10px!important;background:#26364d!important;color:#fff!important;position:static!important}
+#bulk.bulk-fixed button{background:#fff;color:#26364d;font-weight:700}
+.event{touch-action:none!important}
 </style>
 <script>
-/* ===== v2.61 final Todo behavior ===== */
-function taskRow(t){
-  const k=instanceKey(t);
-  return `<div class="task ${t.completed?'done':''} ${selected.has(k)?'selected':''}" data-id="${esc(k)}" onclick="taskClick(event,'${esc(k)}')" oncontextmenu="event.preventDefault();toggleSelect('${esc(k)}')">
-    <span class="${selectMode||selected.size?'selectbox':'check'}"></span>
-    <div class="taskmain"><div class="title">${esc(t.title)}${recurring(t)?' · 🔁':''}</div><div class="meta">${t.date||'无日期'} ${t.start||''}${t.end?'–'+t.end:''}</div></div>
-    <span class="badge">${t.important?'⭐':''}${t.urgent?'⚡':''}</span>
-  </div>`;
-}
+/* v2.61 final interaction layer: one authoritative behavior appended after all legacy layers. */
+(function(){
+  const OLD_RENDER_TODO=window.renderTodo;
 
-let todoTouch={row:null,id:null,x:0,y:0,moved:false,long:false,timer:null};
-function attachTaskGestures(){
-  document.querySelectorAll('.task').forEach(row=>{
-    row.addEventListener('pointerdown',e=>{
-      if(e.pointerType==='mouse'&&e.button!==0)return;
-      if(todoTouch.timer)clearTimeout(todoTouch.timer);
-      todoTouch={row,id:row.dataset.id,x:e.clientX,y:e.clientY,moved:false,long:false,timer:null};
-      /* Long press is deliberately longer so ordinary scrolling/tapping is not mistaken for multi-select. */
-      if(!selectMode){
-        todoTouch.timer=setTimeout(()=>{
-          if(todoTouch.row!==row||todoTouch.moved)return;
-          todoTouch.long=true;
-          toggleSelect(row.dataset.id);
-        },850);
-      }
-    },{passive:true});
-    row.addEventListener('pointermove',e=>{
-      if(todoTouch.row!==row)return;
-      const d=Math.hypot(e.clientX-todoTouch.x,e.clientY-todoTouch.y);
-      if(d>10&&!todoTouch.long){
-        todoTouch.moved=true;
-        if(todoTouch.timer){clearTimeout(todoTouch.timer);todoTouch.timer=null;}
-      }
-    },{passive:true});
-    const end=()=>{
-      if(todoTouch.row!==row)return;
-      if(todoTouch.timer){clearTimeout(todoTouch.timer);todoTouch.timer=null;}
-      setTimeout(()=>{if(todoTouch.row===row)todoTouch={row:null,id:null,x:0,y:0,moved:false,long:false,timer:null};},0);
-    };
-    row.addEventListener('pointerup',end,{passive:true});
-    row.addEventListener('pointercancel',end,{passive:true});
-  });
-}
-function taskClick(e,key){
-  const moved=todoTouch.row?.dataset.id===key && todoTouch.moved;
-  const long=todoTouch.row?.dataset.id===key && todoTouch.long;
-  if(moved||long){e.preventDefault();return;}
-  const f=findInstance(key);if(!f)return;
-  if(selectMode){
-    toggleSelect(key);
-    return;
+  /* Priority order: both > important > urgent > neither. */
+  window.priority=function(t){return t.important&&t.urgent?0:t.important?1:t.urgent?2:3};
+  window.labels=['🔥 重要且紧急','⭐ 重要','⚡ 紧急','○ 其他'];
+
+  /* Todo date colors now encode actual date status, not group position. */
+  function dateStatus(ds){
+    if(ds==='__none__')return 'none';
+    const base=today(),d=parseDate(ds),diff=Math.round((d-parseDate(base))/86400000);
+    if(ds===base)return 'today';
+    if(diff<0)return 'overdue';
+    if(diff===1)return 'tomorrow';
+    return 'other';
   }
-  if(e.target.closest('.check')){completeInstance(f.master,f.instance);return;}
-  editTask(f.master.id);
-}
-function toggleSelect(i){
-  selectMode=true;
-  if(selected.has(i))selected.delete(i);else selected.add(i);
-  if(!selected.size)selectMode=false;
-  render();
-}
-function renderBulk(){
-  const b=$('#bulk');
-  if(!b)return;
-  if(!selectMode||!selected.size){b.classList.add('hidden');return;}
-  b.classList.remove('hidden');
-  b.innerHTML=`<span class="bulk-count">已选 ${selected.size}</span>
-    <button onclick="bulk('done')">✓完成</button>
-    <button onclick="bulk('today')">今天</button>
-    <button onclick="bulk('tomorrow')">明天</button>
-    <button onclick="bulkDate()">📅日期</button>
-    <button onclick="bulkShiftTime()">🕐时间</button>
-    <button onclick="bulk('important')">⭐重要</button>
-    <button onclick="bulk('urgent')">⚡紧急</button>
-    <button onclick="bulk('copy')">📋复制</button>
-    <button onclick="bulk('paste')" ${clipboard.length?'':'disabled'}>📌粘贴</button>
-    <button onclick="bulk('delete')">🗑删除</button>
-    <button onclick="selectMode=false;selected.clear();render()">取消</button>`;
-}
-function renderTodo(){
-  const list=todoInstances(todoTab);
-  const counts={all:todoInstances('all').length,today:todoInstances('today').length,overdue:todoInstances('overdue').length,inbox:todoInstances('inbox').length,done:todoInstances('done').length};
-  $('#subtabs').innerHTML=['all:全部','today:今天','overdue:逾期','inbox:无日期','done:已完成'].map(x=>{const[a,b]=x.split(':');return `<button class="${todoTab===a?'active':''}" onclick="todoTab='${a}';selectMode=false;selected.clear();render()">${b}${counts[a]?` ${counts[a]}`:''}</button>`}).join('');
-  const allSelected=list.length>0&&list.every(t=>selected.has(instanceKey(t)));
-  $('#headActions').innerHTML=`<button class="tabsbtn" style="min-height:38px;padding:8px 12px;background:#edf2f8;border-radius:11px;border:0;color:#34435a;font-weight:700" onclick="toggleSelectAllTodo()">${allSelected?'取消全选':'全选'}</button>`;
-  const base=today();
-  const dateLabel=ds=>{
-    if(ds==='__none__')return'无日期';
-    const d=parseDate(ds),diff=Math.round((d-parseDate(base))/86400000),wd=['日','一','二','三','四','五','六'][d.getDay()];
-    if(ds===base)return`今天 · ${ds} · 周${wd}`;
-    if(diff<0)return`逾期 · ${ds} · 周${wd}`;
-    if(diff===1)return`明天 · ${ds} · 周${wd}`;
-    return`${ds} · 周${wd}`;
+  window.renderTodo=function(){
+    const list=todoInstances(todoTab);
+    const counts={all:todoInstances('all').length,today:todoInstances('today').length,overdue:todoInstances('overdue').length,inbox:todoInstances('inbox').length,done:todoInstances('done').length};
+    $('#subtabs').innerHTML=['all:全部','today:今天','overdue:逾期','inbox:无日期','done:已完成'].map(x=>{const[a,b]=x.split(':');return `<button class="${todoTab===a?'active':''}" onclick="todoTab='${a}';selectMode=false;selected.clear();render()">${b}${counts[a]?` ${counts[a]}`:''}</button>`}).join('');
+    const allSelected=list.length>0&&list.every(t=>selected.has(instanceKey(t)));
+    $('#headActions').innerHTML=`<button class="tabsbtn" style="min-height:38px;padding:8px 12px;background:#edf2f8;border-radius:11px;border:0;color:#34435a;font-weight:700" onclick="toggleSelectAllTodo()">${allSelected?'取消全选':'全选'}</button>`;
+    const groups=new Map();
+    [...list].sort((a,b)=>{const da=a.date||'9999',db=b.date||'9999';return da.localeCompare(db)||(priority(a)-priority(b))||(a.start||'').localeCompare(b.start||'')||a.title.localeCompare(b.title)}).forEach(t=>{const k=t.date||'__none__';if(!groups.has(k))groups.set(k,[]);groups.get(k).push(t)});
+    let html='';
+    for(const [ds,items] of groups){
+      const status=dateStatus(ds);
+      const d=ds==='__none__'?null:parseDate(ds),base=today(),diff=d?Math.round((d-parseDate(base))/86400000):null;
+      const wd=d?['日','一','二','三','四','五','六'][d.getDay()]:'';
+      const label=ds==='__none__'?'无日期':ds===base?`今天 · ${ds} · 周${wd}`:diff===-1?`昨天 · ${ds} · 周${wd}`:diff===1?`明天 · ${ds} · 周${wd}`:`${ds} · 周${wd}`;
+      html+=`<section class="group"><h3 class="date-${status}">${esc(label)}<span style="float:right;font-weight:600;color:#8290a2">${items.length}</span></h3>${items.map(taskRow).join('')}</section>`;
+    }
+    $('#main').innerHTML=html||'<div class="empty">暂无事项</div>';
+    attachTaskGestures();renderBulk();
   };
-  const groupClass=ds=>{
-    if(ds==='__none__')return'date-none';
-    const d=parseDate(ds),diff=Math.round((d-parseDate(base))/86400000);
-    return diff<0?'date-overdue':diff===0?'date-today':diff===1?'date-tomorrow':'date-other';
+
+  /* Multi-select bar: no empty/hollow left area; count is a compact pill. */
+  window.renderBulk=function(){
+    const b=$('#bulk');
+    if(!selectMode){b.classList.add('hidden');b.classList.remove('bulk-fixed');return;}
+    b.classList.remove('hidden');b.classList.add('bulk-fixed');
+    b.innerHTML=`<span class="bulk-count">已选 ${selected.size}</span><button onclick="bulk('done')">✓完成</button><button onclick="bulk('today')">今天</button><button onclick="bulk('tomorrow')">明天</button><button onclick="bulkDate()">📅日期</button><button onclick="bulkShiftTime()">🕐时间</button><button onclick="bulk('important')">⭐重要</button><button onclick="bulk('urgent')">⚡紧急</button><button onclick="bulk('copy')">📋复制</button><button onclick="bulk('paste')" ${clipboard.length?'':'disabled'}>📌粘贴</button><button onclick="bulk('delete')">🗑删除</button><button onclick="selectMode=false;selected.clear();render()">取消</button>`;
   };
-  const groups=new Map();
-  [...list].sort((a,b)=>(a.date||'9999').localeCompare(b.date||'9999')||priority(a)-priority(b)||(a.start||'').localeCompare(b.start||'')||a.title.localeCompare(b.title)).forEach(t=>{const k=t.date||'__none__';if(!groups.has(k))groups.set(k,[]);groups.get(k).push(t)});
-  let html='';
-  for(const[ds,items]of groups)html+=`<section class="group ${groupClass(ds)}"><h3>${esc(dateLabel(ds))}<span style="float:right;font-weight:600;color:#8290a2">${items.length}</span></h3>${items.map(taskRow).join('')}</section>`;
-  $('#main').innerHTML=html||'<div class="empty">暂无事项</div>';
-  attachTaskGestures();renderBulk();
-}
 
-function toggleSelectAllTodo(){
-  const current=todoInstances(todoTab),keys=current.map(instanceKey),all=keys.length&&keys.every(k=>selected.has(k));
-  keys.forEach(k=>all?selected.delete(k):selected.add(k));
-  selectMode=selected.size>0;render();
-}
-</script>
+  /* Todo selection: first long-press enters mode; afterwards every tap toggles an item. */
+  let tg={row:null,id:null,x:0,y:0,timer:null,long:false,moved:false};
+  function resetTG(){if(tg.timer)clearTimeout(tg.timer);tg={row:null,id:null,x:0,y:0,timer:null,long:false,moved:false}}
+  window.attachTaskGestures=function(){
+    document.querySelectorAll('.task').forEach(row=>{
+      row.addEventListener('pointerdown',e=>{
+        if(e.pointerType==='mouse'&&e.button!==0)return;
+        resetTG();tg={row,id:row.dataset.id,x:e.clientX,y:e.clientY,timer:null,long:false,moved:false};
+        if(selectMode)return;
+        tg.timer=setTimeout(()=>{tg.timer=null;tg.long=true;toggleSelect(tg.id)},700);
+      },{passive:true});
+      row.addEventListener('pointermove',e=>{
+        if(tg.row!==row)return;
+        const d=Math.hypot(e.clientX-tg.x,e.clientY-tg.y);
+        if(d>12&&!tg.long){tg.moved=true;if(tg.timer){clearTimeout(tg.timer);tg.timer=null}}
+      },{passive:true});
+      row.addEventListener('pointerup',e=>{
+        if(tg.row!==row)return;
+        if(tg.timer){clearTimeout(tg.timer);tg.timer=null}
+        const wasLong=tg.long,wasMoved=tg.moved,id=tg.id;
+        setTimeout(()=>{tg={row:null,id:null,x:0,y:0,timer:null,long:false,moved:false}},0);
+        if(selectMode && !wasLong && !wasMoved){e.preventDefault();e.stopPropagation();toggleSelect(id)}
+      },{passive:false});
+      row.addEventListener('pointercancel',resetTG,{passive:true});
+    });
+  };
 
-<script>
-/* v2.61 bootstrap: after all override layers are defined, perform a clean first render. */
-requestAnimationFrame(()=>{try{render();}catch(err){console.error('Todo Calendar initial render failed',err);}});
+  /* Calendar: in selection mode a normal tap on ANY event toggles it. */
+  function bindCalendarSelection(){
+    document.querySelectorAll('.event').forEach(ev=>{
+      if(ev.dataset.v261Bound)return;ev.dataset.v261Bound='1';
+      ev.addEventListener('click',e=>{
+        if(!selectMode)return;
+        e.preventDefault();e.stopPropagation();
+        toggleCalendarSelect(ev.dataset.key||ev.dataset.id);
+      },true);
+    });
+  }
+  const oldRenderCalendar=window.renderCalendar;
+  if(oldRenderCalendar){
+    window.renderCalendar=function(){oldRenderCalendar();requestAnimationFrame(bindCalendarSelection)};
+  }
+
+  /* Final calendar gesture layer. Event drag requires a short hold before it arms,
+     reducing accidental selection; once armed, movement is immediate and supports edge auto-scroll. */
+  window.attachTimelineGestures=function(dates,startHour,rowH){
+    const wrap=document.querySelector('.timeline-wrap'),cols=[...document.querySelectorAll('.daycol')];
+    if(!wrap||!cols.length)return;
+    const snap=m=>Math.round(m/15)*15;
+    const clamp=(m,dur=0)=>Math.max(startHour*60,Math.min(1439-dur,snap(m)));
+    const minAt=(y,col)=>{const r=col.getBoundingClientRect();return (y-r.top)/rowH*60+startHour*60};
+    const colAtX=x=>cols.find(c=>{const r=c.getBoundingClientRect();return x>=r.left&&x<=r.right})||cols.reduce((best,c)=>{const r=c.getBoundingClientRect(),d=x<r.left?r.left-x:x>r.right?x-r.right:0,br=best.getBoundingClientRect(),bd=x<br.left?br.left-x:x>br.right?x-br.right:0;return d<bd?c:best},cols[0]);
+    let active=null;
+    function cleanup(){if(!active)return;clearTimeout(active.armTimer);clearTimeout(active.selectTimer);document.removeEventListener('pointermove',move,true);document.removeEventListener('pointerup',up,true);document.removeEventListener('pointercancel',cancel,true);active.ghost?.remove();active.ev?.classList.remove('dragging');active=null}
+    function autoScroll(x,y){
+      const r=wrap.getBoundingClientRect(),edge=42;
+      if(calMode==='week'){
+        if(x<r.left+edge)wrap.scrollLeft-=Math.ceil((r.left+edge-x)/3);
+        else if(x>r.right-edge)wrap.scrollLeft+=Math.ceil((x-(r.right-edge))/3);
+      }
+      if(y<r.top+edge)wrap.scrollTop-=Math.ceil((r.top+edge-y)/3);
+      else if(y>r.bottom-edge)wrap.scrollTop+=Math.ceil((y-(r.bottom-edge))/3);
+    }
+    function ensureGhost(a,f){
+      if(a.ghost)return;
+      const source=a.ev.closest('.daycol'),g=document.createElement('div');
+      g.className='event-ghost priority-'+priority(f.instance);g.innerHTML='<b>'+esc(f.instance.title)+'</b><div class="etime">'+f.instance.start+(f.instance.end?'–'+f.instance.end:'')+'</div>';
+      Object.assign(g.style,{position:'absolute',left:'3px',right:'3px',height:Math.max(28,a.duration/60*rowH)+'px',top:'0px',pointerEvents:'none',zIndex:100,border:'2px dashed currentColor',background:'rgba(30,100,220,.10)'});
+      source.appendChild(g);a.ghost=g;a.ev.classList.add('dragging');
+    }
+    function move(e){
+      if(!active||e.pointerId!==active.pointerId)return;
+      const a=active,dist=Math.hypot(e.clientX-a.startX,e.clientY-a.startY);a.x=e.clientX;a.y=e.clientY;
+      if(!a.armed){
+        if(dist>12){/* allow tiny repositioning but don't turn it into a drag yet */}return;
+      }
+      if(!a.dragging){const f=findInstance(a.key);if(!f)return;const st=timeMin(f.instance.start),en=f.instance.end?timeMin(f.instance.end):st+60;a.duration=Math.max(15,en-st);ensureGhost(a,f);a.dragging=true;}
+      autoScroll(e.clientX,e.clientY);
+      const target=colAtX(e.clientX),nm=clamp(minAt(e.clientY,target)-(a.grabOffset/rowH*60),a.duration);
+      if(a.ghost.parentElement!==target)target.appendChild(a.ghost);
+      a.ghost.style.top=((nm-startHour*60)/60*rowH)+'px';e.preventDefault();
+    }
+    function up(e){
+      if(!active||e.pointerId!==active.pointerId)return;
+      const a=active;
+      if(a.dragging){const target=colAtX(e.clientX),nm=clamp(minAt(e.clientY,target)-(a.grabOffset/rowH*60),a.duration),f=findInstance(a.key);cleanup();if(f){moveOccurrence(f.master,f.instance._occurrenceDate,target.dataset.date,timeStr(nm),timeStr(nm+a.duration));render();}return;}
+      const tap=!a.armed&&Math.hypot(e.clientX-a.startX,e.clientY-a.startY)<=12,key=a.key;cleanup();
+      if(tap){if(selectMode)toggleCalendarSelect(key);else{const f=findInstance(key);if(f)openOccurrenceEditor(f.master,f.instance._occurrenceDate)}}
+    }
+    function cancel(e){if(active&&e.pointerId===active.pointerId)cleanup()}
+    document.querySelectorAll('.event').forEach(ev=>{
+      const fresh=ev.cloneNode(true);ev.replaceWith(fresh);fresh.dataset.v261Bound='1';
+      fresh.addEventListener('pointerdown',e=>{
+        if(e.pointerType==='mouse'&&e.button!==0)return;e.stopPropagation();
+        const key=fresh.dataset.key||fresh.dataset.id,f=findInstance(key);if(!f)return;
+        if(selectMode){return;}
+        const r=fresh.getBoundingClientRect();
+        active={ev:fresh,key,pointerId:e.pointerId,startX:e.clientX,startY:e.clientY,grabOffset:e.clientY-r.top,armed:false,dragging:false,ghost:null,duration:0};
+        active.armTimer=setTimeout(()=>{if(active&&!active.dragging)active.armed=true},350);
+        active.selectTimer=setTimeout(()=>{if(active&&!active.dragging&&!active.armed){const k=active.key;cleanup();toggleCalendarSelect(k)}},800);
+        document.addEventListener('pointermove',move,true);document.addEventListener('pointerup',up,true);document.addEventListener('pointercancel',cancel,true);
+      },{passive:false});
+      fresh.addEventListener('click',e=>{if(selectMode){e.preventDefault();e.stopPropagation();toggleCalendarSelect(fresh.dataset.key||fresh.dataset.id)}},true);
+    });
+    bindCalendarSelection();
+  };
+
+  /* Re-run final Todo after ALL legacy script blocks have finished. */
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{try{render()}catch(e){console.error(e)}}));
+})();
 </script>
 </body></html>
