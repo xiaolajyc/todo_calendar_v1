@@ -433,13 +433,18 @@ function centerWeekToday(){
   const w=document.querySelector('.timeline-wrap');
   if(calMode!=='week'||!w)return;
   const c=w.querySelector('.daycol[data-date="'+today()+'"]');
-  const noon=w.querySelector('.timecol .timecell:nth-child(13)');
-  if(!c||!noon)return;
+  if(!c)return;
   const set=()=>{
+    const now=new Date();
+    const minutes=now.getHours()*60+now.getMinutes()+now.getSeconds()/60;
+    const rowH=64*weekZoom/100;
     const maxX=Math.max(0,w.scrollWidth-w.clientWidth);
     const maxY=Math.max(0,w.scrollHeight-w.clientHeight);
+    // Horizontal: center today's column.
     const x=c.offsetLeft+c.offsetWidth/2-w.clientWidth/2;
-    const y=noon.offsetTop-w.clientHeight/2;
+    // Vertical: center the actual current-time position in today's timeline.
+    const currentY=c.offsetTop+(minutes/60)*rowH;
+    const y=currentY-w.clientHeight/2;
     w.scrollLeft=Math.max(0,Math.min(x,maxX));
     w.scrollTop=Math.max(0,Math.min(y,maxY));
     calScroll={left:w.scrollLeft,top:w.scrollTop};
