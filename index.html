@@ -1182,4 +1182,32 @@ function bulkDate(){let d=prompt('请输入日期（YYYY-MM-DD）',today());if(!
 function bulk(a){let keys=[...selected];if(!keys.length)return;if(a==='delete'&&!confirm(`删除 ${keys.length} 个事项？`))return;if(a==='copy'){clipboard=keys.map(k=>findInstance(k)?.instance).filter(Boolean).map(x=>{let n=cloneObj(x);delete n._key;delete n._masterId;delete n._occurrenceDate;delete n._series;n.id=id();return n});selectMode=false;selected.clear();save();render();return}keys.forEach(k=>mutateInstance(k,(m,x)=>{if(a==='done'){if(recurring(m)){let ex=ensureRec(m);if(!ex.completed.includes(x._occurrenceDate))ex.completed.push(x._occurrenceDate)}else{m.completed=true;m.completedAt=new Date().toISOString()}}else if(a==='today'||a==='tomorrow'){let d=a==='today'?today():addDays(today(),1);if(recurring(m)){let ex=ensureRec(m);ex.overrides[x._occurrenceDate]={...(ex.overrides[x._occurrenceDate]||{}),date:d};}else m.date=d}else if(a==='important'){if(recurring(m)){let ex=ensureRec(m);ex.overrides[x._occurrenceDate]={...(ex.overrides[x._occurrenceDate]||{}),important:!x.important};}else m.important=!m.important}else if(a==='urgent'){if(recurring(m)){let ex=ensureRec(m);ex.overrides[x._occurrenceDate]={...(ex.overrides[x._occurrenceDate]||{}),urgent:!x.urgent};}else m.urgent=!m.urgent}else if(a==='delete'){if(recurring(m)){let ex=ensureRec(m);if(!ex.deleted.includes(x._occurrenceDate))ex.deleted.push(x._occurrenceDate)}else tasks=tasks.filter(z=>z.id!==m.id)}}));selectMode=false;selected.clear();save();render()}
 function toggleCalendarSelect(i){selectMode=true;selected.has(i)?selected.delete(i):selected.add(i);renderCalendar()}
 </script>
+
+<script>
+/* v2.50: robust recurrence creation/save */
+function getRepeatValue(){
+ const base=$('#fRepeat')?.value||'none';
+ if(base!=='custom') return {type:base,interval:1,unit:'day',weekdays:[],endType:'forever',endValue:null};
+ const interval=Math.max(1,Number($('#rInterval')?.value)||1),unit=$('#rUnit')?.value||'day';
+ let weekdays=[...document.querySelectorAll('#rWeekdays [data-wd].active')].map(x=>Number(x.dataset.wd));
+ if(unit==='week'&&!weekdays.length) weekdays=[isoDow($('#fDate').value||today())];
+ const endType=$('#rEndType')?.value||'forever';
+ const endValue=endType==='count'?String(Math.max(1,Number($('#rEndValue')?.value)||1)):endType==='date'?($('#rEndValue')?.value||null):null;
+ return {type:'custom',interval,unit,weekdays,endType,endValue};
+}
+function commit(old,newid){
+ const title=$('#fTitle').value.trim(); if(!title)return alert('请输入事项名称');
+ const x={id:newid,title,date:$('#fDate').value||null,start:$('#fStart').value||'',end:$('#fEnd').value||'',important:$('#imp').classList.contains('active'),urgent:$('#urg').classList.contains('active'),completed:false,notes:$('#fNotes').value||'',repeat:getRepeatValue()};
+ const eo=editingOccurrence;
+ if(old&&eo&&eo.masterId===old){const m=tasks.find(t=>t.id===old);if(!m){editingOccurrence=null;return;}
+  if(eo.mode===1){const ex=ensureRec(m);ex.overrides[eo.date]={...(ex.overrides[eo.date]||{}),title:x.title,start:x.start,end:x.end,important:x.important,urgent:x.urgent,notes:x.notes,date:x.date};}
+  else if(eo.mode===2){truncateSeries(m,eo.date);x.id=id();x.date=eo.date;x.exceptions={deleted:[],completed:[],overrides:{}};tasks.push(x);}
+  else Object.assign(m,x,{id:m.id,completed:m.completed,completedAt:m.completedAt,exceptions:m.exceptions});
+  editingOccurrence=null;save();render();return;
+ }
+ if(old){const o=tasks.find(t=>t.id===old);if(o)Object.assign(o,x,{id:o.id,completed:o.completed,completedAt:o.completedAt,exceptions:o.exceptions});}
+ else tasks.push(x);
+ editingOccurrence=null;save();render();
+}
+</script>
 </body></html>
