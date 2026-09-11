@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"><meta name="theme-color" content="#ffffff"><title>Todo Calendar V2.24</title>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"><meta name="theme-color" content="#ffffff"><title>Todo Calendar V2.31</title>
 <style>
 :root{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#171717;background:#f5f5f7;--line:#e7e7eb;--muted:#777;--accent:#111}*{box-sizing:border-box}body{margin:0;background:#f5f5f7;overscroll-behavior:none}.app{max-width:1100px;margin:auto;min-height:100vh;background:#fff;padding-bottom:76px}.head{position:sticky;top:0;background:rgba(255,255,255,.96);backdrop-filter:blur(12px);padding:12px 14px;border-bottom:1px solid var(--line);z-index:30}.headtop{display:flex;align-items:center;justify-content:space-between;gap:8px}.head h1{margin:0;font-size:21px}.tabs,.seg{display:flex;gap:6px;margin-top:10px;overflow:auto}.tabs button,.seg button,.chip{border:0;border-radius:10px;padding:8px 11px;background:#eee;white-space:nowrap}.active{background:#111!important;color:#fff}.content{padding:12px}.group{margin:18px 0}.group h3{font-size:14px;margin:0 0 6px}.task{display:flex;align-items:center;gap:10px;padding:13px 7px;border-bottom:1px solid #eee;touch-action:pan-y}.check{width:23px;height:23px;border:2px solid #aaa;border-radius:50%;flex:none}.done .check{background:#111}.done .title{text-decoration:line-through;opacity:.45}.taskmain{flex:1;min-width:0}.title{font-weight:600}.meta{font-size:12px;color:#777;margin-top:3px}.badge{font-size:12px}.fab{position:fixed;right:18px;bottom:88px;width:56px;height:56px;border-radius:50%;border:0;background:#111;color:#fff;font-size:30px;z-index:20;box-shadow:0 5px 20px #0002}.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(1100px,100%);height:70px;background:#fff;border-top:1px solid #ddd;display:flex;z-index:40;padding-bottom:env(safe-area-inset-bottom)}.nav button{flex:1;border:0;background:white;font-size:13px}.nav .active{color:#111;background:#eee!important}.card{background:#f5f5f7;border-radius:16px;padding:14px;margin-bottom:12px}.row{display:flex;gap:10px;align-items:center}.row>*{flex:1}.field{margin:12px 0}.field label{display:block;font-size:12px;color:#666;margin-bottom:5px}.field input,.field textarea,.field select{width:100%;padding:12px;border:1px solid #ddd;border-radius:12px;background:#fff}.primary,.danger{border:0;border-radius:12px;padding:12px 16px}.primary{background:#111;color:#fff}.danger{background:#eee}.hidden{display:none!important}.empty{text-align:center;color:#888;padding:35px 10px}
 /* Google Calendar-like week/day timeline */
@@ -352,7 +352,7 @@ body{
 </style></head><body><div class="app"><header class="head"><div class="headtop"><h1 id="heading">Todo</h1><div id="headActions"></div></div><div id="subtabs" class="tabs"></div></header><main id="main" class="content"></main><button id="fab" class="fab">+</button><div id="bulk" class="bulk hidden"></div><nav class="nav"><button data-page="todo" class="active">📋<br>Todo</button><button data-page="calendar">📅<br>日历</button><button data-page="settings">⚙️<br>设置</button></nav></div>
 <script>
 const $=s=>document.querySelector(s), DB='todoCalendarV1';
-let tasks=JSON.parse(localStorage.getItem(DB)||'[]'), page='todo', todoTab='today', calMode='week', calDate=new Date(), selected=new Set(), selectMode=false, clipboard=[], weekZoom=Math.max(50,Math.min(170,Number(localStorage.getItem('todoCalendarWeekZoom')||100))), calScroll={left:0,top:0}, weekCenterRequested=false, calendarViewInitialized=false;
+let tasks=JSON.parse(localStorage.getItem(DB)||'[]'), page='todo', todoTab='today', calMode='week', calDate=new Date(), selected=new Set(), selectMode=false, clipboard=[], weekZoom=Math.max(50,Math.min(170,Number(localStorage.getItem('todoCalendarWeekZoom')||100))), dayZoom=Math.max(50,Math.min(170,Number(localStorage.getItem('todoCalendarDayZoom')||100))), calScroll={left:0,top:0}, weekCenterRequested=false, calendarViewInitialized=false;
 const save=()=>localStorage.setItem(DB,JSON.stringify(tasks));
 const id=()=>crypto.randomUUID?.()||Date.now()+Math.random()+'';
 function workDate(d=new Date()){let x=new Date(d);if(x.getHours()<6||(x.getHours()===6&&x.getMinutes()<30))x.setDate(x.getDate()-1);return fmt(x)}
@@ -365,41 +365,36 @@ function parseDate(s){return new Date(s+'T12:00:00')}
 function timeMin(t){if(!t)return null;let [h,m]=t.split(':').map(Number);return h*60+m}
 function timeStr(min){min=Math.max(0,Math.min(1439,Math.round(min)));return String(Math.floor(min/60)).padStart(2,'0')+':'+String(min%60).padStart(2,'0')}
 function addDays(s,n){let d=parseDate(s);d.setDate(d.getDate()+n);return fmt(d)}
-function changeWeekZoom(dir){
-  if(calMode!=='week')return;
-
-  const oldZoom=weekZoom;
+function changeCalendarZoom(dir){
+  if(!['week','day'].includes(calMode))return;
+  const key=calMode==='week'?'todoCalendarWeekZoom':'todoCalendarDayZoom';
+  const oldZoom=calMode==='week'?weekZoom:dayZoom;
   const oldRowH=64*oldZoom/100;
-  weekZoom=Math.max(50,Math.min(170,weekZoom+dir*10));
-  localStorage.setItem('todoCalendarWeekZoom',String(weekZoom));
-  const newRowH=64*weekZoom/100;
+  const newZoom=Math.max(50,Math.min(170,oldZoom+dir*10));
+  if(calMode==='week')weekZoom=newZoom;else dayZoom=newZoom;
+  localStorage.setItem(key,String(newZoom));
 
   const wrap=document.querySelector('.timeline-wrap');
-  const oldLeft=wrap?wrap.scrollLeft:calScroll.left;
   const oldTop=wrap?wrap.scrollTop:calScroll.top;
   const viewportH=wrap?wrap.clientHeight:0;
-  const viewportW=wrap?wrap.clientWidth:0;
-  const centerX=oldLeft+viewportW/2;
   const centerY=oldTop+viewportH/2;
   const headerH=52;
   const oldTimePx=Math.max(0,centerY-headerH);
-  const newCenterY=headerH+oldTimePx*(newRowH/oldRowH);
+  const newCenterY=headerH+oldTimePx*(newZoom/oldZoom);
   const newTop=Math.max(0,newCenterY-viewportH/2);
 
-  document.documentElement.style.setProperty('--timeline-row-height',newRowH+'px');
   renderCalendar();
-
   requestAnimationFrame(()=>{
     const w=document.querySelector('.timeline-wrap');
     if(w){
-      const maxX=Math.max(0,w.scrollWidth-w.clientWidth);
       const maxY=Math.max(0,w.scrollHeight-w.clientHeight);
-      w.scrollLeft=Math.max(0,Math.min(oldLeft,maxX));
       w.scrollTop=Math.max(0,Math.min(newTop,maxY));
       calScroll={left:w.scrollLeft,top:w.scrollTop};
     }
   });
 }
+function changeWeekZoom(dir){changeCalendarZoom(dir)}
+
 function captureCalendarView(){
   const w=document.querySelector('.timeline-wrap');
   if(!w)return;
@@ -479,6 +474,29 @@ function centerWeekToday(){
   });
 }
 
+function centerTimelineToday(){
+  const w=document.querySelector('.timeline-wrap');
+  if(!w||!['week','day'].includes(calMode))return;
+  const targetDate=today();
+  const c=w.querySelector('.daycol[data-date="'+targetDate+'"]');
+  if(!c)return;
+  const set=()=>{
+    const now=new Date();
+    const minutes=now.getHours()*60+now.getMinutes()+now.getSeconds()/60;
+    const rowH=64*(calMode==='week'?weekZoom:100)/100;
+    const wr=w.getBoundingClientRect(), cr=c.getBoundingClientRect();
+    const contentX=(cr.left-wr.left)+w.scrollLeft;
+    const contentY=(cr.top-wr.top)+w.scrollTop;
+    const currentY=contentY+(minutes/60)*rowH;
+    const targetX=contentX+c.offsetWidth/2-w.clientWidth/2;
+    const targetY=currentY-w.clientHeight/2;
+    w.scrollLeft=Math.max(0,Math.min(targetX,w.scrollWidth-w.clientWidth));
+    w.scrollTop=Math.max(0,Math.min(targetY,w.scrollHeight-w.clientHeight));
+    calScroll={left:w.scrollLeft,top:w.scrollTop};
+  };
+  set();requestAnimationFrame(()=>{set();setTimeout(set,50)});
+}
+
 function rememberCalendarScroll(){
   const w=document.querySelector('.timeline-wrap');
   if(w) calScroll={left:w.scrollLeft,top:w.scrollTop};
@@ -496,7 +514,7 @@ function renderCalendar(options={}){
   const oldScrollTop=calScroll.top||0;
   const centerToday=!!options.centerToday||weekCenterRequested;
   weekCenterRequested=false;
-  $('#subtabs').innerHTML=`<button class="tabsbtn" onclick="shiftCal(-1)">‹</button><button onclick="goToday()">今天</button><button onclick="shiftCal(1)">›</button>${['day:日','week:周','month:月'].map(x=>{let[a,b]=x.split(':');return `<button type="button" class="${calMode===a?'active':''}" data-calmode="${a}">${b}</button>`}).join('')}${calMode==='week'?`<span class="zoomctl"><button onclick="changeWeekZoom(-1)" aria-label="缩小">−</button><b id="zoomLabel">${weekZoom}%</b><button onclick="changeWeekZoom(1)" aria-label="放大">＋</button></span>`:''}`;
+  $('#subtabs').innerHTML=`<button class="tabsbtn" onclick="shiftCal(-1)">‹</button><button onclick="goToday()">今天</button><button onclick="shiftCal(1)">›</button>${['day:日','week:周','month:月'].map(x=>{let[a,b]=x.split(':');return `<button type="button" class="${calMode===a?'active':''}" data-calmode="${a}">${b}</button>`}).join('')}${['week','day'].includes(calMode)?`<span class="zoomctl"><button onclick="changeCalendarZoom(-1)" aria-label="缩小">−</button><b id="zoomLabel">${calMode==='week'?weekZoom:dayZoom}%</b><button onclick="changeCalendarZoom(1)" aria-label="放大">＋</button></span>`:''}`;
   $('#headActions').innerHTML='';
   if(calMode==='month')renderMonth(); else renderTimeline();
   renderBulk();
@@ -504,8 +522,8 @@ function renderCalendar(options={}){
   requestAnimationFrame(()=>{
     const w=document.querySelector('.timeline-wrap');
     if(!w)return;
-    if(centerToday && calMode==='week'){
-      centerWeekToday();
+    if(centerToday && (calMode==='week'||calMode==='day')){
+      centerTimelineToday();
     }else{
       w.scrollLeft=oldScrollLeft;
       w.scrollTop=oldScrollTop;
@@ -516,7 +534,7 @@ function renderCalendar(options={}){
   });
 }
 
-function goToday(){calDate=new Date();selectMode=false;selected.clear();if(calMode==='week')weekCenterRequested=true;render();}
+function goToday(){calDate=new Date();selectMode=false;selected.clear();weekCenterRequested=true;render();}
 function bindCalendarModeButtons(){
   document.querySelectorAll('#subtabs [data-calmode]').forEach(btn=>{
     btn.addEventListener('click',()=>{
@@ -527,7 +545,7 @@ function bindCalendarModeButtons(){
       const keepLeft=wrap?wrap.scrollLeft:calScroll.left;
       const keepTop=wrap?wrap.scrollTop:calScroll.top;
       calMode=next;selectMode=false;selected.clear();
-      renderCalendar({centerToday:next==='week'&&!wasWeek});
+      renderCalendar({centerToday:next==='week'||next==='day'});
       if(next!=='week' && wrap){calScroll={left:keepLeft,top:keepTop};}
     });
   });
@@ -537,7 +555,7 @@ function weekDates(){let base=new Date(calDate),day=(base.getDay()+6)%7;base.set
 
 function renderTimeline(){
   let dates=calMode==='week'?weekDates():[new Date(calDate)];
-  let startHour=0,endHour=24,rowH=(calMode==='week'?64*weekZoom/100:64),total=(endHour-startHour)*rowH;
+  let startHour=0,endHour=24,rowH=64*(calMode==='week'?weekZoom:dayZoom)/100,total=(endHour-startHour)*rowH;
   let title=calMode==='week'?`${dates[0].getMonth()+1}月${dates[0].getDate()}日 – ${dates[6].getMonth()+1}月${dates[6].getDate()}日`:`${dates[0].getFullYear()}年${dates[0].getMonth()+1}月${dates[0].getDate()}日`;
   let gridClass=calMode==='day'?'day-grid':'week-grid';
   let dayHeads=dates.map(d=>`<div class="dayhead ${fmt(d)===today()?'today':''}" data-date="${fmt(d)}">${['一','二','三','四','五','六','日'][(d.getDay()+6)%7]}<strong>${d.getDate()}</strong></div>`).join('');
@@ -619,7 +637,7 @@ function attachTimelineGestures(dates,startHour,rowH){
     let timer=null,press=null,ready=false,drag=null,moved=false,suppressClick=false,lastX=0,lastY=0;
     const clearTimer=()=>{if(timer){clearTimeout(timer);timer=null}};
     const removeGhost=()=>{if(drag?.ghost){drag.ghost.remove();drag.ghost=null}};
-    const reset=()=>{clearTimer();removeGhost();press=null;ready=false;drag=null;moved=false;suppressClick=false;ev.classList.remove('dragging');ev.style.visibility=''};
+    const reset=()=>{clearTimer();removeGhost();press=null;ready=false;drag=null;moved=false;suppressClick=false;ev.classList.remove('dragging');ev.style.visibility='';ev.style.opacity=''};
     const autoScroll=e=>{const w=document.querySelector('.timeline-wrap');if(!w||!drag)return;const r=w.getBoundingClientRect(),edge=42,speed=14;let dx=0;if(e.clientX<r.left+edge)dx=-speed;else if(e.clientX>r.right-edge)dx=speed;if(dx)w.scrollLeft=Math.max(0,Math.min(w.scrollWidth-w.clientWidth,w.scrollLeft+dx));};
     const startDrag=(e,t)=>{const source=ev.closest('.daycol');if(!source)return;const rect=ev.getBoundingClientRect();const origMin=timeMin(t.start);const duration=Math.max(15,(timeMin(t.end)||origMin+60)-origMin);const ghost=document.createElement('div');ghost.className='event-ghost priority-'+priority(t);ghost.innerHTML='<b>'+esc(t.title)+'</b><div class="etime">'+(t.start+(t.end?'–'+t.end:''))+'</div>';ghost.style.position='absolute';ghost.style.left='3px';ghost.style.right='3px';ghost.style.height=Math.max(28,duration/60*rowH)+'px';ghost.style.opacity='1';ghost.style.pointerEvents='none';ghost.style.zIndex='100';source.appendChild(ghost);drag={t,source,duration,grabOffset:e.clientY-rect.top,pointerId:e.pointerId,ghost};ev.classList.add('dragging');ev.style.visibility='visible';ev.style.opacity='.42';suppressClick=true;try{ev.setPointerCapture(e.pointerId)}catch{}};
     const updateGhost=(target,nm)=>{if(!drag?.ghost||!target)return;if(drag.ghost.parentElement!==target)target.appendChild(drag.ghost);drag.ghost.style.top=((nm-startHour*60)/60*rowH)+'px';drag.ghost.style.height=Math.max(28,drag.duration/60*rowH)+'px';drag.ghost.style.left='3px';drag.ghost.style.right='3px';};
@@ -635,9 +653,30 @@ function drawCreating(col,c,startHour,rowH){let old=col.querySelector('.creating
 
 function renderMonth(){let y=calDate.getFullYear(),m=calDate.getMonth(),first=new Date(y,m,1),start=(first.getDay()+6)%7,days=new Date(y,m+1,0).getDate();let html=`<div class="calbar"><button class="navbtn" onclick="copyMonth()">📋 复制本月</button><div class="caltitle">${y}年${m+1}月</div><button class="navbtn" onclick="pasteCalendar()" ${clipboard.length?'':'disabled'}>📌 粘贴${clipboard.length?` ${clipboard.length}`:''}</button></div><div class="hint">点击日期进入日视图；长按事项可进入批量选择</div><div class="month">`;for(let i=0;i<start;i++)html+='<div></div>';for(let n=1;n<=days;n++){let ds=fmt(new Date(y,m,n)),a=tasks.filter(t=>t.date===ds);html+=`<div class="day" onclick="calDate=parseDate('${ds}');calMode='day';selectMode=false;selected.clear();render()"><b>${n}</b>${a.slice(0,4).map(t=>`<div class="mini ${selected.has(t.id)?'selected':''}" onclick="if(selected.size){event.stopPropagation();toggleCalendarSelect('${t.id}')}" oncontextmenu="event.preventDefault();toggleCalendarSelect('${t.id}')">${t.completed?'✓ ':''}${esc(t.title)}</div>`).join('')}</div>`}$('#main').innerHTML=html+'</div>';renderBulk()}
 
-function copyDay(){let dates=calMode==='week'?weekDates():[new Date(calDate)],from=dates.map(fmt);clipboard=tasks.filter(t=>from.includes(t.date)).map(x=>({...x}));render()}
+function copyDay(){
+  let dates=calMode==='week'?weekDates():[new Date(calDate)];
+  let from=dates.map(fmt);
+  let base=from[0];
+  clipboard=tasks.filter(t=>from.includes(t.date)).map(x=>({...x,_copyOffsetDays:x.date?Math.round((parseDate(x.date)-parseDate(base))/86400000):null}));
+  render();
+}
 function copyMonth(){let y=calDate.getFullYear(),m=calDate.getMonth(),a=tasks.filter(t=>{let d=t.date&&parseDate(t.date);return d&&d.getFullYear()===y&&d.getMonth()===m});clipboard=a.map(x=>({...x}));render()}
-function pasteCalendar(){if(!clipboard.length)return;let target=calMode==='week'?fmt(weekDates()[0]):fmt(calDate),base=clipboard.filter(x=>x.date)[0]?.date;let copies=clipboard.map(x=>{let n={...x,id:id(),completed:false,completedAt:null};if(base&&x.date){let delta=Math.round((parseDate(target)-parseDate(base))/86400000);n.date=addDays(x.date,delta)}else if(target)n.date=target;return n});tasks.push(...copies);selectMode=false;selected.clear();save();render()}
+function pasteCalendar(){
+  if(!clipboard.length)return;
+  let target=calMode==='week'?fmt(weekDates()[0]):fmt(calDate);
+  let base=clipboard.find(x=>x.date)?._copyOffsetDays;
+  let firstBase=clipboard.find(x=>x.date)?.date;
+  let copies=clipboard.map(x=>{
+    let n={...x,id:id(),completed:false,completedAt:null};
+    delete n._copyOffsetDays;
+    if(x.date&&firstBase){
+      const offset=(x._copyOffsetDays!=null)?x._copyOffsetDays:Math.round((parseDate(x.date)-parseDate(firstBase))/86400000);
+      n.date=addDays(target,offset);
+    }else if(target)n.date=target;
+    return n;
+  });
+  tasks.push(...copies);selectMode=false;selected.clear();save();render();
+}
 
 function newTask(date=today(),start='',end=''){editTask(null,{date,start,end})}
 function editTask(i,p={}){rememberCalendarScroll();let old=i?tasks.find(x=>x.id===i):null;let t=old||{id:id(),title:'',date:p.date??today(),start:p.start||'',end:p.end||'',important:false,urgent:false,completed:false,notes:'',repeat:'none'};$('#subtabs').innerHTML='';$('#headActions').innerHTML='';$('#heading').textContent=i?'编辑事项':'新事项';$('#main').innerHTML=`<div class="field"><label>事项</label><input id="fTitle" value="${esc(t.title)}" autofocus></div><div class="field"><label>日期</label><input id="fDate" type="date" value="${t.date||''}"></div><div class="row"><div class="field"><label>开始</label><input id="fStart" type="time" value="${t.start||''}"></div><div class="field"><label>结束</label><input id="fEnd" type="time" value="${t.end||''}"></div></div><div class="row"><button id="imp" class="chip ${t.important?'active':''}" onclick="this.classList.toggle('active')">⭐ 重要</button><button id="urg" class="chip ${t.urgent?'active':''}" onclick="this.classList.toggle('active')">⚡ 紧急</button></div><div class="field"><label>重复</label><select id="fRepeat" onchange="toggleCustomRepeat()"><option value="none">不重复</option><option value="daily">每天</option><option value="weekdays">工作日</option><option value="weekly">每周</option><option value="monthly">每月</option><option value="custom">自定义</option></select></div><div id="customRepeat" class="card hidden" style="padding:12px;margin-top:-4px"><div class="row"><div class="field"><label>每隔</label><input id="rInterval" type="number" min="1" max="99" value="1"></div><div class="field"><label>单位</label><select id="rUnit"><option value="day">天</option><option value="week">周</option><option value="month">月</option></select></div></div><div class="field"><label>每周重复日</label><div id="rWeekdays" class="tabs" style="margin-top:0">${['一','二','三','四','五','六','日'].map((d,i)=>`<button type="button" class="chip" data-wd="${i}" onclick="this.classList.toggle('active')">周${d}</button>`).join('')}</div></div><div class="field"><label>结束方式</label><select id="rEndType" onchange="updateRepeatEndField()"><option value="forever">一直重复</option><option value="count">重复次数</option><option value="date">结束日期</option></select></div><div class="field" id="rEndValueWrap"></div></div><div class="field"><label>备注</label><textarea id="fNotes">${esc(t.notes||'')}</textarea></div><div class="row"><button class="primary" onclick="commit('${i||''}','${t.id}')">保存</button>${i?`<button class="danger" onclick="copyOne('${i}')">📋复制</button><button class="danger" onclick="removeTask('${i}')">删除</button>`:''}<button class="danger" onclick="render()">取消</button></div>`;$('#fRepeat').value=(typeof t.repeat==='string'?t.repeat:(t.repeat?.type==='custom'?'custom':'none'));if(typeof t.repeat==='object'&&t.repeat?.type==='custom'){$('#rInterval').value=t.repeat.interval||1;$('#rUnit').value=t.repeat.unit||'day';$('#rEndType').value=t.repeat.endType||'forever';toggleCustomRepeat();updateRepeatEndField();if(t.repeat.weekdays)t.repeat.weekdays.forEach(i=>document.querySelector(`#rWeekdays [data-wd="${i}"]`)?.classList.add('active'));}else toggleCustomRepeat();}
