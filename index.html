@@ -479,28 +479,32 @@ function centerTimelineToday(){
   if(!w||!['week','day'].includes(calMode))return;
   const c=w.querySelector('.daycol[data-date="'+today()+'"]');
   if(!c)return;
+
   const set=()=>{
     const now=new Date();
     const minutes=now.getHours()*60+now.getMinutes()+now.getSeconds()/60;
     const zoom=calMode==='week'?weekZoom:dayZoom;
     const rowH=64*zoom/100;
-    // .daycol begins below the 52px sticky header.  Its absolute top is
-    // the exact coordinate of 00:00 in the scrollable content.
-    const wr=w.getBoundingClientRect(), cr=c.getBoundingClientRect();
-    const dayTop=(cr.top-wr.top)+w.scrollTop;
+
+    // IMPORTANT: use offsetTop/offsetLeft, which are coordinates inside the
+    // scroll content and therefore do NOT change when scrollTop changes.
+    // The previous implementation derived this from getBoundingClientRect()
+    // and then added scrollTop; repeating the centering pass accumulated the
+    // scroll offset and pushed the current-time line too high.
+    const dayTop=c.offsetTop;
     const currentY=dayTop+(minutes/60)*rowH;
-    // Put the current-time line at the vertical center of the viewport.
-    const target=currentY-w.clientHeight/2;
-    const max=Math.max(0,w.scrollHeight-w.clientHeight);
-    w.scrollTop=Math.max(0,Math.min(target,max));
+    const targetY=currentY-w.clientHeight/2;
+    const maxY=Math.max(0,w.scrollHeight-w.clientHeight);
+    w.scrollTop=Math.max(0,Math.min(targetY,maxY));
+
     if(calMode==='week'){
-      const contentX=(cr.left-wr.left)+w.scrollLeft;
-      const targetX=contentX+c.offsetWidth/2-w.clientWidth/2;
+      const targetX=c.offsetLeft+c.offsetWidth/2-w.clientWidth/2;
       const maxX=Math.max(0,w.scrollWidth-w.clientWidth);
       w.scrollLeft=Math.max(0,Math.min(targetX,maxX));
     }
     calScroll={left:w.scrollLeft,top:w.scrollTop};
   };
+
   set();
   requestAnimationFrame(()=>{set();setTimeout(set,80);});
 }
