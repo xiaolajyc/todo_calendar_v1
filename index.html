@@ -345,7 +345,7 @@ body{
 .zoomctl{display:inline-flex;align-items:center;gap:3px;margin-left:auto;padding:3px;background:#eef3f9;border:1px solid #dfe7f0;border-radius:12px;flex:none}
 .zoomctl button{width:34px!important;height:34px!important;min-height:34px!important;padding:0!important;border:0!important;border-radius:9px!important;background:#fff!important;color:#24354c!important;font-size:20px!important;line-height:1!important}
 .zoomctl b{min-width:45px;text-align:center;font-size:12px;color:#53647a}
-.task{touch-action:pan-y;user-select:none;-webkit-user-select:none}.event{touch-action:pan-x pan-y;user-select:none;-webkit-user-select:none}.event.dragging{touch-action:none!important}.timeline-wrap{overscroll-behavior:contain}
+.task{touch-action:pan-y;user-select:none;-webkit-user-select:none}.event{touch-action:none;user-select:none;-webkit-user-select:none}.event.dragging{touch-action:none!important}.timeline-wrap{overscroll-behavior:contain}
 .event-ghost{border-style:dashed!important;box-shadow:0 0 0 2px rgba(22,119,255,.12),0 5px 14px rgba(30,60,100,.10)!important;filter:saturate(.8);display:block!important;visibility:visible!important;background:rgba(255,255,255,.72)!important;z-index:30!important}
 @media(max-width:799px){.zoomctl{margin-left:2px}.zoomctl b{min-width:40px}}
 .timeline-wrap.calendar-scroll{height:calc(100vh - 300px);min-height:300px;max-height:calc(100vh - 230px);overflow:auto;}@supports(height:100dvh){.timeline-wrap.calendar-scroll{height:calc(100dvh - 300px);max-height:calc(100dvh - 230px)}}
@@ -614,68 +614,18 @@ function attachTimelineGestures(dates,startHour,rowH){
     col.addEventListener('pointercancel',()=>{clear();creating=null;col.querySelector('.creating')?.remove()});
   });
 
-  /* 事项手势：短按=编辑；长按静止=选择；长按后移动=拖动。
-     在手势尚未确认前不阻止浏览器滚动，避免“滑动=点按”。 */
+  /* 事项手势：短按=编辑；普通滑动=滚动日历；长按静止=选择；长按后移动=拖动。 */
   document.querySelectorAll('.event').forEach(ev=>{
-    let timer=null,press=null,ready=false,drag=null,moved=false,suppressClick=false,raf=0;
+    let timer=null,press=null,ready=false,drag=null,moved=false,suppressClick=false,lastX=0,lastY=0;
     const clearTimer=()=>{if(timer){clearTimeout(timer);timer=null}};
     const removeGhost=()=>{if(drag?.ghost){drag.ghost.remove();drag.ghost=null}};
-    const reset=()=>{clearTimer();removeGhost();press=null;ready=false;drag=null;moved=false;suppressClick=false;ev.classList.remove('dragging');ev.style.visibility='';if(raf){cancelAnimationFrame(raf);raf=0}};
-    const autoScroll=(e)=>{
-      const w=document.querySelector('.timeline-wrap');if(!w||!drag)return;
-      const r=w.getBoundingClientRect(),edge=42,speed=14;
-      let dx=0;
-      if(e.clientX<r.left+edge)dx=-speed; else if(e.clientX>r.right-edge)dx=speed;
-      if(dx){w.scrollLeft=Math.max(0,Math.min(w.scrollWidth-w.clientWidth,w.scrollLeft+dx));}
-    };
-    const startDrag=(e,t)=>{
-      const source=ev.closest('.daycol'); if(!source)return;
-      const rect=ev.getBoundingClientRect();
-      const origMin=timeMin(t.start);
-      const duration=Math.max(15,(timeMin(t.end)||origMin+60)-origMin);
-      const ghost=document.createElement('div');
-      ghost.className='event-ghost priority-'+priority(t);
-      ghost.innerHTML='<b>'+esc(t.title)+'</b><div class="etime">'+(t.start+(t.end?'–'+t.end:''))+'</div>';
-      ghost.style.position='absolute';ghost.style.left='3px';ghost.style.right='3px';ghost.style.height=Math.max(28,duration/60*rowH)+'px';ghost.style.opacity='.34';ghost.style.pointerEvents='none';ghost.style.zIndex='30';
-      source.appendChild(ghost);
-      drag={t,source,duration,grabOffset:e.clientY-rect.top,pointerId:e.pointerId,ghost};
-      ev.classList.add('dragging');ev.style.visibility='hidden';suppressClick=true;
-      try{ev.setPointerCapture(e.pointerId)}catch{}
-    };
-    const update=(e)=>{
-      if(!drag)return;
-      autoScroll(e);
-      const target=colAtX(e.clientX)||drag.source;
-      const raw=minAt(e,target)-(drag.grabOffset/rowH*60);
-      const nm=clamp(raw,drag.duration);
-      updateGhost(target,nm);
-    };
-    ev.addEventListener('pointerdown',e=>{
-      e.stopPropagation();if(e.pointerType==='mouse'&&e.button!==0)return;
-      const t=tasks.find(x=>x.id===ev.dataset.id);if(!t)return;
-      clearTimer();press={x:e.clientX,y:e.clientY,id:t.id};ready=false;drag=null;moved=false;suppressClick=false;
-      if(selectMode){suppressClick=true;return}
-      timer=setTimeout(()=>{timer=null;ready=true},600);
-    },{passive:true});
-    ev.addEventListener('pointermove',e=>{
-      if(!press)return;
-      const dist=Math.hypot(e.clientX-press.x,e.clientY-press.y);
-      if(!ready&&!drag){if(dist>10){moved=true;suppressClick=true;clearTimer();}return;}
-      if(ready&&!drag&&dist>10){const t=tasks.find(x=>x.id===press.id);if(t)startDrag(e,t);}
-      if(!drag)return;
-      e.preventDefault();update(e);
-    },{passive:false});
-    ev.addEventListener('pointerup',e=>{
-      const p=press;if(!p){reset();return}clearTimer();
-      if(selectMode){toggleCalendarSelect(p.id);reset();return}
-      if(drag){
-        const t=tasks.find(x=>x.id===p.id);if(t){const target=colAtX(e.clientX)||drag.source;const raw=minAt(e,target)-(drag.grabOffset/rowH*60);const nm=clamp(raw,drag.duration);t.date=target.dataset.date;t.start=timeStr(nm);t.end=timeStr(nm+drag.duration);save()}
-        reset();render();return;
-      }
-      if(ready){toggleCalendarSelect(p.id);reset();return}
-      if(moved||suppressClick){reset();return}
-      reset();editTask(p.id);
-    });
+    const reset=()=>{clearTimer();removeGhost();press=null;ready=false;drag=null;moved=false;suppressClick=false;ev.classList.remove('dragging');ev.style.visibility=''};
+    const autoScroll=e=>{const w=document.querySelector('.timeline-wrap');if(!w||!drag)return;const r=w.getBoundingClientRect(),edge=42,speed=14;let dx=0;if(e.clientX<r.left+edge)dx=-speed;else if(e.clientX>r.right-edge)dx=speed;if(dx)w.scrollLeft=Math.max(0,Math.min(w.scrollWidth-w.clientWidth,w.scrollLeft+dx));};
+    const startDrag=(e,t)=>{const source=ev.closest('.daycol');if(!source)return;const rect=ev.getBoundingClientRect();const origMin=timeMin(t.start);const duration=Math.max(15,(timeMin(t.end)||origMin+60)-origMin);const ghost=document.createElement('div');ghost.className='event-ghost priority-'+priority(t);ghost.innerHTML='<b>'+esc(t.title)+'</b><div class="etime">'+(t.start+(t.end?'–'+t.end:''))+'</div>';ghost.style.position='absolute';ghost.style.left='3px';ghost.style.right='3px';ghost.style.height=Math.max(28,duration/60*rowH)+'px';ghost.style.opacity='.34';ghost.style.pointerEvents='none';ghost.style.zIndex='30';source.appendChild(ghost);drag={t,source,duration,grabOffset:e.clientY-rect.top,pointerId:e.pointerId,ghost};ev.classList.add('dragging');ev.style.visibility='hidden';suppressClick=true;try{ev.setPointerCapture(e.pointerId)}catch{}};
+    const update=e=>{if(!drag)return;autoScroll(e);const target=colAtX(e.clientX)||drag.source;const raw=minAt(e,target)-(drag.grabOffset/rowH*60);updateGhost(target,clamp(raw,drag.duration));};
+    ev.addEventListener('pointerdown',e=>{e.stopPropagation();if(e.pointerType==='mouse'&&e.button!==0)return;const t=tasks.find(x=>x.id===ev.dataset.id);if(!t)return;clearTimer();press={x:e.clientX,y:e.clientY,id:t.id};lastX=e.clientX;lastY=e.clientY;ready=false;drag=null;moved=false;suppressClick=false;if(selectMode){suppressClick=true;return}timer=setTimeout(()=>{timer=null;ready=true},600);},{passive:false});
+    ev.addEventListener('pointermove',e=>{if(!press)return;const dist=Math.hypot(e.clientX-press.x,e.clientY-press.y);const w=document.querySelector('.timeline-wrap');if(!ready&&!drag){if(dist>10){moved=true;suppressClick=true;clearTimer();if(w){w.scrollLeft-=e.clientX-lastX;w.scrollTop-=e.clientY-lastY;}lastX=e.clientX;lastY=e.clientY;e.preventDefault();}return;}if(ready&&!drag&&dist>10){const t=tasks.find(x=>x.id===press.id);if(t)startDrag(e,t);}if(!drag)return;e.preventDefault();update(e);},{passive:false});
+    ev.addEventListener('pointerup',e=>{const p=press;if(!p){reset();return}clearTimer();if(selectMode){toggleCalendarSelect(p.id);reset();return}if(drag){const t=tasks.find(x=>x.id===p.id);if(t){const target=colAtX(e.clientX)||drag.source;const raw=minAt(e,target)-(drag.grabOffset/rowH*60);const nm=clamp(raw,drag.duration);t.date=target.dataset.date;t.start=timeStr(nm);t.end=timeStr(nm+drag.duration);save()}reset();render();return}if(ready){toggleCalendarSelect(p.id);reset();return}if(moved||suppressClick){reset();return}reset();editTask(p.id);});
     ev.addEventListener('pointercancel',()=>reset());
   });
 }
