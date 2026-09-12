@@ -1546,4 +1546,62 @@ function attachTimelineGestures(dates,startHour,rowH){
   requestAnimationFrame(()=>requestAnimationFrame(()=>{try{render()}catch(e){console.error('v2.62 render',e)}}));
 })();
 </script>
+
+<style id="v263-final-css">
+/* v2.63: selection scrolling + corrected priority semantics + original Today appearance */
+.timeline-wrap.calendar-scroll{touch-action:pan-x pan-y!important;overflow:auto!important;-webkit-overflow-scrolling:touch!important}
+.timeline-wrap.calendar-scroll .week-grid,.timeline-wrap.calendar-scroll .day-grid,.timeline-wrap.calendar-scroll .daycol{touch-action:pan-x pan-y!important}
+/* priority: 0 both, 1 important, 2 urgent, 3 normal */
+.event.priority-0{border-left-color:#ff4d5d!important;background:linear-gradient(135deg,#fff0f2,#ffdfe4)!important}
+.event.priority-1{border-left-color:#8b6de8!important;background:linear-gradient(135deg,#f5f1ff,#e9e2ff)!important}
+.event.priority-2{border-left-color:#ff7a45!important;background:linear-gradient(135deg,#fff2ed,#ffe4d8)!important}
+.event.priority-3{border-left-color:#4b9cff!important;background:linear-gradient(135deg,#edf6ff,#dceeff)!important}
+/* Original Today headers: neutral/original group appearance */
+body.todo-today-original .group h3{color:#172033!important;background:linear-gradient(90deg,#fdfdfe,#fff)!important}
+</style>
+<script id="v263-final-js">
+(function(){
+  /* Correct priority order everywhere: important comes before urgent. */
+  window.priority=function(t){return t.important&&t.urgent?0:t.important?1:t.urgent?2:3};
+  window.labels=['🔥 重要且紧急','⭐ 重要','⚡ 紧急','○ 其他'];
+
+  /* Restore the original Today visual treatment while keeping the newer instance-aware data. */
+  const baseRenderTodo=window.renderTodo;
+  window.renderTodo=function(){
+    document.body.classList.toggle('todo-today-original',todoTab==='today');
+    baseRenderTodo();
+  };
+
+  /* One and only one calendar selection action per tap.
+     Older versions installed multiple click listeners; capture here prevents double-toggle. */
+  if(!window.__v263SelectionGuard){
+    window.__v263SelectionGuard=true;
+    document.addEventListener('click',function(e){
+      if(!selectMode)return;
+      const ev=e.target.closest?.('.event');
+      if(!ev)return;
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+      toggleCalendarSelect(ev.dataset.key||ev.dataset.id);
+    },true);
+  }
+
+  /* Selection mode must never lock the week view. */
+  function unlockCalendarScroll(){
+    document.querySelectorAll('.timeline-wrap.calendar-scroll,.timeline-wrap.calendar-scroll .week-grid,.timeline-wrap.calendar-scroll .day-grid,.timeline-wrap.calendar-scroll .daycol').forEach(el=>{
+      el.style.touchAction='pan-x pan-y';
+      if(el.classList.contains('timeline-wrap')){
+        el.style.overflowX='auto';el.style.overflowY='auto';el.style.webkitOverflowScrolling='touch';
+      }
+    });
+  }
+  const oldRC=window.renderCalendar;
+  if(oldRC&&!window.__v263RC){
+    window.__v263RC=true;
+    window.renderCalendar=function(){oldRC();requestAnimationFrame(unlockCalendarScroll)};
+  }
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{unlockCalendarScroll();try{render()}catch(e){console.error(e)}}));
+})();
+</script>
 </body></html>
