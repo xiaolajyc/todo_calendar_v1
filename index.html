@@ -1604,4 +1604,60 @@ body.todo-today-original .group h3{color:#172033!important;background:linear-gra
   requestAnimationFrame(()=>requestAnimationFrame(()=>{unlockCalendarScroll();try{render()}catch(e){console.error(e)}}));
 })();
 </script>
+
+<style id="v264-today-style">
+/* v2.64 — Today view: priority-first layout */
+body.todo-priority-today #main{padding-top:10px}
+body.todo-priority-today .today-priority-group{margin:0 0 18px;background:#fff;border:1px solid #e2e8f0;border-radius:18px;overflow:hidden;box-shadow:0 4px 14px rgba(35,55,85,.07)}
+body.todo-priority-today .today-priority-title{display:flex;align-items:center;gap:9px;padding:14px 15px 12px;font-size:17px;line-height:1.2;font-weight:850;letter-spacing:-.25px}
+body.todo-priority-today .today-priority-title .count{margin-left:auto;min-width:25px;height:25px;padding:0 8px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;background:rgba(255,255,255,.78);color:inherit}
+body.todo-priority-today .today-priority-group.p0 .today-priority-title{color:#d83f4d;background:linear-gradient(90deg,#fff0f2,#fff8f9)}
+body.todo-priority-today .today-priority-group.p1 .today-priority-title{color:#7655c9;background:linear-gradient(90deg,#f4efff,#fbf9ff)}
+body.todo-priority-today .today-priority-group.p2 .today-priority-title{color:#df6b38;background:linear-gradient(90deg,#fff1e9,#fffaf7)}
+body.todo-priority-today .today-priority-group.p3 .today-priority-title{color:#4d6b8d;background:linear-gradient(90deg,#eef5fc,#fbfdff)}
+body.todo-priority-today .today-priority-group .task{min-height:66px;padding:13px 14px}
+body.todo-priority-today .today-priority-group.p0 .task:first-of-type{border-top:1px solid #ffe1e5}
+body.todo-priority-today .today-priority-group.p1 .task:first-of-type{border-top:1px solid #e9e0ff}
+body.todo-priority-today .today-priority-group.p2 .task:first-of-type{border-top:1px solid #ffe2d5}
+body.todo-priority-today .today-priority-group.p3 .task:first-of-type{border-top:1px solid #deebf7}
+body.todo-priority-today .today-priority-group.p0 .check{border-color:#ef7180}
+body.todo-priority-today .today-priority-group.p1 .check{border-color:#a38ae9}
+body.todo-priority-today .today-priority-group.p2 .check{border-color:#f0a07a}
+</style>
+<script id="v264-today-js">
+(function(){
+  const previousRenderTodo=window.renderTodo;
+  window.renderTodo=function(){
+    const isToday=(todoTab==='today');
+    document.body.classList.toggle('todo-priority-today',isToday);
+    if(!isToday){previousRenderTodo();return;}
+
+    const list=todoInstances('today').filter(t=>!t.completed);
+    const counts={all:todoInstances('all').length,today:list.length,overdue:todoInstances('overdue').length,inbox:todoInstances('inbox').length,done:todoInstances('done').length};
+    $('#subtabs').innerHTML=['all:全部','today:今天','overdue:逾期','inbox:无日期','done:已完成'].map(x=>{
+      const [a,b]=x.split(':');
+      return `<button class="${todoTab===a?'active':''}" onclick="todoTab='${a}';selectMode=false;selected.clear();render()">${b}${counts[a]?` ${counts[a]}`:''}</button>`;
+    }).join('');
+    const allSelected=list.length>0&&list.every(t=>selected.has(instanceKey(t)));
+    $('#headActions').innerHTML=`<button class="tabsbtn" style="min-height:38px;padding:8px 12px;background:#edf2f8;border-radius:11px;border:0;color:#34435a;font-weight:700" onclick="toggleSelectAllTodo()">${allSelected?'取消全选':'全选'}</button>`;
+
+    const groups=[
+      {p:0,label:'🔥 重要且紧急'},
+      {p:1,label:'⭐ 重要'},
+      {p:2,label:'⚡ 紧急'},
+      {p:3,label:'○ 其他'}
+    ];
+    let html='';
+    for(const g of groups){
+      const items=list.filter(t=>priority(t)===g.p).sort((a,b)=>(a.start||'').localeCompare(b.start||'')||a.title.localeCompare(b.title));
+      if(!items.length)continue;
+      html+=`<section class="today-priority-group p${g.p}"><h3 class="today-priority-title">${g.label}<span class="count">${items.length}</span></h3>${items.map(taskRow).join('')}</section>`;
+    }
+    $('#main').innerHTML=html||'<div class="empty">今天没有待办事项</div>';
+    attachTaskGestures();
+    renderBulk();
+  };
+  requestAnimationFrame(()=>{if(page==='todo'&&todoTab==='today')renderTodo();});
+})();
+</script>
 </body></html>
