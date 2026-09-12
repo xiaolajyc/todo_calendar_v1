@@ -1760,5 +1760,37 @@ body.todo-priority-today .today-priority-group.p2 .check{border-color:#f0a07a}
   style.textContent='.dayhead{height:48px!important}';
   document.head.appendChild(style);
 })();
+
+/* v2.74: robust calendar overlap layout + note display. */
+function eventHtml(t,startHour,rowH,col=0,cols=1){
+  const s=timeMin(t.start), e=timeMin(t.end)||Math.min(s+60,1439);
+  const top=(s-startHour*60)/60*rowH, height=Math.max(28,(e-s)/60*rowH);
+  const gap=3, width=100/cols, left=col*width;
+  const note=t.notes?`<div class="enote">${esc(t.notes)}</div>`:'';
+  return `<div class="event bulkable priority-${priority(t)} ${t.completed?'done':''} ${selected.has(t._key||t.id)?'selected':''}" data-id="${esc(t._masterId||t.id)}" data-occ="${esc(t._occurrenceDate||t.date||'')}" data-key="${esc(t._key||instanceKey(t))}" style="top:${top}px;height:${height}px;left:calc(${left}% + 3px);width:calc(${width}% - 6px);right:auto"><b>${esc(t.title)}${recurring(t)?' 🔁':''}</b><div class="etime">${t.start}${t.end?'–'+t.end:''}</div>${note}</div>`;
+}
+function dayColumn(d,total,startHour,rowH){
+  const ds=fmt(d), events=calendarEventsForDate(ds).filter(t=>t.start);
+  events.sort((a,b)=>timeMin(a.start)-timeMin(b.start)||(timeMin(a.end||'23:59')-timeMin(b.end||'23:59')));
+  const items=events.map(t=>({t,s:timeMin(t.start),e:timeMin(t.end)||Math.min(timeMin(t.start)+60,1439),col:0,cols:1}));
+  const components=[];
+  for(const x of items){
+    let comp=components.find(c=>c.end>x.s);
+    if(!comp){comp={items:[],end:x.e};components.push(comp)}
+    else {comp.end=Math.max(comp.end,x.e)}
+    comp.items.push(x);
+  }
+  for(const comp of components){
+    let cols=[];
+    for(const x of comp.items){
+      let c=0; while(cols[c]!==undefined && cols[c]>x.s)c++;
+      x.col=c; cols[c]=x.e;
+    }
+    const n=cols.length;
+    comp.items.forEach(x=>x.cols=n);
+  }
+  const html=items.map(x=>eventHtml(x.t,startHour,rowH,x.col,x.cols)).join('');
+  return `<div class="daycol ${selected.size?'select-mode':''}" data-date="${ds}" style="height:${total}px">${html}${ds===today()?nowLine(startHour,rowH):''}</div>`;
+}
 </script>
 </body></html>
