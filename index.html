@@ -1599,7 +1599,7 @@ body.todo-today-original .group h3{color:#172033!important;background:linear-gra
   const oldRC=window.renderCalendar;
   if(oldRC&&!window.__v263RC){
     window.__v263RC=true;
-    window.renderCalendar=function(){oldRC();requestAnimationFrame(unlockCalendarScroll)};
+    window.renderCalendar=function(options={}){oldRC(options);requestAnimationFrame(unlockCalendarScroll)};
   }
   requestAnimationFrame(()=>requestAnimationFrame(()=>{unlockCalendarScroll();try{render()}catch(e){console.error(e)}}));
 })();
@@ -1701,6 +1701,16 @@ body.todo-priority-today .today-priority-group.p2 .check{border-color:#f0a07a}
     window.renderCalendar=function(){old();requestAnimationFrame(fixWeekAxis)};
   }
   requestAnimationFrame(fixWeekAxis);
+})();
+</script>
+<style id="v267-center-fix">
+/* v2.67: preserve renderCalendar(options) so switching day/week can re-center current time. */
+</style>
+<script id="v267-center-fix-js">
+(function(){
+  /* The v2.63 wrapper previously dropped the options object, which disabled
+     centerToday when changing between day/week views. The underlying wrapper
+     is corrected above; this is only a marker for the fix. */
 })();
 </script>
 </body></html>
