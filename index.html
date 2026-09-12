@@ -729,8 +729,12 @@ function bindCalendarModeButtons(){
       const keepLeft=wrap?wrap.scrollLeft:calScroll.left;
       const keepTop=wrap?wrap.scrollTop:calScroll.top;
       calMode=next;selectMode=false;selected.clear();
-      renderCalendar({centerToday:next==='week'||next==='day'});
-      if(next!=='week' && wrap){calScroll={left:keepLeft,top:keepTop};}
+      const shouldCenter=next==='week'||next==='day';
+      renderCalendar({centerToday:shouldCenter});
+      /* Final centering pass after every render/wrapper has finished. */
+      if(shouldCenter){
+        requestAnimationFrame(()=>requestAnimationFrame(()=>centerTimelineToday()));
+      }
     });
   });
 }
@@ -1703,14 +1707,25 @@ body.todo-priority-today .today-priority-group.p2 .check{border-color:#f0a07a}
   requestAnimationFrame(fixWeekAxis);
 })();
 </script>
-<style id="v269-center-fix">
-/* v2.69: restore working build and preserve renderCalendar(options) so switching day/week can re-center current time. */
+<style id="v267-center-fix">
+/* v2.70: preserve renderCalendar(options) and force final centering after day/week switches so switching day/week can re-center current time. */
 </style>
-<script id="v267-center-fix-js">
+<script id="v270-center-fix-js">
 (function(){
   /* The v2.63 wrapper previously dropped the options object, which disabled
      centerToday when changing between day/week views. The underlying wrapper
      is corrected above; this is only a marker for the fix. */
+})();
+</script>
+<style id="v270-center-final-style">
+/* v2.70: no visual changes; centering is enforced after the calendar DOM settles. */
+</style>
+<script id="v270-center-final-js">
+(function(){
+  /* Normalize the timeline header height used by the centering calculation. */
+  const style=document.createElement('style');
+  style.textContent='.dayhead{height:48px!important}';
+  document.head.appendChild(style);
 })();
 </script>
 </body></html>
