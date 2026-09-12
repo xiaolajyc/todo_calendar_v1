@@ -1660,4 +1660,36 @@ body.todo-priority-today .today-priority-group.p2 .check{border-color:#f0a07a}
   requestAnimationFrame(()=>{if(page==='todo'&&todoTab==='today')renderTodo();});
 })();
 </script>
+
+<style id="v265-priority-unify">
+.event.priority-0{border-left-color:#ff4d5d!important;background:linear-gradient(135deg,#fff0f2,#ffdfe4)!important;color:#9f2635!important}
+.event.priority-1{border-left-color:#8b6de8!important;background:linear-gradient(135deg,#f5f1ff,#e9e2ff)!important;color:#5f46a9!important}
+.event.priority-2{border-left-color:#ff7a45!important;background:linear-gradient(135deg,#fff2ed,#ffe4d8)!important;color:#c55225!important}
+.event.priority-3{border-left-color:#4b9cff!important;background:linear-gradient(135deg,#edf6ff,#dceeff)!important;color:#315f8f!important}
+.event .priority-label{font-size:9px;font-weight:800;opacity:.82;margin-left:5px}
+</style>
+<script id="v265-priority-unify-js">
+(function(){
+  /* Calendar event and Todo Today now share exactly one priority definition. */
+  window.priorityMeta=function(t){
+    const p=t.important&&t.urgent?0:t.important?1:t.urgent?2:3;
+    return [
+      {p:0,label:'重要且紧急'},
+      {p:1,label:'重要'},
+      {p:2,label:'紧急'},
+      {p:3,label:'其他'}
+    ][p];
+  };
+  window.priority=function(t){return window.priorityMeta(t).p};
+  window.labels=['🔥 重要且紧急','⭐ 重要','⚡ 紧急','○ 其他'];
+  window.eventHtml=function(t,startHour,rowH){
+    const meta=priorityMeta(t);
+    const s=timeMin(t.start),e=timeMin(t.end)||Math.min(s+60,1439);
+    const top=(s-startHour*60)/60*rowH,height=Math.max(28,(e-s)/60*rowH),k=instanceKey(t);
+    return `<div class="event bulkable priority-${meta.p} ${t.completed?'done':''} ${selected.has(k)?'selected':''}" data-id="${esc(t._masterId||t.id)}" data-occ="${esc(t._occurrenceDate||t.date||'')}" data-key="${esc(k)}" style="top:${top}px;height:${height}px"><b>${esc(t.title)}</b><span class="priority-label">${meta.label}</span><div class="etime">${t.start}${t.end?'–'+t.end:''}</div></div>`;
+  };
+  /* Re-render once so existing calendar events immediately use the unified mapping. */
+  requestAnimationFrame(()=>{if(page==='calendar')renderCalendar()});
+})();
+</script>
 </body></html>
