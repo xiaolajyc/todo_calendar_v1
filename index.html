@@ -1660,4 +1660,47 @@ body.todo-priority-today .today-priority-group.p2 .check{border-color:#f0a07a}
   requestAnimationFrame(()=>{if(page==='todo'&&todoTab==='today')renderTodo();});
 })();
 </script>
+
+<style id="v266-drag-axis-fix">
+/* v2.66: while dragging, keep the original event visible but faded; the dashed ghost is the moving preview. */
+.event.dragging{opacity:.28!important;filter:saturate(.65)!important}
+.event.dragging b,.event.dragging .etime{opacity:.72}
+
+/* Week view: keep the time axis pinned to the left while the 7-day grid scrolls horizontally. */
+.timeline-wrap.calendar-scroll .week-grid>.time-axis{
+  position:sticky!important;
+  left:0!important;
+  z-index:31!important;
+  background:#fafbfd!important;
+  box-shadow:2px 0 6px rgba(45,65,90,.10);
+}
+.timeline-wrap.calendar-scroll .week-grid>.dayhead:first-child{
+  position:sticky!important;
+  left:0!important;
+  z-index:32!important;
+  background:#fff!important;
+  box-shadow:2px 0 6px rgba(45,65,90,.06);
+}
+</style>
+<script id="v266-fix-js">
+(function(){
+  /* Re-apply after calendar renders because the timeline DOM is rebuilt each time. */
+  function fixWeekAxis(){
+    if(calMode!=='week')return;
+    const wrap=document.querySelector('.timeline-wrap.calendar-scroll');
+    const grid=wrap?.querySelector('.week-grid');
+    if(!wrap||!grid)return;
+    const axis=grid.querySelector('.time-axis');
+    const corner=grid.querySelector('.dayhead:first-child');
+    if(axis){axis.style.position='sticky';axis.style.left='0px';axis.style.zIndex='31';}
+    if(corner){corner.style.position='sticky';corner.style.left='0px';corner.style.zIndex='32';}
+  }
+  const old=window.renderCalendar;
+  if(old&&!window.__v266AxisFix){
+    window.__v266AxisFix=true;
+    window.renderCalendar=function(){old();requestAnimationFrame(fixWeekAxis)};
+  }
+  requestAnimationFrame(fixWeekAxis);
+})();
+</script>
 </body></html>
