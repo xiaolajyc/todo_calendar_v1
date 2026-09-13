@@ -461,7 +461,8 @@ html,body{height:100%;overflow:hidden}
 }
 .timeline-wrap.calendar-scroll .daycol{touch-action:pan-x pan-y!important}
 .timeline-wrap.calendar-scroll .event{touch-action:none!important}
-</style></head><body><div class="app"><header class="head"><div class="headtop"><h1 id="heading">Todo</h1><div id="headActions"></div></div><div id="subtabs" class="tabs"></div></header><main id="main" class="content"></main><button id="fab" class="fab">+</button><div id="bulk" class="bulk hidden"></div><nav class="nav">
+</style><link rel="manifest" href="./manifest.json"><meta name="theme-color" content="#dbeaff"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Todo 日历">
+</head><body><div class="app"><header class="head"><div class="headtop"><h1 id="heading">Todo</h1><div id="headActions"></div></div><div id="subtabs" class="tabs"></div></header><main id="main" class="content"></main><button id="fab" class="fab">+</button><div id="bulk" class="bulk hidden"></div><nav class="nav">
 <button data-page="todo" class="active"><span class="navicon todoicon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 8l1.5 1.5L12 7"/><path d="M13.5 8H17"/><path d="M8 13l1.5 1.5L12 12"/><path d="M13.5 13H17"/></svg></span><span>Todo</span></button>
 <button data-page="calendar"><span class="navicon calendaricon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="16" rx="2.5"/><path d="M7 3v4M17 3v4M3.5 9.5h17"/><path d="M7.5 13h.01M12 13h.01M16.5 13h.01M7.5 17h.01M12 17h.01M16.5 17h.01"/></svg></span><span>日历</span></button>
 <button data-page="settings"><span class="navicon settingsicon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-1.7 1.7-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.03 1.56V20h-2.4v-.2a1.7 1.7 0 0 0-1.03-1.56 1.7 1.7 0 0 0-1.88.34l-.06.06-1.7-1.7.06-.06A1.7 1.7 0 0 0 8.4 15a1.7 1.7 0 0 0-1.56-1.03H6v-2.4h.84A1.7 1.7 0 0 0 8.4 10a1.7 1.7 0 0 0-.34-1.88L8 8.06l1.7-1.7.06.06a1.7 1.7 0 0 0 1.88.34 1.7 1.7 0 0 0 1.03-1.56V5h2.4v.2a1.7 1.7 0 0 0 1.03 1.56 1.7 1.7 0 0 0 1.88-.34l.06-.06 1.7 1.7-.06.06A1.7 1.7 0 0 0 19.4 10a1.7 1.7 0 0 0 1.56 1.03H21v2.4h-.04A1.7 1.7 0 0 0 19.4 15z"/></svg></span><span>设置</span></button>
@@ -789,7 +790,9 @@ function eventHtml(t,startHour,rowH,col=0,cols=1){
   const note=t.notes?`<div class="enote">${esc(t.notes)}</div>`:'';
   return `<div class="event bulkable priority-${priority(t)} ${t.completed?'done':''} ${selected.has(t.id)?'selected':''}" data-id="${t.id}" style="top:${top}px;height:${height}px;left:calc(${left}% + 3px);width:calc(${width}% - 6px);right:auto"><b>${esc(t.title)}</b><div class="etime">${t.start}${t.end?'–'+t.end:''}</div>${note}</div>`;
 }
-function nowLine(startHour,rowH){let d=new Date(),m=d.getHours()*60+d.getMinutes(),top=(m-startHour*60)/60*rowH;if(top<0||top>24*rowH)return '';return `<div class="nowline" style="top:${top}px"></div>`}
+function nowLine(startHour,rowH){const d=new Date(),m=d.getHours()*60+d.getMinutes(),top=(m-startHour*60)/60*rowH;if(top<0||top>24*rowH)return '';return `<div class="nowline" data-nowline="1" style="top:${top}px"></div>`}
+function refreshNowLine(){document.querySelectorAll('.nowline').forEach(el=>el.remove());if(!['day','week'].includes(calMode))return;document.querySelectorAll('.daycol[data-date="'+today()+'"]').forEach(col=>{const rowH=64*(calMode==='week'?weekZoom:dayZoom)/100;const el=document.createElement('div');el.className='nowline';el.dataset.nowline='1';const m=new Date().getHours()*60+new Date().getMinutes();el.style.top=((m/60)*rowH)+'px';col.appendChild(el)});}
+setInterval(refreshNowLine,60000);
 
 
 function toggleCalendarSelect(i){selectMode=true;selected.has(i)?selected.delete(i):selected.add(i);renderCalendar()}
@@ -1793,4 +1796,6 @@ function dayColumn(d,total,startHour,rowH){
   return `<div class="daycol ${selected.size?'select-mode':''}" data-date="${ds}" style="height:${total}px">${html}${ds===today()?nowLine(startHour,rowH):''}</div>`;
 }
 </script>
+
+<script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));}</script>
 </body></html>
