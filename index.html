@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"><meta name="theme-color" content="#ffffff"><title>Todo Calendar V2.43</title>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"><meta name="theme-color" content="#ffffff"><title>Todo Calendar V2.76</title>
 <style>
 :root{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#171717;background:#f5f5f7;--line:#e7e7eb;--muted:#777;--accent:#111}*{box-sizing:border-box}body{margin:0;background:#f5f5f7;overscroll-behavior:none}.app{max-width:1100px;margin:auto;min-height:100vh;background:#fff;padding-bottom:68px}.head{position:sticky;top:0;background:rgba(255,255,255,.96);backdrop-filter:blur(12px);padding:12px 14px;border-bottom:1px solid var(--line);z-index:30}.headtop{display:flex;align-items:center;justify-content:space-between;gap:8px}.head h1{margin:0;font-size:21px}.tabs,.seg{display:flex;gap:6px;margin-top:10px;overflow:auto}.tabs button,.seg button,.chip{border:0;border-radius:10px;padding:8px 11px;background:#eee;white-space:nowrap}.active{background:#111!important;color:#fff}.content{padding:12px}.group{margin:18px 0}.group h3{font-size:14px;margin:0 0 6px}.task{display:flex;align-items:center;gap:10px;padding:13px 7px;border-bottom:1px solid #eee;touch-action:pan-y}.check{width:23px;height:23px;cursor:pointer;border:2px solid #aaa;border-radius:50%;flex:none}.done .check{background:#111}.done .title{text-decoration:line-through;opacity:.45}.taskmain{flex:1;min-width:0}.title{font-weight:600}.meta{font-size:12px;color:#777;margin-top:3px}.badge{font-size:12px}.fab{position:fixed;right:18px;bottom:88px;width:56px;height:56px;border-radius:50%;border:0;background:#111;color:#fff;font-size:30px;z-index:20;box-shadow:0 5px 20px #0002}.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(1100px,100%);height:70px;background:#fff;border-top:1px solid #ddd;display:flex;z-index:40;padding-bottom:env(safe-area-inset-bottom)}.nav button{flex:1;border:0;background:white;font-size:13px}.nav .active{color:#111;background:#eee!important}.card{background:#f5f5f7;border-radius:16px;padding:14px;margin-bottom:12px}.row{display:flex;gap:10px;align-items:center}.row>*{flex:1}.field{margin:12px 0}.field label{display:block;font-size:12px;color:#666;margin-bottom:5px}.field input,.field textarea,.field select{width:100%;padding:12px;border:1px solid #ddd;border-radius:12px;background:#fff}.primary,.danger{border:0;border-radius:12px;padding:12px 16px}.primary{background:#111;color:#fff}.danger{background:#eee}.hidden{display:none!important}.empty{text-align:center;color:#888;padding:35px 10px}
 /* Google Calendar-like week/day timeline */
@@ -461,8 +461,68 @@ html,body{height:100%;overflow:hidden}
 }
 .timeline-wrap.calendar-scroll .daycol{touch-action:pan-x pan-y!important}
 .timeline-wrap.calendar-scroll .event{touch-action:none!important}
-</style><link rel="manifest" href="./manifest.json"><meta name="theme-color" content="#dbeaff"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Todo 日历">
-</head><body><div class="app"><header class="head"><div class="headtop"><h1 id="heading">Todo</h1><div id="headActions"></div></div><div id="subtabs" class="tabs"></div></header><main id="main" class="content"></main><button id="fab" class="fab">+</button><div id="bulk" class="bulk hidden"></div><nav class="nav">
+
+/* ===== V2.76 Desktop workspace ===== */
+@media(min-width:1000px){
+  html,body{overflow:hidden}
+  body{background:linear-gradient(135deg,#f5f8fc 0,#eef3f9 100%)}
+  .app{width:100%;max-width:none;height:100dvh;min-height:100dvh;padding:0 0 0 236px;display:flex;flex-direction:column;border:0;background:transparent}
+  .head{position:sticky;top:0;height:82px;padding:14px 28px 12px;background:rgba(248,251,255,.92);border-bottom:1px solid #dfe6ef;z-index:30;flex:none}
+  .headtop{height:42px}
+  .head h1{font-size:25px;letter-spacing:-.5px}
+  .tabs{margin-top:0;gap:7px;overflow:visible;flex:1;justify-content:flex-start}
+  .headtop #headActions{display:flex;align-items:center;gap:8px}
+  .headtop+.tabs{position:absolute;left:28px;bottom:-1px;transform:translateY(100%);background:transparent;padding-top:8px}
+  .content{padding:24px 28px 28px;overflow-y:auto!important;overflow-x:hidden!important;height:auto;min-height:0;flex:1}
+  .app>.content:has(.timeline-wrap){padding:14px 22px 18px;overflow:hidden!important}
+  .nav{position:fixed;left:0;top:0;bottom:0;transform:none;width:236px;height:100dvh;padding:20px 12px;background:rgba(255,255,255,.96);border:0;border-right:1px solid #dfe6ef;box-shadow:8px 0 28px rgba(35,55,85,.06);display:flex;flex-direction:column;justify-content:flex-start;gap:6px;z-index:60}
+  .nav:before{content:'Todo 日历';font-size:20px;font-weight:850;color:#172033;padding:8px 14px 24px;letter-spacing:-.4px}
+  .nav button{flex:none;width:100%;height:52px;border-radius:13px;display:flex;flex-direction:row;justify-content:flex-start;align-items:center;gap:13px;padding:0 15px;font-size:14px;color:#63738a;background:transparent}
+  .nav button.active{color:var(--blue);background:#edf5ff!important;box-shadow:inset 3px 0 0 var(--blue)}
+  .navicon{width:22px;height:22px}
+  .nav button span:last-child{font-size:14px;font-weight:750}
+  .fab{position:fixed;right:30px;bottom:28px;width:52px;height:52px;font-size:27px;z-index:55}
+  .bulk{left:236px;transform:none;width:calc(100% - 236px);bottom:0;border-radius:0;padding:10px 22px;justify-content:flex-start}
+  .bulk span{margin-right:6px}
+  .group{margin:0 0 18px;border-radius:16px}
+  .group h3{padding:12px 16px;font-size:13px}
+  .task{min-height:62px;padding:11px 16px;transition:background .12s,box-shadow .12s}
+  .task:hover{background:#f7faff}
+  .task .title{font-size:14px}
+  .task .meta{font-size:11px}
+  .todo-desktop-grid{display:grid;grid-template-columns:repeat(2,minmax(360px,1fr));gap:18px;align-items:start}
+  .todo-desktop-grid .group{margin:0}
+  .empty{margin:20px 0}
+  .card{padding:18px 20px}
+  /* calendar: use the entire desktop width; no artificial 120px day columns */
+  .app>.content:has(.timeline-wrap) .calbar{flex:none;margin:0 0 10px}
+  .app>.content:has(.timeline-wrap) .timeline-wrap{width:100%;border-radius:14px}
+  .week-grid{grid-template-columns:70px repeat(7,minmax(0,1fr))!important;width:100%!important;min-width:0!important}
+  .day-grid{grid-template-columns:70px minmax(0,1fr)!important}
+  .dayhead{height:50px;padding-top:7px;font-size:11px}
+  .dayhead strong{font-size:15px}
+  .timecell{height:64px;font-size:11px;padding-right:8px}
+  .daycol{height:1152px}
+  .event{font-size:12px;padding:7px 9px;border-radius:9px}
+  .event b{font-size:12px}
+  .event .etime{font-size:10px;margin-top:2px}
+  .event .enote{font-size:10px}
+  .month{gap:8px}
+  .day{min-height:110px;padding:8px;font-size:12px}
+  .mini{font-size:11px;padding:4px 6px}
+  .zoomctl{margin-left:8px}
+}
+@media(min-width:1400px){
+  .content{padding-left:36px;padding-right:36px}
+  .app>.content:has(.timeline-wrap){padding-left:28px;padding-right:28px}
+  .todo-desktop-grid{grid-template-columns:repeat(3,minmax(300px,1fr))}
+}
+@media(min-width:1000px) and (max-height:800px){
+  .head{height:72px;padding-top:10px}
+  .content{padding-top:16px}
+  .app>.content:has(.timeline-wrap){padding-top:8px}
+}
+</style></head><body><div class="app"><header class="head"><div class="headtop"><h1 id="heading">Todo</h1><div id="headActions"></div></div><div id="subtabs" class="tabs"></div></header><main id="main" class="content"></main><button id="fab" class="fab">+</button><div id="bulk" class="bulk hidden"></div><nav class="nav">
 <button data-page="todo" class="active"><span class="navicon todoicon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 8l1.5 1.5L12 7"/><path d="M13.5 8H17"/><path d="M8 13l1.5 1.5L12 12"/><path d="M13.5 13H17"/></svg></span><span>Todo</span></button>
 <button data-page="calendar"><span class="navicon calendaricon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="16" rx="2.5"/><path d="M7 3v4M17 3v4M3.5 9.5h17"/><path d="M7.5 13h.01M12 13h.01M16.5 13h.01M7.5 17h.01M12 17h.01M16.5 17h.01"/></svg></span><span>日历</span></button>
 <button data-page="settings"><span class="navicon settingsicon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-1.7 1.7-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.03 1.56V20h-2.4v-.2a1.7 1.7 0 0 0-1.03-1.56 1.7 1.7 0 0 0-1.88.34l-.06.06-1.7-1.7.06-.06A1.7 1.7 0 0 0 8.4 15a1.7 1.7 0 0 0-1.56-1.03H6v-2.4h.84A1.7 1.7 0 0 0 8.4 10a1.7 1.7 0 0 0-.34-1.88L8 8.06l1.7-1.7.06.06a1.7 1.7 0 0 0 1.88.34 1.7 1.7 0 0 0 1.03-1.56V5h2.4v.2a1.7 1.7 0 0 0 1.03 1.56 1.7 1.7 0 0 0 1.88-.34l.06-.06 1.7 1.7-.06.06A1.7 1.7 0 0 0 19.4 10a1.7 1.7 0 0 0 1.56 1.03H21v2.4h-.04A1.7 1.7 0 0 0 19.4 15z"/></svg></span><span>设置</span></button>
@@ -1797,5 +1857,35 @@ function dayColumn(d,total,startHour,rowH){
 }
 </script>
 
-<script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));}</script>
+<script>
+/* V2.76 desktop usability layer */
+(function(){
+  const originalRenderTodo=window.renderTodo;
+  window.renderTodo=function(){
+    originalRenderTodo();
+    if(window.matchMedia('(min-width:1000px)').matches){
+      const main=document.getElementById('main');
+      if(main && !main.querySelector('.todo-desktop-grid')){
+        const groups=[...main.querySelectorAll('.group')];
+        if(groups.length>1){
+          const grid=document.createElement('div');
+          grid.className='todo-desktop-grid';
+          groups.forEach(g=>grid.appendChild(g));
+          main.replaceChildren(grid);
+        }
+      }
+    }
+  };
+
+  document.addEventListener('keydown',function(e){
+    const tag=(e.target&&e.target.tagName||'').toLowerCase();
+    const typing=tag==='input'||tag==='textarea'||tag==='select'||e.target?.isContentEditable;
+    if(typing)return;
+    if(e.key==='n'||e.key==='N'){e.preventDefault();if(typeof newTask==='function')newTask();}
+    else if(e.key==='t'||e.key==='T'){e.preventDefault();window.page='todo';window.selectMode=false;window.selected?.clear?.();if(typeof render==='function')render();}
+    else if(e.key==='c'||e.key==='C'){e.preventDefault();window.page='calendar';window.selectMode=false;window.selected?.clear?.();if(typeof render==='function')render();}
+    else if(e.key==='Escape'&&window.selectMode){window.selectMode=false;window.selected?.clear?.();if(typeof render==='function')render();}
+  });
+})();
+</script>
 </body></html>
