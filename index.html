@@ -529,7 +529,84 @@ html,body{height:100%;overflow:hidden}
   .app>.head>.tabs{position:static!important;transform:none!important;left:auto!important;bottom:auto!important;display:flex;min-height:38px;height:auto;padding-top:8px;margin-top:0;overflow:visible}
   .app>.content{position:relative;z-index:1}
 }
-</style></head><body><div class="app"><header class="head"><div class="headtop"><h1 id="heading">Todo</h1><div id="headActions"></div></div><div id="subtabs" class="tabs"></div></header><main id="main" class="content"></main><button id="fab" class="fab">+</button><div id="bulk" class="bulk hidden"></div><nav class="nav">
+
+<style>
+/* V2.78: desktop multi-select toolbar — show all actions without clipping */
+@media(min-width:1000px){
+  #bulk.bulk-fixed{
+    left:236px!important;right:0!important;width:auto!important;
+    bottom:0!important;transform:none!important;
+    box-sizing:border-box!important;
+    min-height:64px!important;
+    max-height:none!important;
+    padding:10px 22px!important;
+    border-radius:0!important;
+    display:flex!important;
+    flex-wrap:wrap!important;
+    align-content:center!important;
+    align-items:center!important;
+    justify-content:flex-start!important;
+    gap:8px!important;
+    overflow:visible!important;
+    box-shadow:0 -6px 22px rgba(30,50,80,.10)!important;
+  }
+  #bulk.bulk-fixed .bulk-count{
+    flex:0 0 auto!important;
+    white-space:nowrap!important;
+  }
+  #bulk.bulk-fixed button{
+    flex:0 0 auto!important;
+    white-space:nowrap!important;
+    min-height:38px!important;
+    padding:8px 13px!important;
+  }
+}
+</style>
+</style>
+<style id="v2-79-desktop-bulk-fix">
+/* V2.79: desktop multi-select toolbar must span the content area, not the left sidebar. */
+@media (min-width:1000px){
+  #bulk.bulk-fixed{
+    position:fixed!important;
+    left:236px!important;
+    right:0!important;
+    width:auto!important;
+    max-width:none!important;
+    bottom:0!important;
+    transform:none!important;
+    box-sizing:border-box!important;
+    min-height:64px!important;
+    height:auto!important;
+    padding:10px 22px!important;
+    margin:0!important;
+    border-radius:0!important;
+    display:flex!important;
+    flex-direction:row!important;
+    flex-wrap:wrap!important;
+    align-items:center!important;
+    align-content:center!important;
+    justify-content:flex-start!important;
+    gap:8px!important;
+    overflow:visible!important;
+    z-index:100!important;
+  }
+  #bulk.bulk-fixed .bulk-count{
+    position:static!important;
+    left:auto!important;
+    flex:0 0 auto!important;
+    white-space:nowrap!important;
+    margin:0!important;
+  }
+  #bulk.bulk-fixed button{
+    position:static!important;
+    flex:0 0 auto!important;
+    white-space:nowrap!important;
+    margin:0!important;
+  }
+  .app>.content{padding-bottom:110px!important}
+}
+</style>
+</head><body><div class="app"><header class="head"><div class="headtop"><h1 id="heading">Todo</h1><div id="headActions"></div></div><div id="subtabs" class="tabs"></div></header><main id="main" class="content"></main><button id="fab" class="fab">+</button><div id="bulk" class="bulk hidden"></div><nav class="nav">
 <button data-page="todo" class="active"><span class="navicon todoicon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 8l1.5 1.5L12 7"/><path d="M13.5 8H17"/><path d="M8 13l1.5 1.5L12 12"/><path d="M13.5 13H17"/></svg></span><span>Todo</span></button>
 <button data-page="calendar"><span class="navicon calendaricon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="16" rx="2.5"/><path d="M7 3v4M17 3v4M3.5 9.5h17"/><path d="M7.5 13h.01M12 13h.01M16.5 13h.01M7.5 17h.01M12 17h.01M16.5 17h.01"/></svg></span><span>日历</span></button>
 <button data-page="settings"><span class="navicon settingsicon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-1.7 1.7-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.03 1.56V20h-2.4v-.2a1.7 1.7 0 0 0-1.03-1.56 1.7 1.7 0 0 0-1.88.34l-.06.06-1.7-1.7.06-.06A1.7 1.7 0 0 0 8.4 15a1.7 1.7 0 0 0-1.56-1.03H6v-2.4h.84A1.7 1.7 0 0 0 8.4 10a1.7 1.7 0 0 0-.34-1.88L8 8.06l1.7-1.7.06.06a1.7 1.7 0 0 0 1.88.34 1.7 1.7 0 0 0 1.03-1.56V5h2.4v.2a1.7 1.7 0 0 0 1.03 1.56 1.7 1.7 0 0 0 1.88-.34l.06-.06 1.7 1.7-.06.06A1.7 1.7 0 0 0 19.4 10a1.7 1.7 0 0 0 1.56 1.03H21v2.4h-.04A1.7 1.7 0 0 0 19.4 15z"/></svg></span><span>设置</span></button>
@@ -1895,4 +1972,48 @@ function dayColumn(d,total,startHour,rowH){
   });
 })();
 </script>
+
+<style id="v2-80-desktop-bulk-final">
+/* V2.80: multi-select toolbar stays INSIDE the right content area. */
+@media (min-width:1000px){
+  #bulk.bulk-fixed{
+    position:fixed!important;
+    left:calc(236px + 28px)!important;
+    right:28px!important;
+    bottom:20px!important;
+    width:auto!important;
+    max-width:none!important;
+    transform:none!important;
+    box-sizing:border-box!important;
+    min-height:58px!important;
+    height:auto!important;
+    padding:9px 12px!important;
+    margin:0!important;
+    border-radius:14px!important;
+    display:flex!important;
+    flex-direction:row!important;
+    flex-wrap:wrap!important;
+    align-items:center!important;
+    align-content:center!important;
+    justify-content:flex-start!important;
+    gap:7px!important;
+    overflow:visible!important;
+    z-index:100!important;
+    box-shadow:0 8px 28px rgba(30,50,80,.18)!important;
+  }
+  #bulk.bulk-fixed .bulk-count{
+    position:static!important; left:auto!important;
+    flex:0 0 auto!important; white-space:nowrap!important; margin:0!important;
+  }
+  #bulk.bulk-fixed button{
+    position:static!important; flex:0 0 auto!important;
+    white-space:nowrap!important; margin:0!important;
+  }
+  .app>.content{padding-bottom:100px!important}
+}
+@media (min-width:1400px){
+  #bulk.bulk-fixed{left:calc(236px + 36px)!important;right:36px!important}
+}
+</style>
+
 </body></html>
