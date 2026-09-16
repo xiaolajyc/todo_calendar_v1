@@ -2207,4 +2207,46 @@ render=function(){
 };
 </script>
 
+
+<style id="v2-86-final-layout">
+/* V2.86: final fix — compact desktop calendar header, non-overlapping Focus, visible version. */
+#heading{display:flex!important;align-items:baseline!important;gap:7px!important;}
+#headingText{display:inline!important;}
+#appVersion{display:inline-block!important;visibility:visible!important;opacity:1!important;font-size:10px!important;line-height:1!important;font-weight:650!important;color:#8d9aae!important;letter-spacing:.2px!important;white-space:nowrap!important;vertical-align:baseline!important;}
+/* The Focus bar is a normal-flow child of #main, never an overlay. */
+#main.content:has(.goals-focus){display:flex!important;flex-direction:column!important;min-height:0!important;}
+#main.content .goals-focus{position:relative!important;flex:0 0 36px!important;height:36px!important;min-height:36px!important;margin:0 0 6px!important;box-sizing:border-box!important;z-index:2!important;}
+#main.content .goal-focus-card{height:34px!important;min-height:34px!important;padding:4px 10px!important;box-sizing:border-box!important;}
+#main.content .goal-focus-label{font-size:9px!important;line-height:12px!important;}
+#main.content .goal-focus-title{font-size:12px!important;line-height:16px!important;}
+#main.content:has(.timeline-wrap) .calbar{flex:0 0 28px!important;height:28px!important;min-height:28px!important;margin:0 0 3px!important;box-sizing:border-box!important;}
+#main.content:has(.timeline-wrap) .calbar .navbtn{height:26px!important;min-height:26px!important;padding:2px 8px!important;font-size:10px!important;border-radius:7px!important;}
+#main.content:has(.timeline-wrap) .caltitle{font-size:14px!important;line-height:26px!important;}
+#main.content:has(.timeline-wrap) .hint{flex:0 0 auto!important;margin:1px 0 3px!important;font-size:8px!important;line-height:11px!important;}
+#main.content:has(.timeline-wrap) .timeline-wrap{position:relative!important;flex:1 1 0!important;min-height:0!important;height:auto!important;max-height:none!important;}
+/* Week date header: compact only for the actual week grid, not the top calendar toolbar. */
+#main.content:has(.week-grid) .week-grid .dayhead{height:24px!important;min-height:24px!important;padding-top:1px!important;font-size:8px!important;line-height:1!important;box-sizing:border-box!important;}
+#main.content:has(.week-grid) .week-grid .dayhead strong{font-size:10px!important;margin-top:0!important;line-height:16px!important;}
+#main.content:has(.week-grid) .week-grid .dayhead.today strong{width:16px!important;height:16px!important;line-height:16px!important;margin:0 auto!important;}
+@media(max-width:999px){
+  #appVersion{font-size:9px!important;}
+  #main.content .goals-focus{flex-basis:34px!important;height:34px!important;min-height:34px!important;}
+  #main.content .goal-focus-card{height:32px!important;min-height:32px!important;padding:3px 8px!important;}
+}
+</style>
+<script id="v2-86-final-version">
+/* Keep the version label visible even if an older render wrapper rewrites the heading text. */
+(function(){
+  function ensureVersion(){
+    const h=document.getElementById('heading');
+    if(!h)return;
+    let v=document.getElementById('appVersion');
+    if(!v){v=document.createElement('small');v.id='appVersion';v.textContent='v2.86';h.appendChild(v);}
+    else v.textContent='v2.86';
+  }
+  ensureVersion();
+  new MutationObserver(ensureVersion).observe(document.getElementById('heading')||document.body,{childList:true,subtree:true});
+})();
+</script>
+
 </body></html>
