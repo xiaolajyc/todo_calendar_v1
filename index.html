@@ -615,6 +615,48 @@ html,body{height:100%;overflow:hidden}
   .app>.content{padding-bottom:110px!important}
 }
 </style>
+
+<style id="v2-89-todo-scroll-fix">
+/* V2.89: Todo must keep its own vertical scroll area after the Focus bar was added. */
+@media(min-width:800px){
+  html,body{overflow:hidden!important;}
+  .app>.content#main:not(:has(.timeline-wrap)){
+    display:block!important;
+    overflow-y:auto!important;
+    overflow-x:hidden!important;
+    min-height:0!important;
+    height:auto!important;
+    flex:1 1 auto!important;
+    -webkit-overflow-scrolling:touch!important;
+  }
+}
+@media(max-width:799px){
+  .app>.content#main:not(:has(.timeline-wrap)){
+    display:block!important;
+    overflow-y:auto!important;
+    overflow-x:hidden!important;
+    min-height:0!important;
+    height:auto!important;
+    flex:1 1 auto!important;
+    -webkit-overflow-scrolling:touch!important;
+  }
+}
+</style>
+<script id="v2-89-version">
+(function(){
+  function fixVersion(){
+    const h=document.getElementById('heading'); if(!h)return;
+    let t=h.querySelector('#headingText');
+    if(!t){t=document.createElement('span');t.id='headingText';h.insertBefore(t,h.firstChild)}
+    t.textContent=page==='todo'?'Todo':page==='calendar'?'日历':page==='goals'?'目标':'设置';
+    let v=h.querySelector('#appVersion');
+    if(!v){v=document.createElement('small');v.id='appVersion';h.appendChild(v)}
+    v.textContent='v2.89';
+  }
+  window.ensureTodoVersion=fixVersion;
+  fixVersion();
+})();
+</script>
 </head><body><div class="app"><header class="head"><div class="headtop"><h1 id="heading"><span id="headingText">Todo</span><small id="appVersion">v2.88</small></h1><div id="headActions"></div></div><div id="subtabs" class="tabs"></div></header><main id="main" class="content"></main><button id="fab" class="fab">+</button><div id="bulk" class="bulk hidden"></div><nav class="nav">
 <button data-page="todo" class="active"><span class="navicon todoicon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 8l1.5 1.5L12 7"/><path d="M13.5 8H17"/><path d="M8 13l1.5 1.5L12 12"/><path d="M13.5 13H17"/></svg></span><span>Todo</span></button>
 <button data-page="calendar"><span class="navicon calendaricon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="16" rx="2.5"/><path d="M7 3v4M17 3v4M3.5 9.5h17"/><path d="M7.5 13h.01M12 13h.01M16.5 13h.01M7.5 17h.01M12 17h.01M16.5 17h.01"/></svg></span><span>日历</span></button>
@@ -1007,8 +1049,11 @@ function clearAllData(){
   localStorage.removeItem('todoCalendarWeekZoom');localStorage.removeItem('todoCalendarDayZoom');
   weekZoom=100;dayZoom=100;render();
 }
-function exportData(){let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(tasks,null,2)],{type:'application/json'}));a.download='todo-calendar-backup.json';a.click()}
-function importData(el){let r=new FileReader();r.onload=()=>{try{let x=JSON.parse(r.result);if(!Array.isArray(x))throw 0;tasks=x;save();render()}catch{alert('文件格式错误')}};if(el.files[0])r.readAsText(el.files[0])}
+function exportData(){
+  const backup={version:'2.89',tasks:cloneObj(tasks),goals:cloneObj(goals||{year:[],month:[]}),exportedAt:new Date().toISOString()};
+  let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(backup,null,2)],{type:'application/json'}));a.download='todo-calendar-backup-v2.89.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500)
+}
+function importData(el){let r=new FileReader();r.onload=()=>{try{let x=JSON.parse(r.result);if(Array.isArray(x)){tasks=x}else if(x&&Array.isArray(x.tasks)){tasks=x.tasks;if(x.goals&&typeof x.goals==='object'){goals={year:Array.isArray(x.goals.year)?x.goals.year.slice(0,3):[],month:Array.isArray(x.goals.month)?x.goals.month.slice(0,3):[]};saveGoals()}}else throw 0;save();render()}catch{alert('文件格式错误')}};if(el.files[0])r.readAsText(el.files[0])}
 document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>{captureCalendarView();const next=b.dataset.page;if(next==='calendar'&&!calendarViewInitialized&&calMode==='week')weekCenterRequested=true;page=next;selectMode=false;selected.clear();render()});$('#fab').onclick=()=>newTask();render();
 </script>
 <script>
@@ -2266,7 +2311,7 @@ render=function(){
 </script>
 <script>
 if('serviceWorker' in navigator){
-  window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=2.88',{updateViaCache:'none'}).catch(()=>{}));
+  window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=2.89',{updateViaCache:'none'}).catch(()=>{}));
 }
 </script>
 </body></html>
