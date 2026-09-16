@@ -2132,4 +2132,28 @@ renderCalendar=function(options={}){
 </script>
 
 
+
+<style id="v2-84-calendar-header-goals">
+/* V2.84: tighter calendar header + always show Year/Month Focus on every calendar mode. */
+@media(min-width:800px){
+  .app>.content:has(.timeline-wrap) .calbar{margin:0 0 6px!important;min-height:34px!important;height:34px!important;gap:8px}
+  .app>.content:has(.timeline-wrap) .calbar .navbtn{padding:5px 10px!important;min-height:32px!important;height:32px!important;font-size:12px!important;border-radius:9px!important}
+  .app>.content:has(.timeline-wrap) .caltitle{font-size:17px!important;line-height:32px!important}
+  .app>.content:has(.timeline-wrap) .hint{margin:3px 0 6px!important;font-size:10px!important}
+  .timeline-wrap:has(.week-grid) .dayhead{height:34px!important;padding-top:3px!important;font-size:9px!important;line-height:1!important}
+  .timeline-wrap:has(.week-grid) .dayhead strong{font-size:12px!important;margin-top:1px!important}
+  .timeline-wrap:has(.week-grid) .dayhead.today strong{width:20px!important;height:20px!important;line-height:20px!important}
+}
+</style>
+<script>
+/* V2.84: calendar Focus is present in day/week/month. Remove any older injected Focus bar first. */
+const __renderCalendarV84Base=renderCalendar;
+renderCalendar=function(options={}){
+  __renderCalendarV84Base(options);
+  const main=$('#main');
+  if(!main)return;
+  main.querySelectorAll('.goals-focus').forEach(el=>el.remove());
+  main.insertAdjacentHTML('afterbegin',goalFocusBar());
+};
+</script>
 </body></html>
