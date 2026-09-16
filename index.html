@@ -1065,7 +1065,7 @@ function removeTask(i){if(confirm('删除此事项？')){tasks=tasks.filter(t=>t
 function renderSettings(){
   /* v2.95: version information belongs in Settings, not beside the page title. */
   const VERSION_INFO_HTML = '<div class="settings-card version-info-card"><div class="settings-title">版本信息</div><div class="settings-row"><span>Todo 日历</span><b>v2.95</b></div></div>';
-$('#subtabs').innerHTML='';$('#headActions').innerHTML='';$('#main').innerHTML=`<div class="card"><b>版本信息</b><p>Todo 日历 v2.96</p></div><div class="card"><b>每日开始时间</b><p>06:30（今天/逾期和每日刷新边界）</p></div><div class="card"><b>默认事件时长</b><p>60 分钟</p></div><div class="card"><button class="primary" onclick="exportData()">导出 JSON</button> <button class="danger" onclick="clipboard=[];render()">清空复制板</button> <label class="danger">导入 JSON<input type="file" accept="application/json" hidden onchange="importData(this)"></label></div><div class="card"><b>本地数据</b><p>${tasks.length} 个事项。当前数据保存在浏览器本地。</p><button class="danger" style="margin-top:8px;width:100%;color:#c62828" onclick="clearAllData()">⚠️ 清除全部数据</button></div>`}
+$('#subtabs').innerHTML='';$('#headActions').innerHTML='';$('#main').innerHTML=`<div class="card"><b>版本信息</b><p>Todo 日历 v2.97</p></div><div class="card"><b>每日开始时间</b><p>06:30（今天/逾期和每日刷新边界）</p></div><div class="card"><b>默认事件时长</b><p>60 分钟</p></div><div class="card"><button class="primary" onclick="exportData()">导出 JSON</button> <button class="danger" onclick="clipboard=[];render()">清空复制板</button> <label class="danger">导入 JSON<input type="file" accept="application/json" hidden onchange="importData(this)"></label></div><div class="card"><b>本地数据</b><p>${tasks.length} 个事项。当前数据保存在浏览器本地。</p><button class="danger" style="margin-top:8px;width:100%;color:#c62828" onclick="clearAllData()">⚠️ 清除全部数据</button></div>`}
 function clearAllData(){
   if(!confirm('第一次确认：确定要清除全部 Todo、日历事项和本地数据吗？此操作不可撤销。'))return;
   if(!confirm('第二次确认：再次确认要永久删除全部数据吗？'))return;
@@ -2149,7 +2149,28 @@ function renderGoals(){
   const section=(type,label,icon,arr)=>{return `<section class="goal-section"><div class="goal-section-head"><h3>${icon} ${label}</h3><span class="goal-limit">${pct3(arr)}</span></div><div class="goal-list">${arr.map((g,i)=>renderGoalRow(type,g,i)).join('')}</div>${arr.length<3?`<button class="goal-add" type="button" onclick="addGoal('${type}')">＋ 添加${label}</button>`:''}</section>`};
   $('#main').innerHTML=`<div class="goals-page"><div class="goals-hero"><h2>🎯 少一点计划，多一点行动</h2><p>年度最多 3 个目标；每个月最多 3 个目标。月度 OKR 按月份独立保存，页面只显示当前月份。</p></div>${section('year','年度目标','🎯',y)}<section class="goal-section"><div class="goal-section-head"><h3>📅 ${goalMonth()} 月度目标</h3><span class="goal-limit">${pct3(m)}</span></div><div class="goal-list">${m.map((g,i)=>renderGoalRow('month',g,i)).join('')}</div>${m.length<3?`<button class="goal-add" type="button" onclick="addGoal('month')">＋ 添加月度目标</button>`:''}<div class="month-goal-hint">其他月份可以通过“添加月度目标”时指定月份写入；这里只显示本月。</div></section><div class="goal-review-entry"><button class="goal-add" type="button" onclick="renderMonthlyReview()">📝 月度回顾</button></div></div>`;
 }
-function addGoal(type){const arr=type==='month'?monthGoals():goals[type];if(arr.length>=3)return alert('该月份最多只能设置 3 个目标');const label=type==='year'?'年度目标':'月度目标';let targetMonth=goalMonth();if(type==='month'){const v=prompt(`添加月度目标\n\n请输入月份（YYYY-MM）：`,targetMonth);if(v===null)return;if(!/^\\d{4}-\\d{2}$/.test(v)||Number(v.slice(5))<1||Number(v.slice(5))>12)return alert('月份格式应为 YYYY-MM，例如 2026-10');targetMonth=v;const target=monthGoals(targetMonth);if(target.length>=3)return alert(`${targetMonth} 已经有 3 个月度目标`)}const v=prompt(`添加${label}\n\n直接写一句话即可：`,'');if(v===null||!v.trim())return;const target=type==='month'?monthGoals(targetMonth):goals[type];target.push({title:v.trim(),done:false,krs:[]});if(type==='month')setMonthGoals(targetMonth,target);saveGoals();renderGoals()}
+function addGoal(type){
+  const arr=type==='month'?monthGoals():goals[type];
+  if(arr.length>=3)return alert('该月份最多只能设置 3 个目标');
+  const label=type==='year'?'年度目标':'月度目标';
+  let targetMonth=goalMonth();
+  if(type==='month'){
+    let v=prompt(`添加月度目标\n\n请输入月份，例如：2026-10\n也支持 2026/10：`,targetMonth);
+    if(v===null)return;
+    v=v.trim().replace(/\//g,'-').replace(/\s+/g,'');
+    const m=v.match(/^(\d{4})-(\d{1,2})$/);
+    if(!m||Number(m[2])<1||Number(m[2])>12)return alert('月份格式不正确，请输入例如 2026-10');
+    targetMonth=`${m[1]}-${String(Number(m[2])).padStart(2,'0')}`;
+    const target=monthGoals(targetMonth);
+    if(target.length>=3)return alert(`${targetMonth} 已经有 3 个月度目标`)
+  }
+  const v=prompt(`添加${label}\n\n直接写一句话即可：`,'');
+  if(v===null||!v.trim())return;
+  const target=type==='month'?monthGoals(targetMonth):goals[type];
+  target.push({title:v.trim(),done:false,krs:[]});
+  if(type==='month')setMonthGoals(targetMonth,target);
+  saveGoals();renderGoals()
+}
 function editGoal(type,i){const arr=type==='month'?monthGoals():goals[type],g=arr[i];if(!g)return;const v=prompt('修改目标：',g.title);if(v===null)return;if(!v.trim())return alert('目标不能为空');g.title=v.trim();saveGoals();renderGoals()}
 function deleteGoal(type,i){if(!confirm('删除这个目标？'))return;const arr=type==='month'?monthGoals():goals[type];arr.splice(i,1);if(type==='month')setMonthGoals(goalMonth(),arr);saveGoals();renderGoals()}
 function moveGoal(type,i,d){const arr=type==='month'?monthGoals():goals[type],j=i+d;if(j<0||j>=arr.length)return;[arr[i],arr[j]]=[arr[j],arr[i]];if(type==='month')setMonthGoals(goalMonth(),arr);saveGoals();renderGoals()}
@@ -2347,7 +2368,7 @@ render=function(){
 
 <script>
 if('serviceWorker' in navigator){
-  window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=2.96',{updateViaCache:'none'}).catch(()=>{}));
+  window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=2.97',{updateViaCache:'none'}).catch(()=>{}));
 }
 </script>
 
@@ -2360,6 +2381,17 @@ if('serviceWorker' in navigator){
 .review-status{margin-left:8px;font-size:11px;font-weight:700;vertical-align:middle}
 .review-pending{color:#9a6b00}
 .review-done{color:#2f7d4a}
+</style>
+
+<style id="v2-97-goal-fixes">
+.goal-row{grid-template-columns:34px 28px minmax(0,1fr) auto!important;text-align:left!important}
+.goal-check{display:grid!important;place-items:center!important;text-align:center!important;font-weight:900!important;font-size:16px!important;color:var(--primary)!important;background:#fff!important}
+.goal-done .goal-check{background:var(--primary)!important;color:#fff!important}
+.goal-main,.goal-text,.goal-okr,.goal-okr-head,.goal-kr,.goal-kr span{text-align:left!important}
+.goal-text{display:block!important}
+.goal-okr-head{justify-content:space-between!important}
+.goal-kr{justify-content:flex-start!important}
+.goal-kr span:nth-child(2){text-align:left!important}
 </style>
 </body></html>
 
