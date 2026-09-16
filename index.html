@@ -609,6 +609,7 @@ html,body{height:100%;overflow:hidden}
 </head><body><div class="app"><header class="head"><div class="headtop"><h1 id="heading">Todo</h1><div id="headActions"></div></div><div id="subtabs" class="tabs"></div></header><main id="main" class="content"></main><button id="fab" class="fab">+</button><div id="bulk" class="bulk hidden"></div><nav class="nav">
 <button data-page="todo" class="active"><span class="navicon todoicon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 8l1.5 1.5L12 7"/><path d="M13.5 8H17"/><path d="M8 13l1.5 1.5L12 12"/><path d="M13.5 13H17"/></svg></span><span>Todo</span></button>
 <button data-page="calendar"><span class="navicon calendaricon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="16" rx="2.5"/><path d="M7 3v4M17 3v4M3.5 9.5h17"/><path d="M7.5 13h.01M12 13h.01M16.5 13h.01M7.5 17h.01M12 17h.01M16.5 17h.01"/></svg></span><span>日历</span></button>
+<button data-page="goals"><span class="navicon goalsicon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1.5"/></svg></span><span>目标</span></button>
 <button data-page="settings"><span class="navicon settingsicon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-1.7 1.7-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.03 1.56V20h-2.4v-.2a1.7 1.7 0 0 0-1.03-1.56 1.7 1.7 0 0 0-1.88.34l-.06.06-1.7-1.7.06-.06A1.7 1.7 0 0 0 8.4 15a1.7 1.7 0 0 0-1.56-1.03H6v-2.4h.84A1.7 1.7 0 0 0 8.4 10a1.7 1.7 0 0 0-.34-1.88L8 8.06l1.7-1.7.06.06a1.7 1.7 0 0 0 1.88.34 1.7 1.7 0 0 0 1.03-1.56V5h2.4v.2a1.7 1.7 0 0 0 1.03 1.56 1.7 1.7 0 0 0 1.88-.34l.06-.06 1.7 1.7-.06.06A1.7 1.7 0 0 0 19.4 10a1.7 1.7 0 0 0 1.56 1.03H21v2.4h-.04A1.7 1.7 0 0 0 19.4 15z"/></svg></span><span>设置</span></button>
 </nav></div>
 <script>
@@ -2016,4 +2017,69 @@ function dayColumn(d,total,startHour,rowH){
 }
 </style>
 
+
+<style id="v2-81-goals-polish">
+/* V2.81: focused goals + polished desktop workspace */
+:root{--goal-red:#ff6b73;--goal-blue:#3f8cff;--goal-gold:#f0ad2e;--goal-ink:#182235}
+.goals-focus{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:0 0 18px}
+.goal-focus-card{position:relative;min-height:78px;border-radius:18px;padding:15px 18px;background:linear-gradient(135deg,#fff6f7,#fff);border:1px solid #ffe0e3;box-shadow:0 6px 20px rgba(45,60,90,.06);overflow:hidden}
+.goal-focus-card.month{background:linear-gradient(135deg,#f3f8ff,#fff);border-color:#dceaff}
+.goal-focus-label{font-size:12px;font-weight:800;letter-spacing:.2px;margin-bottom:6px;color:#df5963}
+.goal-focus-card.month .goal-focus-label{color:#347ce1}
+.goal-focus-title{font-size:18px;font-weight:850;color:#182235;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:8px}
+.goal-focus-sub{margin-top:5px;font-size:11px;color:#8491a4}
+.goal-focus-empty{color:#8b98aa;font-weight:650}
+.goals-page{max-width:980px;margin:0 auto}
+.goals-hero{padding:22px 24px;border-radius:22px;background:linear-gradient(135deg,#fff,#f5f9ff);border:1px solid #e1e9f4;box-shadow:var(--shadow);margin-bottom:18px}
+.goals-hero h2{margin:0;font-size:24px;letter-spacing:-.5px}.goals-hero p{margin:7px 0 0;color:#78879b;font-size:13px}
+.goal-section{margin:0 0 18px;padding:18px;border-radius:20px;background:#fff;border:1px solid #e3eaf3;box-shadow:var(--shadow2)}
+.goal-section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}.goal-section-head h3{margin:0;font-size:17px}.goal-limit{font-size:11px;color:#8996a8;background:#f2f5f9;padding:5px 9px;border-radius:9px}
+.goal-list{display:flex;flex-direction:column;gap:9px}.goal-row{display:grid;grid-template-columns:34px 1fr auto;align-items:center;gap:10px;padding:12px 13px;border:1px solid #e7edf5;border-radius:14px;background:#fbfcfe;transition:.15s}.goal-row:hover{border-color:#cbdcf4;box-shadow:0 4px 12px rgba(35,55,85,.05)}
+.goal-rank{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:850;background:#f0f4f9;color:#63738a}.goal-row:first-child .goal-rank{background:#fff1d3;color:#b87a08}.goal-text{font-size:14px;font-weight:720;color:#25334a;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.goal-actions{display:flex;gap:5px}.goal-actions button{min-width:34px!important;width:34px!important;height:34px!important;min-height:34px!important;padding:0!important;border:0!important;border-radius:9px!important;background:#eef3f8!important;color:#506179!important;font-size:14px!important}.goal-actions button:hover{background:#e4edf8!important}.goal-add{width:100%;margin-top:10px;border:1px dashed #cfdbea!important;background:#f8fafc!important;color:#52709b!important;box-shadow:none!important}
+@media(max-width:799px){.goals-focus{grid-template-columns:1fr;gap:9px}.goal-focus-card{min-height:66px;padding:12px 14px}.goal-focus-title{font-size:16px}.goals-hero{padding:18px}.goal-section{padding:14px}.goal-row{grid-template-columns:30px 1fr auto}.goal-actions button{min-width:30px!important;width:30px!important;height:30px!important;min-height:30px!important}}
+@media(min-width:1000px){
+  .nav:before{content:'🐉  我的计划';font-size:20px;font-weight:850;color:#172033;padding:8px 14px 24px;letter-spacing:-.4px}
+  .nav button{height:50px}
+  .app>.head{box-shadow:0 4px 18px rgba(35,55,85,.035)}
+  .app>.content{padding-top:20px}
+  .group{border-radius:20px}
+  .todo-desktop-grid{gap:20px}
+  .task{min-height:72px;border-radius:0}
+  .goal-focus-card:hover{transform:translateY(-1px);box-shadow:0 9px 24px rgba(35,55,85,.09)}
+}
+</style>
+<script>
+/* V2.81: lightweight goals. No progress tracking, no task linking, max 3 per level. */
+const GOAL_DB='todoCalendarGoalsV1';
+let goals=(()=>{try{const x=JSON.parse(localStorage.getItem(GOAL_DB)||'{}');return {year:Array.isArray(x.year)?x.year.slice(0,3):[],month:Array.isArray(x.month)?x.month.slice(0,3):[]}}catch{return {year:[],month:[]}}})();
+const saveGoals=()=>localStorage.setItem(GOAL_DB,JSON.stringify(goals));
+const goalYear=()=>String(new Date().getFullYear());
+const goalMonth=()=>String(new Date().getFullYear())+'-'+String(new Date().getMonth()+1).padStart(2,'0');
+function goalFocusBar(){
+  const y=goals.year[0]||''; const m=goals.month[0]||'';
+  return `<div class="goals-focus">
+    <div class="goal-focus-card"><div class="goal-focus-label">🎯 ${goalYear()} 年度 Focus</div><div class="goal-focus-title ${y?'':'goal-focus-empty'}">${esc(y||'还没有年度目标')}</div>${goals.year.length>1?`<div class="goal-focus-sub">另有 ${goals.year.length-1} 个年度目标</div>`:''}</div>
+    <div class="goal-focus-card month"><div class="goal-focus-label">📅 ${goalMonth().slice(5)} 月 Focus</div><div class="goal-focus-title ${m?'':'goal-focus-empty'}">${esc(m||'还没有月度目标')}</div>${goals.month.length>1?`<div class="goal-focus-sub">另有 ${goals.month.length-1} 个月度目标</div>`:''}</div>
+  </div>`;
+}
+function renderGoals(){
+  $('#heading').textContent='目标'; $('#subtabs').innerHTML=''; $('#headActions').innerHTML=''; $('#fab').classList.add('hidden');
+  const section=(type,label,icon)=>{const arr=goals[type]; return `<section class="goal-section"><div class="goal-section-head"><h3>${icon} ${label}</h3><span class="goal-limit">最多 3 个 · ${arr.length}/3</span></div><div class="goal-list">${arr.map((g,i)=>`<div class="goal-row"><span class="goal-rank">${i+1}</span><span class="goal-text" title="${esc(g)}">${esc(g)}</span><span class="goal-actions"><button onclick="moveGoal('${type}',${i},-1)" ${i===0?'disabled':''}>↑</button><button onclick="moveGoal('${type}',${i},1)" ${i===arr.length-1?'disabled':''}>↓</button><button onclick="editGoal('${type}',${i})">✎</button><button onclick="deleteGoal('${type}',${i})">×</button></span></div>`).join('')}</div>${arr.length<3?`<button class="goal-add" onclick="addGoal('${type}')">＋ 添加${label}</button>`:''}</section>`};
+  $('#main').innerHTML=`<div class="goals-page"><div class="goals-hero"><h2>🎯 少一点计划，多一点行动</h2><p>每层最多 3 个目标。第 1 个自动成为 Focus，不做进度统计，也不增加额外维护。</p></div>${section('year','年度目标','🎯')}${section('month','本月目标','📅')}</div>`;
+}
+function addGoal(type){const arr=goals[type];if(arr.length>=3)return alert('最多只能设置 3 个目标');const label=type==='year'?'年度目标':'本月目标';const v=prompt(`添加${label}\n\n直接写一句话即可：`,'');if(v===null||!v.trim())return;arr.push(v.trim());saveGoals();renderGoals()}
+function editGoal(type,i){const v=prompt('修改目标：',goals[type][i]);if(v===null)return;if(!v.trim())return alert('目标不能为空');goals[type][i]=v.trim();saveGoals();renderGoals()}
+function deleteGoal(type,i){if(!confirm('删除这个目标？'))return;goals[type].splice(i,1);saveGoals();renderGoals()}
+function moveGoal(type,i,d){const arr=goals[type],j=i+d;if(j<0||j>=arr.length)return;[arr[i],arr[j]]=[arr[j],arr[i]];saveGoals();renderGoals()}
+const __baseRenderTodo=renderTodo;
+renderTodo=function(){__baseRenderTodo();const main=$('#main');if(main){main.insertAdjacentHTML('afterbegin',goalFocusBar());}};
+const __baseRenderCalendar=renderCalendar;
+renderCalendar=function(options={}){__baseRenderCalendar(options);const main=$('#main');if(main){main.insertAdjacentHTML('afterbegin',goalFocusBar());}};
+const __baseRender=render;
+render=function(){if(page==='goals'){document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.page==='goals'));renderGoals();return}__baseRender()};
+const goalNav=document.querySelector('.nav button[data-page="goals"]');
+if(goalNav)goalNav.onclick=()=>{captureCalendarView();page='goals';selectMode=false;selected.clear();render()};
+// Rebind title behavior for keyboard shortcuts and make goals reachable.
+document.addEventListener('keydown',e=>{if(e.target.matches('input,textarea,select'))return;if(e.key.toLowerCase()==='g'){page='goals';selectMode=false;selected.clear();render()}});
+</script>
 </body></html>
