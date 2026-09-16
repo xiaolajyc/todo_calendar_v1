@@ -2106,4 +2106,30 @@ document.addEventListener('keydown',e=>{if(e.target.matches('input,textarea,sele
 }
 </style>
 
+
+<style id="v2-83-week-header-focus">
+/* V2.83: compact weekly date header. */
+@media(min-width:800px){
+  .timeline-wrap:has(.week-grid) .dayhead{height:40px!important;padding-top:4px!important;font-size:10px!important;line-height:1.1!important}
+  .timeline-wrap:has(.week-grid) .dayhead strong{font-size:13px!important;margin-top:1px!important}
+  .timeline-wrap:has(.week-grid) .dayhead.today strong{width:22px!important;height:22px!important;line-height:22px!important}
+}
+@media(max-width:799px){
+  .timeline-wrap:has(.week-grid) .dayhead{height:42px!important;padding-top:4px!important}
+  .timeline-wrap:has(.week-grid) .dayhead strong{font-size:13px!important;margin-top:1px!important}
+}
+</style>
+<script>
+/* V2.83: guarantee the compact Focus bar (including Month Focus) on week/day calendar views. */
+const __renderCalendarV83Base=renderCalendar;
+renderCalendar=function(options={}){
+  __renderCalendarV83Base(options);
+  const main=$('#main');
+  if(!main)return;
+  main.querySelectorAll('.goals-focus').forEach(el=>el.remove());
+  if(['week','day'].includes(calMode)) main.insertAdjacentHTML('afterbegin',goalFocusBar());
+};
+</script>
+
+
 </body></html>
