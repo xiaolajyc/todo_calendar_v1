@@ -679,7 +679,7 @@ html,body{height:100%;overflow:hidden}
 }
 </style>
 
-<style id="v2.99-final-fixes">
+<style id="v2.100-final-fixes">
 .nav .active{background:var(--primary,#3478f6)!important;color:#fff!important}
 .goal-row,.goal-main,.goal-text,.goal-okr,.goal-okr-head,.goal-kr{ text-align:left!important}
 .goal-okr{width:100%;box-sizing:border-box}
@@ -2156,7 +2156,7 @@ function firstOpen(type){const arr=type==='month'?monthGoals(viewMonth()):goals[
 function goalFocusBar(){const y=firstOpen('year'),m=firstOpen('month');return `<div class="goals-focus" aria-label="Focus"><div class="goal-focus-card"><div class="goal-focus-label">🎯 ${goalYear()} 年 Focus</div><div class="goal-focus-title ${y?'':'goal-focus-empty'}" title="${escGoal(y?.title||'')}">${escGoal(y?.title||'年度目标已全部完成')}</div></div><div class="goal-focus-card month"><div class="goal-focus-label">📅 本月 Focus</div><div class="goal-focus-title ${m?'':'goal-focus-empty'}" title="${escGoal(m?.title||'')}">${escGoal(m?.title||'本月目标已全部完成')}</div></div></div>`}
 function pct3(arr){const total=arr.length,n=arr.filter(g=>g.done).length;return total?`${n} / ${total} · ${Math.round(n/total*100)}%`:'0 / 0 · 0%'}
 function krPct(g){const ks=g.krs||[],n=ks.filter(k=>k.done).length;return ks.length?`${n} / ${ks.length} · ${Math.round(n/ks.length*100)}%`:'0 / 0 · 0%'}
-function renderGoalRow(type,g,i,arr){arr=arr||[];const ks=g.krs||[];return `<div class="goal-row ${g.done?'goal-done':''}"><button class="goal-check" aria-label="完成目标" onclick="toggleGoalDone('${type}',${i})">${g.done?'✓':''}</button><span class="goal-rank">${i+1}</span><div class="goal-main"><span class="goal-text ${g.done?'done':''}" title="${escGoal(g.title)}">${escGoal(g.title)}</span><div class="goal-okr"><div class="goal-okr-head"><span>KR ${krPct(g)}</span>${ks.length<3?`<button type="button" onclick="addKR('${type}',${i});event.stopPropagation()">＋ 添加 KR</button>`:''}</div>${ks.map((k,j)=>`<div class="goal-kr ${k.done?'done':''}" onclick="toggleKR('${type}',${i},${j});event.stopPropagation()"><span class="goal-kr-box">${k.done?'✓':''}</span><span>${escGoal(k.title)}</span><button type="button" aria-label="编辑 KR" onclick="editKR('${type}',${i},${j});event.stopPropagation()">✎</button><button type="button" aria-label="删除 KR" onclick="deleteKR('${type}',${i},${j});event.stopPropagation()">×</button></div>`).join('')||'<div class="empty" style="padding:4px 0">还没有 KR</div>'}</div></div><span class="goal-actions"><button type="button" onclick="moveGoal('${type}',${i},-1)" ${i===0?'disabled':''}>↑</button><button type="button" onclick="moveGoal('${type}',${i},1)" ${i===arr.length-1?'disabled':''}>↓</button><button type="button" onclick="editGoal('${type}',${i})">✎</button><button type="button" onclick="deleteGoal('${type}',${i})">×</button></span></div>`}
+function renderGoalRow(type,g,i,arr){arr=arr||[];const ks=g.krs||[];return `<div class="goal-row ${g.done?'goal-done':''}"><button class="goal-check" aria-label="完成目标" onclick="toggleGoalDone('${type}',${i})">${g.done?'✓':''}</button><span class="goal-rank">${i+1}</span><div class="goal-main"><span class="goal-text ${g.done?'done':''}" title="${escGoal(g.title)}">${escGoal(g.title)}</span><div class="goal-okr"><div class="goal-okr-head"><span>KR ${krPct(g)}</span>${ks.length<3?`<button type="button" onclick="addKR('${type}',${i});event.stopPropagation()">＋ 添加 KR</button>`:''}</div><div class="goal-kr-grid">${ks.map((k,j)=>`<div class="goal-kr-card ${k.done?'done':''}"><button class="goal-kr-box" type="button" aria-label="完成 KR" onclick="toggleKR('${type}',${i},${j});event.stopPropagation()">${k.done?'✓':''}</button><span class="goal-kr-title" title="${escGoal(k.title)}">${escGoal(k.title)}</span><div class="goal-kr-actions"><button type="button" aria-label="编辑 KR" onclick="editKR('${type}',${i},${j});event.stopPropagation()">✎</button><button type="button" aria-label="删除 KR" onclick="deleteKR('${type}',${i},${j});event.stopPropagation()">×</button></div></div>`).join('')||'<div class="empty" style="padding:4px 0;grid-column:1/-1">还没有 KR</div>'}</div></div></div><span class="goal-actions"><button type="button" onclick="moveGoal('${type}',${i},-1)" ${i===0?'disabled':''}>↑</button><button type="button" onclick="moveGoal('${type}',${i},1)" ${i===arr.length-1?'disabled':''}>↓</button><button type="button" onclick="editGoal('${type}',${i})">✎</button><button type="button" onclick="deleteGoal('${type}',${i})">×</button></span></div>`}
 function renderGoals(resetMonth=false){
   if(resetMonth)goalViewMonth=goalMonth();
   $('#heading').textContent='目标'; $('#subtabs').innerHTML=''; $('#headActions').innerHTML=''; $('#fab').classList.add('hidden');
@@ -2203,7 +2203,7 @@ function monthTasks(mk){
   return tasks.filter(t=>t.date&&String(t.date).slice(0,7)===mk&&!t.completed&&!recurring(t));
 }
 function completedInMonth(mk){return tasks.filter(t=>t.completed&&String(t.completedAt||'').slice(0,7)===mk)}
-function renderMonthlyReview(mk=monthKey()){window.__reviewMonth=mk;const r=getReviews()[mk]||{},pending=monthTasks(mk),done=completedInMonth(mk),delayed=pending.filter(t=>Number(t.deferCount||0)>0).sort((a,b)=>(b.deferCount||0)-(a.deferCount||0)).slice(0,5);const ya=goals.year,ma=monthGoals(mk),yd=ya.filter(g=>g.done).length,md=ma.filter(g=>g.done).length;$('#heading').textContent='月度回顾';$('#subtabs').innerHTML='';$('#headActions').innerHTML='';$('#fab').classList.add('hidden');$('#main').innerHTML=`<div class="goals-page"><div class="goals-hero"><h2>📝 ${mk} 月度回顾 <small class="review-status ${r.completed?'review-done':'review-pending'}">${r.completed?'✓ 已完成':'○ 尚未完成'}</small></h2><p>大部分内容自动生成，你只需要看看这个月发生了什么，并决定未完成事项下一步怎么处理。</p></div><div class="goal-review-card"><h3>🎯 目标</h3><div class="review-stat"><span>年度目标</span><b>${pct3(ya)}</b></div><div class="review-stat"><span>月度目标</span><b>${pct3(ma)}</b></div></div><div class="goal-review-card"><h3>✓ 本月完成</h3><div class="review-stat"><span>完成 Todo</span><b>${done.length}</b></div>${done.slice().sort((a,b)=>String(b.completedAt||'').localeCompare(String(a.completedAt||''))).slice(0,10).map(t=>`<div class="review-stat"><span>✓ ${esc(t.title)}</span><span>${esc(String(t.completedAt||'').slice(0,10))}</span></div>`).join('')||'<div class="empty">本月还没有完成记录</div>'}</div><div class="goal-review-card"><h3>○ 尚未完成</h3><div class="review-stat"><span>本月计划但未完成</span><b>${pending.length}</b></div>${pending.slice(0,10).map(t=>`<div class="review-stat"><span>${esc(t.title)}</span><button class="btn small" onclick="shiftTaskToNextMonth('${t.id}')">移到下月</button></div>`).join('')||'<div class="empty">全部完成 🎉</div>'}</div><div class="goal-review-card"><h3>🔄 反复延期</h3>${delayed.map(t=>`<div class="review-stat"><span>${esc(t.title)}</span><b>${t.deferCount} 次</b></div>`).join('')||'<div class="empty">暂无反复延期</div>'}</div><div class="goal-review-card"><h3>🔥 本月 Focus</h3><div class="review-stat"><span>年度</span><b>${esc(firstOpen('year')?.title||'全部完成 🎉')}</b></div><div class="review-stat"><span>本月</span><b>${esc(monthGoals(mk).find(g=>!g.done)?.title||'全部完成 🎉')}</b></div></div><div class="goal-review-card"><h3>📝 给这个月留一句话</h3><textarea id="monthlyReviewNote" class="review-note" placeholder="这个月最值得肯定自己的事情是……">${esc(r.note||'')}</textarea><div class="review-actions"><button type="button" class="btn" onclick="renderGoals(true)">← 返回目标</button><button type="button" class="btn primary" onclick="saveMonthlyReview()">保存回顾</button><button type="button" class="btn" onclick="completeMonthlyReview()">✓ 完成回顾</button></div></div></div>`}
+function renderMonthlyReview(mk=monthKey()){window.__reviewMonth=mk;const r=getReviews()[mk]||{},pending=monthTasks(mk),done=completedInMonth(mk),delayed=pending.filter(t=>Number(t.deferCount||0)>0).sort((a,b)=>(b.deferCount||0)-(a.deferCount||0)).slice(0,5);const ya=goals.year,ma=monthGoals(mk),yd=ya.filter(g=>g.done).length,md=ma.filter(g=>g.done).length;$('#heading').textContent='月度回顾';$('#subtabs').innerHTML='';$('#headActions').innerHTML='';$('#fab').classList.add('hidden');$('#main').innerHTML=`<div class="goals-page"><div class="goals-hero"><h2>📝 ${mk} 月度回顾 <small class="review-status ${r.completed?'review-done':'review-pending'}">${r.completed?'✓ 已完成':'○ 尚未完成'}</small></h2><p>大部分内容自动生成，你只需要看看这个月发生了什么，并决定未完成事项下一步怎么处理。</p></div><div class="goal-review-card"><h3>🎯 目标</h3><div class="review-stat"><span>年度目标</span><b>${pct3(ya)}</b></div><div class="review-stat"><span>月度目标</span><b>${pct3(ma)}</b></div></div><div class="goal-review-card"><h3>✓ 本月完成</h3><div class="review-stat"><span>完成 Todo</span><b>${done.length}</b></div>${done.slice().sort((a,b)=>String(b.completedAt||'').localeCompare(String(a.completedAt||''))).slice(0,10).map(t=>`<div class="review-stat"><span>✓ ${esc(t.title)}</span><span>${esc(String(t.completedAt||'').slice(0,10))}</span></div>`).join('')||'<div class="empty">本月还没有完成记录</div>'}</div><div class="goal-review-card"><h3>○ 尚未完成</h3><div class="review-stat"><span>本月计划但未完成</span><b>${pending.length}</b></div>${pending.slice(0,10).map(t=>`<div class="review-stat"><span>${esc(t.title)}</span><button class="btn small" onclick="shiftTaskToNextMonth('${t.id}')">移到下月</button></div>`).join('')||'<div class="empty">全部完成 🎉</div>'}</div><div class="goal-review-card"><h3>🔄 反复延期</h3>${delayed.map(t=>`<div class="review-stat"><span>${esc(t.title)}</span><b>${t.deferCount} 次</b></div>`).join('')||'<div class="empty">暂无反复延期</div>'}</div><div class="goal-review-card"><h3>🔥 本月 Focus</h3><div class="review-stat"><span>年度</span><b>${esc(firstOpen('year')?.title||'全部完成 🎉')}</b></div><div class="review-stat"><span>本月</span><b>${esc(monthGoals(mk).find(g=>!g.done)?.title||'全部完成 🎉')}</b></div></div><div class="goal-review-card"><h3>📝 给这个月留一句话</h3><textarea id="monthlyReviewNote" class="review-note" placeholder="这个月最值得肯定自己的事情是……">${esc(r.note||'')}</textarea><div class="review-actions"><button type="button" class="btn" onclick="openGoalsCurrentMonth()">← 返回目标</button><button type="button" class="btn" onclick="completeMonthlyReview()">✓ 完成回顾</button></div></div></div>`}
 function saveMonthlyReview(){const mk=window.__reviewMonth||monthKey(),r=getReviews();const old=r[mk]||{};r[mk]={...old,note:$('#monthlyReviewNote')?.value||'',completed:!!old.completed};saveReviews(r);renderMonthlyReview(mk);alert('月度回顾已保存')}
 function completeMonthlyReview(){const mk=window.__reviewMonth||monthKey(),r=getReviews();r[mk]={...(r[mk]||{}),note:$('#monthlyReviewNote')?.value||'',completed:true,completedAt:new Date().toISOString()};saveReviews(r);renderMonthlyReview(mk);alert('月度回顾已完成')}
 function shiftTaskToNextMonth(id){
@@ -2403,7 +2403,7 @@ if('serviceWorker' in navigator){
 </style>
 
 <script>
-// v2.99 stability patch: Goals navigation/render + goal row data
+// v2.100 stability patch: Goals navigation/render + goal row data
 (function(){
   function openGoals(){
     try{
@@ -2415,6 +2415,45 @@ if('serviceWorker' in navigator){
   const b=document.querySelector('.nav button[data-page="goals"]');
   if(b) b.onclick=openGoals;
   window.openGoals=openGoals;
+})();
+</script>
+
+<style id="v2-100-goal-review-fixes">
+/* Goals navigation: selected tab uses the same blue filled treatment as other mobile tabs. */
+@media(max-width:799px){
+  .nav button[data-page="goals"].active{background:var(--blue,#3478f6)!important;color:#fff!important;border-radius:12px!important;margin:5px!important;height:58px!important;}
+  .nav button[data-page="goals"].active .navicon{color:#fff!important;}
+  .goal-okr{padding:8px!important}
+  .goal-kr-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px!important;margin-top:7px}
+  .goal-kr-card{min-width:0;display:grid!important;grid-template-columns:18px minmax(0,1fr);grid-template-rows:auto auto;gap:5px;padding:8px!important;border:1px solid #e1e7ef;border-radius:10px;background:#fff;align-items:start}
+  .goal-kr-card .goal-kr-box{grid-column:1;grid-row:1;width:18px!important;height:18px!important;margin:0!important}
+  .goal-kr-title{grid-column:2;grid-row:1;min-width:0!important;white-space:normal!important;overflow-wrap:anywhere!important;text-align:left!important;font-size:12px!important;line-height:1.35}
+  .goal-kr-actions{grid-column:2;grid-row:2;display:flex;justify-content:flex-end;gap:2px}
+  .goal-kr-actions button{border:0;background:transparent;color:#8792a2;padding:2px 5px!important}
+  .goal-kr-card.done .goal-kr-title{text-decoration:line-through;opacity:.48}
+}
+@media(min-width:800px){
+  .goal-kr-grid{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px!important;margin-top:7px}
+  .goal-kr-card{min-width:0;display:grid!important;grid-template-columns:18px minmax(0,1fr);grid-template-rows:auto auto;gap:5px;padding:8px;border:1px solid #e1e7ef;border-radius:10px;background:#fff}
+  .goal-kr-title{grid-column:2;min-width:0;text-align:left!important;white-space:normal!important;overflow-wrap:anywhere}
+  .goal-kr-actions{grid-column:2;display:flex;justify-content:flex-end}
+}
+.goal-kr-card .goal-kr-box{display:grid!important;place-items:center!important;border:1px solid #aeb8c5!important;border-radius:4px!important;background:#fff!important;color:var(--primary,#3478f6)!important;padding:0!important;font-weight:900!important}
+.goal-kr-card.done .goal-kr-box{background:var(--primary,#3478f6)!important;color:#fff!important;border-color:var(--primary,#3478f6)!important}
+</style>
+<script>
+function openGoalsCurrentMonth(){
+  try{ if(typeof captureCalendarView==='function') captureCalendarView(); }catch(e){}
+  goalViewMonth=goalMonth(); page='goals'; selectMode=false; selected.clear();
+  if(typeof renderGoals==='function') renderGoals(false);
+}
+window.openGoalsCurrentMonth=openGoalsCurrentMonth;
+</script>
+
+<script id="v2-100-final-goal-nav">
+(function(){
+ const b=document.querySelector('.nav button[data-page="goals"]');
+ if(b){b.onclick=function(e){if(e)e.preventDefault();openGoalsCurrentMonth();};}
 })();
 </script>
 </body></html>
@@ -2441,7 +2480,7 @@ if('serviceWorker' in navigator){
 .goal-review-entry{display:grid!important;grid-template-columns:1fr 1fr;gap:8px}
 </style>
 <script>
-// v2.99: monthly review history and reliable completion controls
+// v2.100: monthly review history and reliable completion controls
 
 function annualKey(d=new Date()){return String(d.getFullYear())}
 const ANNUAL_REVIEW_DB='todoCalendarAnnualReviewsV1';
@@ -2452,7 +2491,7 @@ function renderAnnualReview(yr=annualKey()){
   const done=tasks.filter(t=>t.completed&&String(t.completedAt||'').slice(0,4)===yr);
   const pending=tasks.filter(t=>t.date&&String(t.date).slice(0,4)===yr&&!t.completed&&!recurring(t));
   $('#heading').textContent='年度回顾';$('#subtabs').innerHTML='';$('#headActions').innerHTML='';$('#fab').classList.add('hidden');
-  $('#main').innerHTML=`<div class="goals-page"><div class="goals-hero"><h2>📊 ${yr} 年度回顾 <small class="review-status ${r.completed?'review-done':'review-pending'}">${r.completed?'✓ 已完成':'○ 尚未完成'}</small></h2><p>年度目标、任务完成情况和年度总结。</p></div><div class="goal-review-card"><h3>🎯 年度目标</h3><div class="review-stat"><span>年度目标</span><b>${pct3(ys)}</b></div></div><div class="goal-review-card"><h3>✓ 年度完成</h3><div class="review-stat"><span>完成 Todo</span><b>${done.length}</b></div>${done.slice().sort((a,b)=>String(b.completedAt||'').localeCompare(String(a.completedAt||''))).slice(0,20).map(t=>`<div class="review-stat"><span>✓ ${esc(t.title)}</span><span>${esc(String(t.completedAt||'').slice(0,10))}</span></div>`).join('')||'<div class="empty">本年度还没有完成记录</div>'}</div><div class="goal-review-card"><h3>○ 尚未完成</h3><div class="review-stat"><span>年度计划但未完成</span><b>${pending.length}</b></div>${pending.slice(0,20).map(t=>`<div class="review-stat"><span>${esc(t.title)}</span></div>`).join('')||'<div class="empty">全部完成 🎉</div>'}</div><div class="goal-review-card"><h3>📝 给这一年留一句话</h3><textarea id="annualReviewNote" class="review-note" placeholder="这一年最值得记录的事情是……">${esc(r.note||'')}</textarea><div class="review-actions"><button type="button" class="btn" onclick="renderGoals(true)">← 返回目标</button><button type="button" class="btn" onclick="saveAnnualReview()">保存回顾</button><button type="button" class="btn primary" onclick="completeAnnualReview()">✓ 完成回顾</button></div></div></div>`;
+  $('#main').innerHTML=`<div class="goals-page"><div class="goals-hero"><h2>📊 ${yr} 年度回顾 <small class="review-status ${r.completed?'review-done':'review-pending'}">${r.completed?'✓ 已完成':'○ 尚未完成'}</small></h2><p>年度目标、任务完成情况和年度总结。</p></div><div class="goal-review-card"><h3>🎯 年度目标</h3><div class="review-stat"><span>年度目标</span><b>${pct3(ys)}</b></div></div><div class="goal-review-card"><h3>✓ 年度完成</h3><div class="review-stat"><span>完成 Todo</span><b>${done.length}</b></div>${done.slice().sort((a,b)=>String(b.completedAt||'').localeCompare(String(a.completedAt||''))).slice(0,20).map(t=>`<div class="review-stat"><span>✓ ${esc(t.title)}</span><span>${esc(String(t.completedAt||'').slice(0,10))}</span></div>`).join('')||'<div class="empty">本年度还没有完成记录</div>'}</div><div class="goal-review-card"><h3>○ 尚未完成</h3><div class="review-stat"><span>年度计划但未完成</span><b>${pending.length}</b></div>${pending.slice(0,20).map(t=>`<div class="review-stat"><span>${esc(t.title)}</span></div>`).join('')||'<div class="empty">全部完成 🎉</div>'}</div><div class="goal-review-card"><h3>📝 给这一年留一句话</h3><textarea id="annualReviewNote" class="review-note" placeholder="这一年最值得记录的事情是……">${esc(r.note||'')}</textarea><div class="review-actions"><button type="button" class="btn" onclick="openGoalsCurrentMonth()">← 返回目标</button><button type="button" class="btn primary" onclick="completeAnnualReview()">✓ 完成回顾</button></div></div></div>`;
 }
 function saveAnnualReview(){const yr=window.__annualReviewYear||annualKey(),r=getAnnualReviews();r[yr]={...(r[yr]||{}),note:$('#annualReviewNote')?.value||'',completed:!!r[yr]?.completed};saveAnnualReviews(r);renderAnnualReview(yr);alert('年度回顾已保存')}
 function completeAnnualReview(){const yr=window.__annualReviewYear||annualKey(),r=getAnnualReviews();r[yr]={...(r[yr]||{}),note:$('#annualReviewNote')?.value||'',completed:true,completedAt:new Date().toISOString()};saveAnnualReviews(r);renderAnnualReview(yr);alert('年度回顾已完成')}
@@ -2461,7 +2500,7 @@ function renderReviewHistory(){
  $('#heading').textContent='历史回顾'; $('#subtabs').innerHTML=''; $('#headActions').innerHTML=''; $('#fab').classList.add('hidden');
  const mhtml=mk.map(k=>{const r=ms[k]||{};return `<div class="review-stat"><button class="btn small" type="button" onclick="openReviewMonth('${k}')">${k} 月度回顾</button><span>${r.completed?'✓ 已完成':'○ 尚未完成'}</span><button class="btn small danger" type="button" onclick="deleteMonthlyReview('${k}')">删除</button></div>`}).join('')||'<div class="empty">还没有保存的月度回顾</div>';
  const ahtml=ak.map(k=>{const r=as[k]||{};return `<div class="review-stat"><button class="btn small" type="button" onclick="renderAnnualReview('${k}')">${k} 年度回顾</button><span>${r.completed?'✓ 已完成':'○ 尚未完成'}</span><button class="btn small danger" type="button" onclick="deleteAnnualReview('${k}')">删除</button></div>`}).join('')||'<div class="empty">还没有保存的年度回顾</div>';
- $('#main').innerHTML=`<div class="goals-page"><div class="goals-hero"><h2>📚 历史回顾</h2><p>查看、编辑或删除已经保存的月度和年度回顾。</p></div><div class="goal-review-card"><h3>📅 月度回顾</h3>${mhtml}</div><div class="goal-review-card"><h3>📊 年度回顾</h3>${ahtml}</div><button class="goal-add" type="button" onclick="renderGoals(true)">← 返回目标</button></div>`;
+ $('#main').innerHTML=`<div class="goals-page"><div class="goals-hero"><h2>📚 历史回顾</h2><p>查看、编辑或删除已经保存的月度和年度回顾。</p></div><div class="goal-review-card"><h3>📅 月度回顾</h3>${mhtml}</div><div class="goal-review-card"><h3>📊 年度回顾</h3>${ahtml}</div><button class="goal-add" type="button" onclick="openGoalsCurrentMonth()">← 返回目标</button></div>`;
 }
 function deleteMonthlyReview(mk){if(!confirm(`确定删除 ${mk} 月度回顾吗？`))return;const r=getReviews();delete r[mk];saveReviews(r);renderReviewHistory()}
 function deleteAnnualReview(yr){if(!confirm(`确定删除 ${yr} 年度回顾吗？`))return;const r=getAnnualReviews();delete r[yr];saveAnnualReviews(r);renderReviewHistory()}
