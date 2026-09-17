@@ -8,7 +8,7 @@
 <link rel="manifest" href="./manifest.json">
 <link rel="apple-touch-icon" href="./icon-180.png">
 <link rel="icon" href="./icon-192.png" type="image/png">
-<title>Todo · v2.114</title>
+<title>Todo · v2.115</title>
 <style>
 :root{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#171717;background:#f5f5f7;--line:#e7e7eb;--muted:#777;--accent:#111}*{box-sizing:border-box}body{margin:0;background:#f5f5f7;overscroll-behavior:none}.app{max-width:1100px;margin:auto;min-height:100vh;background:#fff;padding-bottom:68px}.head{position:sticky;top:0;background:rgba(255,255,255,.96);backdrop-filter:blur(12px);padding:12px 14px;border-bottom:1px solid var(--line);z-index:30}.headtop{display:flex;align-items:center;justify-content:space-between;gap:8px}.head h1{margin:0;font-size:21px}.tabs,.seg{display:flex;gap:6px;margin-top:10px;overflow:auto}.tabs button,.seg button,.chip{border:0;border-radius:10px;padding:8px 11px;background:#eee;white-space:nowrap}.active{background:#111!important;color:#fff}.content{padding:12px}.group{margin:18px 0}.group h3{font-size:14px;margin:0 0 6px}.task{display:flex;align-items:center;gap:10px;padding:13px 7px;border-bottom:1px solid #eee;touch-action:pan-y}.check{width:23px;height:23px;cursor:pointer;border:2px solid #aaa;border-radius:50%;flex:none}.done .check{background:#111}.done .title{text-decoration:line-through;opacity:.45}.taskmain{flex:1;min-width:0}.title{font-weight:600}.meta{font-size:12px;color:#777;margin-top:3px}.badge{font-size:12px}.fab{position:fixed;right:18px;bottom:88px;width:56px;height:56px;border-radius:50%;border:0;background:#111;color:#fff;font-size:30px;z-index:20;box-shadow:0 5px 20px #0002}.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(1100px,100%);height:70px;background:#fff;border-top:1px solid #ddd;display:flex;z-index:40;padding-bottom:env(safe-area-inset-bottom)}.nav button{flex:1;border:0;background:white;font-size:13px}.nav .active{color:#fff!important;background:var(--primary,#3478f6)!important}.card{background:#f5f5f7;border-radius:16px;padding:14px;margin-bottom:12px}.row{display:flex;gap:10px;align-items:center}.row>*{flex:1}.field{margin:12px 0}.field label{display:block;font-size:12px;color:#666;margin-bottom:5px}.field input,.field textarea,.field select{width:100%;padding:12px;border:1px solid #ddd;border-radius:12px;background:#fff}.primary,.danger{border:0;border-radius:12px;padding:12px 16px}.primary{background:#111;color:#fff}.danger{background:#eee}.hidden{display:none!important}.empty{text-align:center;color:#888;padding:35px 10px}
 /* Google Calendar-like week/day timeline */
@@ -2163,6 +2163,10 @@ function renderGoalRow(type,g,i,arr){
   return `<div class="goal-row ${g.done?'goal-done':''}"><button class="goal-check" aria-label="完成目标" onclick="toggleGoalDone('${type}',${i})">${g.done?'✓':''}</button><span class="goal-rank">${i+1}</span><div class="goal-main"><span class="goal-text ${g.done?'done':''}" title="${escGoal(g.title)}">${escGoal(g.title)}</span><div class="goal-okr"><div class="goal-okr-head"><span>KR ${krPct(g)}</span>${ks.length<3?`<button type="button" onclick="addKR('${type}',${i});event.stopPropagation()">＋ 添加 KR</button>`:''}</div>${krRows||'<div class="empty" style="padding:4px 0">还没有 KR</div>'}</div></div><span class="goal-actions"><button type="button" onclick="moveGoal('${type}',${i},-1)" ${i===0?'disabled':''}>↑</button><button type="button" onclick="moveGoal('${type}',${i},1)" ${i===arr.length-1?'disabled':''}>↓</button><button type="button" onclick="editGoal('${type}',${i})">✎</button><button type="button" onclick="deleteGoal('${type}',${i})">×</button></span></div>`
 }
 function renderGoals(resetMonth=false){
+  document.querySelectorAll('.goals-focus').forEach(el=>el.remove());
+  document.querySelectorAll('.app>.focus-fixed-root').forEach(el=>el.remove());
+  document.getElementById('main')?.classList.remove('focus-fixed-offset');
+  document.getElementById('main')?.style.removeProperty('padding-top');
   if(resetMonth)goalViewMonth=goalMonth();
   document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.page==='goals'));
   $('#heading').textContent='目标'; $('#subtabs').innerHTML=''; $('#headActions').innerHTML=''; $('#fab').classList.add('hidden');
@@ -2637,8 +2641,8 @@ function openReviewMonth(mk){window.__reviewMonth=mk;renderMonthlyReview(mk)}
 
 
 
-<style id="v2-114-focus-authoritative">
-/* v2.114: corrected Focus vertical anchoring. The fixed root is positioned below the full header.
+<style id="v2-113-focus-authoritative">
+/* v2.115: corrected Focus vertical anchoring. The fixed root is positioned below the full header.
    Todo/Calendar: Focus is viewport-fixed; #main is the ONLY scrolling surface.
    Goals: unchanged normal-flow Focus. */
 html,body{height:100%!important;overflow:hidden!important}
@@ -2661,7 +2665,7 @@ html,body{height:100%!important;overflow:hidden!important}
   .app>.focus-fixed-root{left:236px!important}
 }
 </style>
-<script id="v2-114-focus-authoritative-js">
+<script id="v2-113-focus-authoritative-js">
 (function(){
   /* Preserve the real Goals Focus renderer, but make all legacy Todo/Calendar
      injection wrappers harmless. */
@@ -2753,4 +2757,21 @@ html,body{height:100%!important;overflow:hidden!important}
 })();
 </script>
 
+<style id="v2-115-goals-no-focus">
+/* Goals page: Focus is not displayed here. Focus is shown only on Todo/Calendar. */
+body:has(.nav button[data-page="goals"].active) .focus-fixed-root{display:none!important}
+</style>
+<script id="v2-115-goals-no-focus-js">
+(function(){
+  function cleanGoalsFocus(){
+    if(typeof page!=="undefined" && page==="goals") {
+      document.querySelectorAll(".goals-focus, .app>.focus-fixed-root").forEach(el=>el.remove());
+      const main=document.getElementById("main");
+      if(main){main.classList.remove("focus-fixed-offset");main.style.removeProperty("padding-top");}
+    }
+  }
+  cleanGoalsFocus();
+  new MutationObserver(cleanGoalsFocus).observe(document.body,{childList:true,subtree:true});
+})();
+</script>
 </body></html>
