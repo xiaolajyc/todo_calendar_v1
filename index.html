@@ -8,7 +8,7 @@
 <link rel="manifest" href="./manifest.json">
 <link rel="apple-touch-icon" href="./icon-180.png">
 <link rel="icon" href="./icon-192.png" type="image/png">
-<title>Todo · v2.88</title>
+<title>Todo · v2.106</title>
 <style>
 :root{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#171717;background:#f5f5f7;--line:#e7e7eb;--muted:#777;--accent:#111}*{box-sizing:border-box}body{margin:0;background:#f5f5f7;overscroll-behavior:none}.app{max-width:1100px;margin:auto;min-height:100vh;background:#fff;padding-bottom:68px}.head{position:sticky;top:0;background:rgba(255,255,255,.96);backdrop-filter:blur(12px);padding:12px 14px;border-bottom:1px solid var(--line);z-index:30}.headtop{display:flex;align-items:center;justify-content:space-between;gap:8px}.head h1{margin:0;font-size:21px}.tabs,.seg{display:flex;gap:6px;margin-top:10px;overflow:auto}.tabs button,.seg button,.chip{border:0;border-radius:10px;padding:8px 11px;background:#eee;white-space:nowrap}.active{background:#111!important;color:#fff}.content{padding:12px}.group{margin:18px 0}.group h3{font-size:14px;margin:0 0 6px}.task{display:flex;align-items:center;gap:10px;padding:13px 7px;border-bottom:1px solid #eee;touch-action:pan-y}.check{width:23px;height:23px;cursor:pointer;border:2px solid #aaa;border-radius:50%;flex:none}.done .check{background:#111}.done .title{text-decoration:line-through;opacity:.45}.taskmain{flex:1;min-width:0}.title{font-weight:600}.meta{font-size:12px;color:#777;margin-top:3px}.badge{font-size:12px}.fab{position:fixed;right:18px;bottom:88px;width:56px;height:56px;border-radius:50%;border:0;background:#111;color:#fff;font-size:30px;z-index:20;box-shadow:0 5px 20px #0002}.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(1100px,100%);height:70px;background:#fff;border-top:1px solid #ddd;display:flex;z-index:40;padding-bottom:env(safe-area-inset-bottom)}.nav button{flex:1;border:0;background:white;font-size:13px}.nav .active{color:#fff!important;background:var(--primary,#3478f6)!important}.card{background:#f5f5f7;border-radius:16px;padding:14px;margin-bottom:12px}.row{display:flex;gap:10px;align-items:center}.row>*{flex:1}.field{margin:12px 0}.field label{display:block;font-size:12px;color:#666;margin-bottom:5px}.field input,.field textarea,.field select{width:100%;padding:12px;border:1px solid #ddd;border-radius:12px;background:#fff}.primary,.danger{border:0;border-radius:12px;padding:12px 16px}.primary{background:#111;color:#fff}.danger{background:#eee}.hidden{display:none!important}.empty{text-align:center;color:#888;padding:35px 10px}
 /* Google Calendar-like week/day timeline */
@@ -2382,7 +2382,7 @@ render=function(){
 
 <script>
 if('serviceWorker' in navigator){
-  window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=2.105',{updateViaCache:'none'}).catch(()=>{}));
+  window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=2.106',{updateViaCache:'none'}).catch(()=>{}));
 }
 </script>
 
@@ -2720,6 +2720,80 @@ function openReviewMonth(mk){window.__reviewMonth=mk;renderMonthlyReview(mk)}
   // Re-apply after initial page render and after delayed calendar Focus injection.
   requestAnimationFrame(normalizeFocusLayout);
   setTimeout(normalizeFocusLayout,80);
+})();
+</script>
+
+<style id="v2-106-clean-final-fix">
+/* v2.106: clean final scroll architecture. Goals: fixed Focus + one scrolling body. Calendar week: vertical + horizontal scrolling. */
+@media(max-width:999px){
+  #main.content.focus-page-layout{
+    display:flex!important; flex-direction:column!important; overflow:hidden!important;
+    height:100%!important; min-height:0!important; padding-bottom:8px!important;
+  }
+  #main.content.focus-page-layout > .goals-focus{
+    position:relative!important; flex:0 0 auto!important; top:auto!important;
+    z-index:20!important; width:100%!important; margin:0 0 7px!important;
+  }
+  #main.content.focus-page-layout > .focus-scroll-body{
+    display:block!important; flex:1 1 0!important; min-height:0!important;
+    height:auto!important; overflow-y:auto!important; overflow-x:hidden!important;
+    -webkit-overflow-scrolling:touch!important; touch-action:pan-y!important;
+  }
+  /* The week timeline itself owns both scroll axes. */
+  #main.content:has(.week-grid){overflow:hidden!important;}
+  #main.content:has(.week-grid) .timeline-wrap.calendar-scroll{
+    overflow-x:auto!important; overflow-y:auto!important;
+    -webkit-overflow-scrolling:touch!important; touch-action:pan-x pan-y!important;
+    min-height:0!important;
+  }
+  #main.content:has(.week-grid) .week-grid{touch-action:pan-x pan-y!important;}
+  #main.content:has(.week-grid) .daycol{touch-action:pan-x pan-y!important;}
+}
+@media(min-width:1000px){
+  #main.content.focus-page-layout{
+    display:flex!important; flex-direction:column!important; overflow:hidden!important;
+    height:100%!important; min-height:0!important;
+  }
+  #main.content.focus-page-layout > .goals-focus{position:relative!important;flex:0 0 auto!important;top:auto!important;z-index:20!important;}
+  #main.content.focus-page-layout > .focus-scroll-body{flex:1 1 0!important;min-height:0!important;overflow-y:auto!important;overflow-x:hidden!important;}
+}
+</style>
+<script id="v2-106-clean-final-fix-js">
+(function(){
+  function fixGoalsScroll(){
+    const main=document.querySelector('#main.content');
+    if(!main)return;
+    if(page!=='goals'){
+      main.classList.remove('focus-page-layout');
+      const body=main.querySelector(':scope > .focus-scroll-body');
+      if(body){while(body.firstChild)main.appendChild(body.firstChild);body.remove();}
+      return;
+    }
+    const focus=main.querySelector('.goals-focus');
+    if(!focus)return;
+    main.classList.add('focus-page-layout');
+    // Always rebuild the wrapper from current children. This avoids the v2.105 sticky/flex conflict.
+    let body=main.querySelector(':scope > .focus-scroll-body');
+    if(body) body.remove();
+    const kids=Array.from(main.children).filter(x=>x!==focus);
+    body=document.createElement('div'); body.className='focus-scroll-body';
+    kids.forEach(x=>body.appendChild(x));
+    if(focus.parentElement!==main) main.prepend(focus);
+    main.appendChild(body);
+  }
+  window.fixGoalsScroll=fixGoalsScroll;
+  const oldRG=window.renderGoals;
+  if(typeof oldRG==='function'){
+    window.renderGoals=function(resetMonth=false){
+      oldRG(resetMonth);
+      fixGoalsScroll();
+    };
+  }
+  const oldR=window.render;
+  if(typeof oldR==='function'){
+    window.render=function(){oldR();requestAnimationFrame(fixGoalsScroll);};
+  }
+  requestAnimationFrame(fixGoalsScroll);
 })();
 </script>
 </body></html>
