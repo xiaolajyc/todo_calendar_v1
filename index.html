@@ -2382,7 +2382,7 @@ render=function(){
 
 <script>
 if('serviceWorker' in navigator){
-  window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=2.102',{updateViaCache:'none'}).catch(()=>{}));
+  window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=2.105',{updateViaCache:'none'}).catch(()=>{}));
 }
 </script>
 
@@ -2723,3 +2723,75 @@ function openReviewMonth(mk){window.__reviewMonth=mk;renderMonthlyReview(mk)}
 })();
 </script>
 </body></html>
+
+<style id="v2-105-final-focus-fix">
+/* Final Focus fix: Goals Focus is a sticky sibling inside the actual #main scroll container. */
+#main.content.focus-page-layout{
+  display:block!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  min-height:0!important;
+  height:100%!important;
+  position:relative!important;
+  -webkit-overflow-scrolling:touch!important;
+}
+#main.content.focus-page-layout > .goals-focus{
+  position:sticky!important;
+  top:0!important;
+  z-index:100!important;
+  flex:none!important;
+  width:100%!important;
+  margin-top:0!important;
+  background:#f5f5f7!important;
+  isolation:isolate!important;
+}
+#main.content.focus-page-layout > .focus-scroll-body{
+  display:block!important;
+  overflow:visible!important;
+  min-height:0!important;
+  height:auto!important;
+}
+@media(max-width:799px){
+  #main.content.focus-page-layout > .goals-focus{
+    top:0!important;
+    padding-top:1px!important;
+    margin-bottom:7px!important;
+  }
+}
+</style>
+<script id="v2-105-final-focus-fix-js">
+(function(){
+  function finalFocusFix(){
+    const main=document.querySelector('#main.content');
+    if(!main)return;
+    if(page!=='goals'){main.classList.remove('focus-page-layout');return;}
+    const focus=main.querySelector('.goals-focus');
+    if(!focus)return;
+    main.classList.add('focus-page-layout');
+    // Put Focus directly under #main so sticky positioning is relative to the real scroll container.
+    if(focus.parentElement!==main) main.prepend(focus);
+    // Undo the previous wrapper if it exists: Goals content should remain in #main's scroll flow.
+    const body=main.querySelector(':scope > .focus-scroll-body');
+    if(body){
+      while(body.firstChild) main.appendChild(body.firstChild);
+      body.remove();
+    }
+    // Keep exactly one Focus bar.
+    main.querySelectorAll('.goals-focus').forEach((el,i)=>{if(i>0)el.remove()});
+  }
+  window.finalFocusFix=finalFocusFix;
+  const old=window.renderGoals;
+  if(typeof old==='function'){
+    window.renderGoals=function(resetMonth=false){
+      old(resetMonth);
+      finalFocusFix();
+      requestAnimationFrame(finalFocusFix);
+    };
+  }
+  const oldRender=window.render;
+  if(typeof oldRender==='function'){
+    window.render=function(){oldRender();requestAnimationFrame(finalFocusFix)};
+  }
+  requestAnimationFrame(finalFocusFix);
+})();
+</script>
