@@ -1,23 +1,13 @@
 {
-  "name": "Todo 日历",
-  "short_name": "Todo 日历",
-  "start_url": "./",
-  "display": "standalone",
-  "background_color": "#f4f7fb",
-  "theme_color": "#4f8cff",
-  "orientation": "portrait-primary",
-  "icons": [
-    {
-      "src": "icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    }
+  "name":"Todo 日历",
+  "short_name":"Todo 日历",
+  "start_url":"./",
+  "display":"standalone",
+  "background_color":"#f5f5f7",
+  "theme_color":"#3478f6",
+  "orientation":"portrait-primary",
+  "icons":[
+    {"src":"icon-192.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},
+    {"src":"icon-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}
   ]
 }

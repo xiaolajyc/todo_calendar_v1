@@ -1077,7 +1077,7 @@ function removeTask(i){if(confirm('删除此事项？')){tasks=tasks.filter(t=>t
 function renderSettings(){
   /* v2.95: version information belongs in Settings, not beside the page title. */
   const VERSION_INFO_HTML = '<div class="settings-card version-info-card"><div class="settings-title">版本信息</div><div class="settings-row"><span>Todo 日历</span><b>v2.105</b></div></div>';
-$('#subtabs').innerHTML='';$('#headActions').innerHTML='';$('#main').innerHTML=`<div class="card"><b>版本信息</b><p>Todo 日历 v2.105</p></div><div class="card"><b>每日开始时间</b><p>06:30（今天/逾期和每日刷新边界）</p></div><div class="card"><b>默认事件时长</b><p>60 分钟</p></div><div class="card"><button class="primary" onclick="exportData()">导出 JSON</button> <button class="danger" onclick="clipboard=[];render()">清空复制板</button> <label class="danger">导入 JSON<input type="file" accept="application/json" hidden onchange="importData(this)"></label></div><div class="card"><b>本地数据</b><p>${tasks.length} 个事项。当前数据保存在浏览器本地。</p><button class="danger" style="margin-top:8px;width:100%;color:#c62828" onclick="clearAllData()">⚠️ 清除全部数据</button></div>`}
+$('#subtabs').innerHTML='';$('#headActions').innerHTML='';$('#main').innerHTML=`<div class="card"><b>版本信息</b><p>Todo 日历 v2.107</p></div><div class="card"><b>每日开始时间</b><p>06:30（今天/逾期和每日刷新边界）</p></div><div class="card"><b>默认事件时长</b><p>60 分钟</p></div><div class="card"><button class="primary" onclick="exportData()">导出 JSON</button> <button class="danger" onclick="clipboard=[];render()">清空复制板</button> <label class="danger">导入 JSON<input type="file" accept="application/json" hidden onchange="importData(this)"></label></div><div class="card"><b>本地数据</b><p>${tasks.length} 个事项。当前数据保存在浏览器本地。</p><button class="danger" style="margin-top:8px;width:100%;color:#c62828" onclick="clearAllData()">⚠️ 清除全部数据</button></div>`}
 function clearAllData(){
   if(!confirm('第一次确认：确定要清除全部 Todo、日历事项和本地数据吗？此操作不可撤销。'))return;
   if(!confirm('第二次确认：再次确认要永久删除全部数据吗？'))return;
@@ -2504,7 +2504,7 @@ window.openGoalsCurrentMonth=openGoalsCurrentMonth;
 .goal-kr>button:not(.goal-kr-box){border:0!important;background:none!important;color:#8792a2!important;padding:2px 4px!important;flex:0 0 auto!important}
 @media(max-width:799px){.goal-kr{font-size:13px!important;padding:5px 0!important}.goal-kr>span{word-break:keep-all!important;overflow-wrap:break-word!important}}
 </style>
-</body></html>
+
 
 <style id="v2-93-mobile-nav-fix">
 @media(max-width:799px){
@@ -2635,237 +2635,109 @@ function openReviewMonth(mk){window.__reviewMonth=mk;renderMonthlyReview(mk)}
 })();
 </script>
 
-<style id="v2-105-focus-structural-fix">
-/* v2.105: Focus is a fixed sibling of the scrolling content, not a sticky child. */
+
+<style id="v2-107-clean-focus-and-week-scroll">
+/* v2.107: one clean scroll architecture. No sticky/wrapper conflict. */
 #main.content.focus-page-layout{
   display:flex!important;
   flex-direction:column!important;
+  flex:1 1 0!important;
   min-height:0!important;
+  height:auto!important;
+  max-height:none!important;
   overflow:hidden!important;
 }
 #main.content.focus-page-layout > .goals-focus{
   position:relative!important;
-  top:auto!important;
   flex:0 0 auto!important;
-  z-index:30!important;
-  margin:0 0 6px!important;
+  top:auto!important;
+  z-index:50!important;
+  width:100%!important;
+  margin:0 0 7px!important;
+  transform:none!important;
 }
 #main.content.focus-page-layout > .focus-scroll-body{
   flex:1 1 0!important;
   min-height:0!important;
+  height:auto!important;
+  max-height:none!important;
   overflow-y:auto!important;
   overflow-x:hidden!important;
   -webkit-overflow-scrolling:touch!important;
-  overscroll-behavior-y:contain!important;
+  overscroll-behavior-y:auto!important;
+  touch-action:pan-y!important;
 }
+/* The weekly calendar owns its two-dimensional scrolling. */
+#main.content:has(.week-grid){
+  overflow:hidden!important;
+}
+#main.content:has(.week-grid) .timeline-wrap.calendar-scroll{
+  flex:1 1 0!important;
+  min-height:0!important;
+  height:auto!important;
+  max-height:none!important;
+  overflow-x:auto!important;
+  overflow-y:auto!important;
+  -webkit-overflow-scrolling:touch!important;
+  touch-action:pan-x pan-y!important;
+}
+#main.content:has(.week-grid) .week-grid{
+  touch-action:pan-x pan-y!important;
+  min-height:1152px!important;
+}
+#main.content:has(.week-grid) .daycol{touch-action:pan-x pan-y!important;}
 @media(max-width:799px){
   #main.content.focus-page-layout > .goals-focus{margin-bottom:7px!important;}
-  #main.content.focus-page-layout > .focus-scroll-body{padding-bottom:4px!important;}
 }
 </style>
-<script id="v2-105-focus-structural-fix-js">
+<script id="v2-107-clean-focus-and-week-scroll-js">
 (function(){
-  function normalizeFocusLayout(){
+  function cleanFocusLayout(){
     const main=document.querySelector('#main.content');
     if(!main)return;
-    const focus=main.querySelector('.goals-focus');
-    if(!focus){
-      main.classList.remove('focus-page-layout');
-      return;
-    }
-    main.classList.add('focus-page-layout');
-    // Focus must be a direct child of the non-scrolling #main container.
-    if(focus.parentElement!==main) main.prepend(focus);
-    // Everything except Focus gets its own independent scroll container.
-    let body=main.querySelector(':scope > .focus-scroll-body');
-    if(!body){
-      body=document.createElement('div');
-      body.className='focus-scroll-body';
-      while(main.children.length>1){
-        const child=main.children[1];
-        if(child===body)break;
-        body.appendChild(child);
-      }
-      main.appendChild(body);
-    }else{
-      // If a renderer inserted new content outside the wrapper, move it in.
-      Array.from(main.children).forEach(child=>{
-        if(child!==focus && child!==body) body.appendChild(child);
-      });
-    }
-  }
-
-  // Goals page: explicitly render the two Focus values above the independently scrolling goals.
-  if(typeof renderGoals==='function'){
-    const baseRenderGoals=renderGoals;
-    window.renderGoals=function(resetMonth=false){
-      baseRenderGoals(resetMonth);
-      const main=document.querySelector('#main.content');
-      if(!main)return;
-      main.querySelectorAll('.goals-focus').forEach((el,i)=>{if(i>0)el.remove()});
-      if(!main.querySelector(':scope > .goals-focus')) main.insertAdjacentHTML('afterbegin',goalFocusBar());
-      normalizeFocusLayout();
-    };
-  }
-
-  // Final render wrapper catches Todo/Calendar render paths after all legacy v2.8x wrappers.
-  if(typeof render==='function'){
-    const baseRender105=render;
-    window.render=function(){
-      baseRender105();
-      requestAnimationFrame(normalizeFocusLayout);
-    };
-  }
-  window.normalizeFocusLayout=normalizeFocusLayout;
-  // Re-apply after initial page render and after delayed calendar Focus injection.
-  requestAnimationFrame(normalizeFocusLayout);
-  setTimeout(normalizeFocusLayout,80);
-})();
-</script>
-
-<style id="v2-106-clean-final-fix">
-/* v2.106: clean final scroll architecture. Goals: fixed Focus + one scrolling body. Calendar week: vertical + horizontal scrolling. */
-@media(max-width:999px){
-  #main.content.focus-page-layout{
-    display:flex!important; flex-direction:column!important; overflow:hidden!important;
-    height:100%!important; min-height:0!important; padding-bottom:8px!important;
-  }
-  #main.content.focus-page-layout > .goals-focus{
-    position:relative!important; flex:0 0 auto!important; top:auto!important;
-    z-index:20!important; width:100%!important; margin:0 0 7px!important;
-  }
-  #main.content.focus-page-layout > .focus-scroll-body{
-    display:block!important; flex:1 1 0!important; min-height:0!important;
-    height:auto!important; overflow-y:auto!important; overflow-x:hidden!important;
-    -webkit-overflow-scrolling:touch!important; touch-action:pan-y!important;
-  }
-  /* The week timeline itself owns both scroll axes. */
-  #main.content:has(.week-grid){overflow:hidden!important;}
-  #main.content:has(.week-grid) .timeline-wrap.calendar-scroll{
-    overflow-x:auto!important; overflow-y:auto!important;
-    -webkit-overflow-scrolling:touch!important; touch-action:pan-x pan-y!important;
-    min-height:0!important;
-  }
-  #main.content:has(.week-grid) .week-grid{touch-action:pan-x pan-y!important;}
-  #main.content:has(.week-grid) .daycol{touch-action:pan-x pan-y!important;}
-}
-@media(min-width:1000px){
-  #main.content.focus-page-layout{
-    display:flex!important; flex-direction:column!important; overflow:hidden!important;
-    height:100%!important; min-height:0!important;
-  }
-  #main.content.focus-page-layout > .goals-focus{position:relative!important;flex:0 0 auto!important;top:auto!important;z-index:20!important;}
-  #main.content.focus-page-layout > .focus-scroll-body{flex:1 1 0!important;min-height:0!important;overflow-y:auto!important;overflow-x:hidden!important;}
-}
-</style>
-<script id="v2-106-clean-final-fix-js">
-(function(){
-  function fixGoalsScroll(){
-    const main=document.querySelector('#main.content');
-    if(!main)return;
-    if(page!=='goals'){
+    const isGoals=(typeof page!=='undefined' && page==='goals');
+    if(!isGoals){
       main.classList.remove('focus-page-layout');
       const body=main.querySelector(':scope > .focus-scroll-body');
-      if(body){while(body.firstChild)main.appendChild(body.firstChild);body.remove();}
+      if(body){
+        Array.from(body.children).forEach(x=>main.appendChild(x));
+        body.remove();
+      }
       return;
     }
-    const focus=main.querySelector('.goals-focus');
+    let focus=main.querySelector('.goals-focus');
+    if(!focus){
+      if(typeof goalFocusBar==='function') main.insertAdjacentHTML('afterbegin',goalFocusBar());
+      focus=main.querySelector('.goals-focus');
+    }
     if(!focus)return;
     main.classList.add('focus-page-layout');
-    // Always rebuild the wrapper from current children. This avoids the v2.105 sticky/flex conflict.
-    let body=main.querySelector(':scope > .focus-scroll-body');
-    if(body) body.remove();
-    const kids=Array.from(main.children).filter(x=>x!==focus);
-    body=document.createElement('div'); body.className='focus-scroll-body';
-    kids.forEach(x=>body.appendChild(x));
-    if(focus.parentElement!==main) main.prepend(focus);
+
+    /* Flatten any previous wrapper, then create exactly one scroll body. */
+    const oldBodies=Array.from(main.querySelectorAll(':scope > .focus-scroll-body'));
+    oldBodies.forEach(b=>{
+      while(b.firstChild) main.appendChild(b.firstChild);
+      b.remove();
+    });
+    main.querySelectorAll(':scope > .goals-focus').forEach((x,i)=>{if(i>0)x.remove()});
+    focus=main.querySelector(':scope > .goals-focus');
+    if(!focus){main.prepend(main.querySelector('.goals-focus'));focus=main.querySelector(':scope > .goals-focus');}
+    const body=document.createElement('div');
+    body.className='focus-scroll-body';
+    Array.from(main.children).forEach(x=>{if(x!==focus)body.appendChild(x)});
     main.appendChild(body);
   }
-  window.fixGoalsScroll=fixGoalsScroll;
-  const oldRG=window.renderGoals;
-  if(typeof oldRG==='function'){
-    window.renderGoals=function(resetMonth=false){
-      oldRG(resetMonth);
-      fixGoalsScroll();
-    };
+  window.cleanFocusLayout=cleanFocusLayout;
+
+  const rg=window.renderGoals;
+  if(typeof rg==='function'){
+    window.renderGoals=function(resetMonth=false){rg(resetMonth);cleanFocusLayout();requestAnimationFrame(cleanFocusLayout);};
   }
-  const oldR=window.render;
-  if(typeof oldR==='function'){
-    window.render=function(){oldR();requestAnimationFrame(fixGoalsScroll);};
+  const rr=window.render;
+  if(typeof rr==='function'){
+    window.render=function(){rr();requestAnimationFrame(cleanFocusLayout);};
   }
-  requestAnimationFrame(fixGoalsScroll);
+  requestAnimationFrame(cleanFocusLayout);
 })();
 </script>
 </body></html>
-
-<style id="v2-105-final-focus-fix">
-/* Final Focus fix: Goals Focus is a sticky sibling inside the actual #main scroll container. */
-#main.content.focus-page-layout{
-  display:block!important;
-  overflow-y:auto!important;
-  overflow-x:hidden!important;
-  min-height:0!important;
-  height:100%!important;
-  position:relative!important;
-  -webkit-overflow-scrolling:touch!important;
-}
-#main.content.focus-page-layout > .goals-focus{
-  position:sticky!important;
-  top:0!important;
-  z-index:100!important;
-  flex:none!important;
-  width:100%!important;
-  margin-top:0!important;
-  background:#f5f5f7!important;
-  isolation:isolate!important;
-}
-#main.content.focus-page-layout > .focus-scroll-body{
-  display:block!important;
-  overflow:visible!important;
-  min-height:0!important;
-  height:auto!important;
-}
-@media(max-width:799px){
-  #main.content.focus-page-layout > .goals-focus{
-    top:0!important;
-    padding-top:1px!important;
-    margin-bottom:7px!important;
-  }
-}
-</style>
-<script id="v2-105-final-focus-fix-js">
-(function(){
-  function finalFocusFix(){
-    const main=document.querySelector('#main.content');
-    if(!main)return;
-    if(page!=='goals'){main.classList.remove('focus-page-layout');return;}
-    const focus=main.querySelector('.goals-focus');
-    if(!focus)return;
-    main.classList.add('focus-page-layout');
-    // Put Focus directly under #main so sticky positioning is relative to the real scroll container.
-    if(focus.parentElement!==main) main.prepend(focus);
-    // Undo the previous wrapper if it exists: Goals content should remain in #main's scroll flow.
-    const body=main.querySelector(':scope > .focus-scroll-body');
-    if(body){
-      while(body.firstChild) main.appendChild(body.firstChild);
-      body.remove();
-    }
-    // Keep exactly one Focus bar.
-    main.querySelectorAll('.goals-focus').forEach((el,i)=>{if(i>0)el.remove()});
-  }
-  window.finalFocusFix=finalFocusFix;
-  const old=window.renderGoals;
-  if(typeof old==='function'){
-    window.renderGoals=function(resetMonth=false){
-      old(resetMonth);
-      finalFocusFix();
-      requestAnimationFrame(finalFocusFix);
-    };
-  }
-  const oldRender=window.render;
-  if(typeof oldRender==='function'){
-    window.render=function(){oldRender();requestAnimationFrame(finalFocusFix)};
-  }
-  requestAnimationFrame(finalFocusFix);
-})();
-</script>
