@@ -2635,60 +2635,58 @@ function openReviewMonth(mk){window.__reviewMonth=mk;renderMonthlyReview(mk)}
 })();
 </script>
 
-<style id="v2-111-focus-final">
-/* v2.111: Focus is fixed on Todo/Calendar, but remains normal-flow on Goals. */
+<style id="v2-112-focus-clean">
+/* v2.112: exactly one Focus on Todo/Calendar. Goals keeps its own normal-flow Focus. */
 html,body{overflow:hidden!important;height:100%!important;}
 .app{position:relative!important;height:100dvh!important;min-height:100dvh!important;overflow:hidden!important;}
-.app>.focus-fixed-root{
-  position:absolute!important;left:0!important;right:0!important;top:var(--focus-top,0px)!important;
-  z-index:55!important;margin:0!important;pointer-events:auto!important;
-}
+.app>.focus-fixed-root{position:absolute!important;left:0!important;right:0!important;top:var(--focus-top,0px)!important;z-index:55!important;margin:0!important;padding:0!important;}
 .app>.focus-fixed-root .goals-focus{margin:0!important;}
 .app>.content.focus-fixed-offset{padding-top:var(--focus-offset,0px)!important;}
-@media(max-width:799px){
- .app>.focus-fixed-root{width:100%!important;}
-}
-@media(min-width:800px){
- .app>.focus-fixed-root{left:236px!important;right:0!important;}
-}
+@media(min-width:800px){.app>.focus-fixed-root{left:236px!important;right:0!important;}}
 </style>
-<script id="v2-111-focus-final-js">
+<script id="v2-112-focus-clean-js">
 (function(){
-  function cleanup(){
-    document.querySelectorAll('.app>.focus-fixed-root').forEach(x=>x.remove());
-    const main=document.querySelector('#main.content');
-    if(main) main.classList.remove('focus-fixed-offset');
+  function removeAllFocus(){
+    document.querySelectorAll('.goals-focus').forEach(el=>el.remove());
+    document.querySelectorAll('.app>.focus-fixed-root').forEach(el=>el.remove());
   }
   function install(){
     const app=document.querySelector('.app'),main=document.querySelector('#main.content');
     if(!app||!main)return;
-    cleanup();
-    // Goals page intentionally keeps its Focus in normal document flow so it scrolls with Goals.
-    if(typeof page==='undefined'||!['todo','calendar'].includes(page))return;
-    const old=main.querySelectorAll('.goals-focus');
-    if(!old.length)return;
-    const wrap=document.createElement('div');
-    wrap.className='focus-fixed-root';
-    wrap.appendChild(old[0]);
-    old.forEach((x,i)=>{if(i>0)x.remove();});
-    app.appendChild(wrap);
+    const isFixed=(typeof page!=='undefined'&&['todo','calendar'].includes(page));
+    const oldScroll=main.scrollTop;
+    removeAllFocus();
+    main.classList.remove('focus-fixed-offset');
+    if(!isFixed){
+      if(typeof page!=='undefined'&&page==='goals'){}
+      return;
+    }
+    const root=document.createElement('div');
+    root.className='focus-fixed-root';
+    root.innerHTML=goalFocusBar();
+    app.appendChild(root);
     main.classList.add('focus-fixed-offset');
     size();
+    main.scrollTop=oldScroll;
   }
   function size(){
-    const app=document.querySelector('.app'),head=document.querySelector('.app>.head'),root=document.querySelector('.app>.focus-fixed-root'),main=document.querySelector('#main.content');
-    if(!app||!head||!root||!main)return;
+    const head=document.querySelector('.app>.head'),root=document.querySelector('.app>.focus-fixed-root'),main=document.querySelector('#main.content');
+    if(!head||!root||!main)return;
     const top=head.getBoundingClientRect().height;
     const h=root.getBoundingClientRect().height;
-    app.style.setProperty('--focus-top',top+'px');
+    document.querySelector('.app')?.style.setProperty('--focus-top',top+'px');
     main.style.setProperty('--focus-offset',(top+h+7)+'px');
   }
+  const originalRender=window.render;
+  if(typeof originalRender==='function'){window.render=function(){originalRender();requestAnimationFrame(install);};}
+  const originalRenderTodo=window.renderTodo;
+  if(typeof originalRenderTodo==='function'){window.renderTodo=function(){originalRenderTodo();requestAnimationFrame(install);};}
+  const originalRenderCalendar=window.renderCalendar;
+  if(typeof originalRenderCalendar==='function'){window.renderCalendar=function(options={}){originalRenderCalendar(options);requestAnimationFrame(install);};}
+  const originalRenderGoals=window.renderGoals;
+  if(typeof originalRenderGoals==='function'){window.renderGoals=function(resetMonth=false){originalRenderGoals(resetMonth);requestAnimationFrame(install);};}
   window.addEventListener('resize',()=>requestAnimationFrame(size),{passive:true});
   window.addEventListener('orientationchange',()=>setTimeout(size,100),{passive:true});
-  const oldRender=window.render;
-  if(typeof oldRender==='function') window.render=function(){oldRender();requestAnimationFrame(install);};
-  const oldRenderGoals=window.renderGoals;
-  if(typeof oldRenderGoals==='function') window.renderGoals=function(resetMonth=false){oldRenderGoals(resetMonth);requestAnimationFrame(install);};
   requestAnimationFrame(install);
 })();
 </script>
