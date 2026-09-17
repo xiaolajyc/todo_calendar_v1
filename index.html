@@ -2144,11 +2144,11 @@ function firstOpen(type){const arr=type==='month'?monthGoals(viewMonth()):goals[
 function goalFocusBar(){const y=firstOpen('year'),m=firstOpen('month');return `<div class="goals-focus" aria-label="Focus"><div class="goal-focus-card"><div class="goal-focus-label">🎯 ${goalYear()} 年 Focus</div><div class="goal-focus-title ${y?'':'goal-focus-empty'}" title="${escGoal(y?.title||'')}">${escGoal(y?.title||'年度目标已全部完成')}</div></div><div class="goal-focus-card month"><div class="goal-focus-label">📅 本月 Focus</div><div class="goal-focus-title ${m?'':'goal-focus-empty'}" title="${escGoal(m?.title||'')}">${escGoal(m?.title||'本月目标已全部完成')}</div></div></div>`}
 function pct3(arr){const n=arr.filter(g=>g.done).length;return `${n} / 3 · ${Math.round(n/3*100)}%`}
 function krPct(g){const ks=g.krs||[],n=ks.filter(k=>k.done).length;return ks.length?`${n} / ${ks.length} · ${Math.round(n/ks.length*100)}%`:'0 / 0 · 0%'}
-function renderGoalRow(type,g,i){const ks=g.krs||[];return `<div class="goal-row ${g.done?'goal-done':''}"><button class="goal-check" aria-label="完成目标" onclick="toggleGoalDone('${type}',${i})">${g.done?'✓':''}</button><span class="goal-rank">${i+1}</span><div class="goal-main"><span class="goal-text ${g.done?'done':''}" title="${escGoal(g.title)}">${escGoal(g.title)}</span><div class="goal-okr"><div class="goal-okr-head"><span>KR ${krPct(g)}</span>${ks.length<3?`<button type="button" onclick="addKR('${type}',${i});event.stopPropagation()">＋ 添加 KR</button>`:''}</div>${ks.map((k,j)=>`<div class="goal-kr ${k.done?'done':''}" onclick="toggleKR('${type}',${i},${j});event.stopPropagation()"><span class="goal-kr-box">${k.done?'✓':''}</span><span>${k.done?'✓ ':''}${escGoal(k.title)}</span><button type="button" aria-label="编辑 KR" onclick="editKR('${type}',${i},${j});event.stopPropagation()">✎</button><button type="button" aria-label="删除 KR" onclick="deleteKR('${type}',${i},${j});event.stopPropagation()">×</button></div>`).join('')||'<div class="empty" style="padding:4px 0">还没有 KR</div>'}</div></div><span class="goal-actions"><button type="button" onclick="moveGoal('${type}',${i},-1)" ${i===0?'disabled':''}>↑</button><button type="button" onclick="moveGoal('${type}',${i},1)" ${i===arr.length-1?'disabled':''}>↓</button><button type="button" onclick="editGoal('${type}',${i})">✎</button><button type="button" onclick="deleteGoal('${type}',${i})">×</button></span></div>`}
+function renderGoalRow(type,g,i,arr){arr=arr||[];const ks=g.krs||[];return `<div class="goal-row ${g.done?'goal-done':''}"><button class="goal-check" aria-label="完成目标" onclick="toggleGoalDone('${type}',${i})">${g.done?'✓':''}</button><span class="goal-rank">${i+1}</span><div class="goal-main"><span class="goal-text ${g.done?'done':''}" title="${escGoal(g.title)}">${escGoal(g.title)}</span><div class="goal-okr"><div class="goal-okr-head"><span>KR ${krPct(g)}</span>${ks.length<3?`<button type="button" onclick="addKR('${type}',${i});event.stopPropagation()">＋ 添加 KR</button>`:''}</div>${ks.map((k,j)=>`<div class="goal-kr ${k.done?'done':''}" onclick="toggleKR('${type}',${i},${j});event.stopPropagation()"><span class="goal-kr-box">${k.done?'✓':''}</span><span>${escGoal(k.title)}</span><button type="button" aria-label="编辑 KR" onclick="editKR('${type}',${i},${j});event.stopPropagation()">✎</button><button type="button" aria-label="删除 KR" onclick="deleteKR('${type}',${i},${j});event.stopPropagation()">×</button></div>`).join('')||'<div class="empty" style="padding:4px 0">还没有 KR</div>'}</div></div><span class="goal-actions"><button type="button" onclick="moveGoal('${type}',${i},-1)" ${i===0?'disabled':''}>↑</button><button type="button" onclick="moveGoal('${type}',${i},1)" ${i===arr.length-1?'disabled':''}>↓</button><button type="button" onclick="editGoal('${type}',${i})">✎</button><button type="button" onclick="deleteGoal('${type}',${i})">×</button></span></div>`}
 function renderGoals(){
   $('#heading').textContent='目标'; $('#subtabs').innerHTML=''; $('#headActions').innerHTML=''; $('#fab').classList.add('hidden');
   const y=goals.year,m=monthGoals(viewMonth());
-  const section=(type,label,icon,arr)=>{return `<section class="goal-section"><div class="goal-section-head"><h3>${icon} ${label}</h3><span class="goal-limit">${pct3(arr)}</span></div><div class="goal-list">${arr.map((g,i)=>renderGoalRow(type,g,i)).join('')}</div>${arr.length<3?`<button class="goal-add" type="button" onclick="addGoal('${type}')">＋ 添加${label}</button>`:''}</section>`};
+  const section=(type,label,icon,arr)=>{return `<section class="goal-section"><div class="goal-section-head"><h3>${icon} ${label}</h3><span class="goal-limit">${pct3(arr)}</span></div><div class="goal-list">${arr.map((g,i)=>renderGoalRow(type,g,i,arr)).join('')}</div>${arr.length<3?`<button class="goal-add" type="button" onclick="addGoal('${type}')">＋ 添加${label}</button>`:''}</section>`};
   $('#main').innerHTML=`<div class="goals-page"><div class="goals-hero"><h2>🎯 少一点计划，多一点行动</h2><p>年度最多 3 个目标；月度 OKR 按月份独立保存。</p></div>${section('year','年度目标','🎯',y)}<section class="goal-section"><div class="goal-section-head"><h3>📅 月度目标</h3><span class="goal-limit">${pct3(m)}</span></div><div class="goal-month-toolbar"><button type="button" onclick="changeGoalMonth(-1)">‹</button><input id="goalMonthPicker" type="month" value="${viewMonth()}" onchange="setGoalViewMonth(this.value)"><button type="button" onclick="changeGoalMonth(1)">›</button></div><div class="goal-list">${m.map((g,i)=>renderGoalRow('month',g,i)).join('')}</div>${m.length<3?`<button class="goal-add" type="button" onclick="addGoal('month')">＋ 添加 ${viewMonth()} 月度目标</button>`:''}</section><div class="goal-review-entry"><button class="goal-add" type="button" onclick="renderMonthlyReview()">📝 月度回顾</button><button class="goal-add" type="button" onclick="renderReviewHistory()">📚 历史回顾</button></div></div>`;
 }
 function setGoalViewMonth(v){if(!/^\d{4}-\d{2}$/.test(v)||Number(v.slice(5))<1||Number(v.slice(5))>12)return alert('请选择有效月份');goalViewMonth=v;renderGoals()}
@@ -2397,6 +2397,22 @@ if('serviceWorker' in navigator){
 .goal-kr{justify-content:flex-start!important}
 .goal-kr span:nth-child(2){text-align:left!important}
 </style>
+
+<script>
+// v2.98 stability patch: Goals navigation/render + goal row data
+(function(){
+  function openGoals(){
+    try{
+      if(typeof captureCalendarView==='function') captureCalendarView();
+      page='goals'; selectMode=false; selected.clear();
+      if(typeof renderGoals==='function') renderGoals();
+    }catch(e){console.error('Goals open error',e);alert('目标页面加载失败：'+(e&&e.message?e.message:'未知错误'));}
+  }
+  const b=document.querySelector('.nav button[data-page="goals"]');
+  if(b) b.onclick=openGoals;
+  window.openGoals=openGoals;
+})();
+</script>
 </body></html>
 
 <style id="v2-93-mobile-nav-fix">
@@ -2421,7 +2437,7 @@ if('serviceWorker' in navigator){
 .goal-review-entry{display:grid!important;grid-template-columns:1fr 1fr;gap:8px}
 </style>
 <script>
-// v2.97: monthly review history and reliable completion controls
+// v2.98: monthly review history and reliable completion controls
 function renderReviewHistory(){
  const rs=getReviews(); const keys=Object.keys(rs).sort().reverse();
  $('#heading').textContent='历史回顾'; $('#subtabs').innerHTML=''; $('#headActions').innerHTML=''; $('#fab').classList.add('hidden');
