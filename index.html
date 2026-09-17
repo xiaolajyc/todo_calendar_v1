@@ -2740,4 +2740,74 @@ function openReviewMonth(mk){window.__reviewMonth=mk;renderMonthlyReview(mk)}
   requestAnimationFrame(cleanFocusLayout);
 })();
 </script>
+
+<style id="v2-108-focus-fixed-final">
+/* v2.108: Goals Focus is viewport-fixed. The content below it is the only scroller. */
+#main.content.focus-page-layout{
+  display:flex!important;
+  flex-direction:column!important;
+  min-height:0!important;
+  height:auto!important;
+  max-height:none!important;
+  overflow:hidden!important;
+  position:relative!important;
+}
+#main.content.focus-page-layout > .goals-focus{
+  position:fixed!important;
+  top:var(--goals-focus-top,0px)!important;
+  left:0!important;
+  right:0!important;
+  width:auto!important;
+  margin:0!important;
+  z-index:1000!important;
+  flex:none!important;
+}
+#main.content.focus-page-layout > .focus-scroll-body{
+  flex:1 1 0!important;
+  min-height:0!important;
+  height:auto!important;
+  max-height:none!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  -webkit-overflow-scrolling:touch!important;
+  touch-action:pan-y!important;
+  padding-top:var(--goals-focus-space,0px)!important;
+  box-sizing:border-box!important;
+}
+@media(min-width:800px){
+  #main.content.focus-page-layout > .goals-focus{
+    left:236px!important;
+  }
+}
+</style>
+<script id="v2-108-focus-fixed-final-js">
+(function(){
+  function updateFocusFixed(){
+    const main=document.querySelector('#main.content');
+    if(!main || !main.classList.contains('focus-page-layout')) return;
+    const focus=main.querySelector(':scope > .goals-focus');
+    const body=main.querySelector(':scope > .focus-scroll-body');
+    const head=document.querySelector('.app > .head');
+    if(!focus || !body) return;
+    const top=head ? Math.max(0,head.getBoundingClientRect().bottom) : 0;
+    const h=focus.getBoundingClientRect().height;
+    const gap=7;
+    main.style.setProperty('--goals-focus-top',top+'px');
+    main.style.setProperty('--goals-focus-space',(h+gap)+'px');
+  }
+  function apply(){
+    if(typeof cleanFocusLayout==='function') cleanFocusLayout();
+    requestAnimationFrame(updateFocusFixed);
+    setTimeout(updateFocusFixed,60);
+  }
+  window.updateFocusFixed=updateFocusFixed;
+  window.addEventListener('resize',updateFocusFixed,{passive:true});
+  window.addEventListener('orientationchange',()=>setTimeout(updateFocusFixed,100),{passive:true});
+  const oldClean=window.cleanFocusLayout;
+  if(typeof oldClean==='function'){
+    window.cleanFocusLayout=function(){ oldClean(); updateFocusFixed(); };
+  }
+  apply();
+})();
+</script>
 </body></html>
