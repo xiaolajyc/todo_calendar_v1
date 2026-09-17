@@ -1076,8 +1076,8 @@ function copyOne(i){let t=tasks.find(x=>x.id===i);if(t){clipboard=[{...t,id:id()
 function removeTask(i){if(confirm('删除此事项？')){tasks=tasks.filter(t=>t.id!==i);save();render()}}
 function renderSettings(){
   /* v2.95: version information belongs in Settings, not beside the page title. */
-  const VERSION_INFO_HTML = '<div class="settings-card version-info-card"><div class="settings-title">版本信息</div><div class="settings-row"><span>Todo 日历</span><b>v2.103</b></div></div>';
-$('#subtabs').innerHTML='';$('#headActions').innerHTML='';$('#main').innerHTML=`<div class="card"><b>版本信息</b><p>Todo 日历 v2.103</p></div><div class="card"><b>每日开始时间</b><p>06:30（今天/逾期和每日刷新边界）</p></div><div class="card"><b>默认事件时长</b><p>60 分钟</p></div><div class="card"><button class="primary" onclick="exportData()">导出 JSON</button> <button class="danger" onclick="clipboard=[];render()">清空复制板</button> <label class="danger">导入 JSON<input type="file" accept="application/json" hidden onchange="importData(this)"></label></div><div class="card"><b>本地数据</b><p>${tasks.length} 个事项。当前数据保存在浏览器本地。</p><button class="danger" style="margin-top:8px;width:100%;color:#c62828" onclick="clearAllData()">⚠️ 清除全部数据</button></div>`}
+  const VERSION_INFO_HTML = '<div class="settings-card version-info-card"><div class="settings-title">版本信息</div><div class="settings-row"><span>Todo 日历</span><b>v2.105</b></div></div>';
+$('#subtabs').innerHTML='';$('#headActions').innerHTML='';$('#main').innerHTML=`<div class="card"><b>版本信息</b><p>Todo 日历 v2.105</p></div><div class="card"><b>每日开始时间</b><p>06:30（今天/逾期和每日刷新边界）</p></div><div class="card"><b>默认事件时长</b><p>60 分钟</p></div><div class="card"><button class="primary" onclick="exportData()">导出 JSON</button> <button class="danger" onclick="clipboard=[];render()">清空复制板</button> <label class="danger">导入 JSON<input type="file" accept="application/json" hidden onchange="importData(this)"></label></div><div class="card"><b>本地数据</b><p>${tasks.length} 个事项。当前数据保存在浏览器本地。</p><button class="danger" style="margin-top:8px;width:100%;color:#c62828" onclick="clearAllData()">⚠️ 清除全部数据</button></div>`}
 function clearAllData(){
   if(!confirm('第一次确认：确定要清除全部 Todo、日历事项和本地数据吗？此操作不可撤销。'))return;
   if(!confirm('第二次确认：再次确认要永久删除全部数据吗？'))return;
@@ -1086,8 +1086,8 @@ function clearAllData(){
   weekZoom=100;dayZoom=100;render();
 }
 function exportData(){
-  const backup={version:'2.102',tasks:cloneObj(tasks),goals:cloneObj(goals||{year:[],month:[]}),exportedAt:new Date().toISOString()};
-  let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(backup,null,2)],{type:'application/json'}));a.download='todo-calendar-backup-v2.95.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500)
+  const backup={version:'2.105',tasks:cloneObj(tasks),goals:cloneObj(goals||{year:[],month:[]}),exportedAt:new Date().toISOString()};
+  let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(backup,null,2)],{type:'application/json'}));a.download='todo-calendar-backup-v2.105.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500)
 }
 function importData(el){let r=new FileReader();r.onload=()=>{try{let x=JSON.parse(r.result);if(Array.isArray(x)){tasks=x}else if(x&&Array.isArray(x.tasks)){tasks=x.tasks;if(x.goals&&typeof x.goals==='object'){goals={year:Array.isArray(x.goals.year)?x.goals.year.slice(0,3):[],month:Array.isArray(x.goals.month)?x.goals.month.slice(0,3):[]};saveGoals()}}else throw 0;save();render()}catch{alert('文件格式错误')}};if(el.files[0])r.readAsText(el.files[0])}
 document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>{captureCalendarView();const next=b.dataset.page;if(next==='calendar'&&!calendarViewInitialized&&calMode==='week')weekCenterRequested=true;page=next;selectMode=false;selected.clear();render()});$('#fab').onclick=()=>newTask();render();
@@ -2556,7 +2556,7 @@ function openReviewMonth(mk){window.__reviewMonth=mk;renderMonthlyReview(mk)}
 
 </script>
 
-<!-- v2.103 fixes -->
+<!-- v2.105 fixes -->
 <style id="v2-103-goals-review-fixes">
 @media(max-width:799px){
   .app{padding-bottom:82px!important}
@@ -2632,6 +2632,94 @@ function openReviewMonth(mk){window.__reviewMonth=mk;renderMonthlyReview(mk)}
     const ahtml=ak.map(k=>{const r=as[k]||{};return `<div class="review-stat"><button class="btn small" type="button" onclick="renderAnnualReview('${k}',true)">${k} 年度回顾</button><span>${r.completed?'✓ 已完成':'○ 尚未完成'}</span><button class="btn small danger" type="button" onclick="deleteAnnualReview('${k}')">删除</button></div>`}).join('')||'<div class="empty">还没有保存的年度回顾</div>';
     $('#main').innerHTML=`<div class="goals-page"><div class="goals-hero"><h2>📚 历史回顾</h2><p>历史回顾只能查看或删除，不能修改。</p></div><div class="goal-review-card"><h3>📅 月度回顾</h3>${mhtml}</div><div class="goal-review-card"><h3>📊 年度回顾</h3>${ahtml}</div><button class="goal-add" type="button" onclick="openGoalsCurrentMonth()">← 返回目标</button></div>`;
   };
+})();
+</script>
+
+<style id="v2-105-focus-structural-fix">
+/* v2.105: Focus is a fixed sibling of the scrolling content, not a sticky child. */
+#main.content.focus-page-layout{
+  display:flex!important;
+  flex-direction:column!important;
+  min-height:0!important;
+  overflow:hidden!important;
+}
+#main.content.focus-page-layout > .goals-focus{
+  position:relative!important;
+  top:auto!important;
+  flex:0 0 auto!important;
+  z-index:30!important;
+  margin:0 0 6px!important;
+}
+#main.content.focus-page-layout > .focus-scroll-body{
+  flex:1 1 0!important;
+  min-height:0!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  -webkit-overflow-scrolling:touch!important;
+  overscroll-behavior-y:contain!important;
+}
+@media(max-width:799px){
+  #main.content.focus-page-layout > .goals-focus{margin-bottom:7px!important;}
+  #main.content.focus-page-layout > .focus-scroll-body{padding-bottom:4px!important;}
+}
+</style>
+<script id="v2-105-focus-structural-fix-js">
+(function(){
+  function normalizeFocusLayout(){
+    const main=document.querySelector('#main.content');
+    if(!main)return;
+    const focus=main.querySelector('.goals-focus');
+    if(!focus){
+      main.classList.remove('focus-page-layout');
+      return;
+    }
+    main.classList.add('focus-page-layout');
+    // Focus must be a direct child of the non-scrolling #main container.
+    if(focus.parentElement!==main) main.prepend(focus);
+    // Everything except Focus gets its own independent scroll container.
+    let body=main.querySelector(':scope > .focus-scroll-body');
+    if(!body){
+      body=document.createElement('div');
+      body.className='focus-scroll-body';
+      while(main.children.length>1){
+        const child=main.children[1];
+        if(child===body)break;
+        body.appendChild(child);
+      }
+      main.appendChild(body);
+    }else{
+      // If a renderer inserted new content outside the wrapper, move it in.
+      Array.from(main.children).forEach(child=>{
+        if(child!==focus && child!==body) body.appendChild(child);
+      });
+    }
+  }
+
+  // Goals page: explicitly render the two Focus values above the independently scrolling goals.
+  if(typeof renderGoals==='function'){
+    const baseRenderGoals=renderGoals;
+    window.renderGoals=function(resetMonth=false){
+      baseRenderGoals(resetMonth);
+      const main=document.querySelector('#main.content');
+      if(!main)return;
+      main.querySelectorAll('.goals-focus').forEach((el,i)=>{if(i>0)el.remove()});
+      if(!main.querySelector(':scope > .goals-focus')) main.insertAdjacentHTML('afterbegin',goalFocusBar());
+      normalizeFocusLayout();
+    };
+  }
+
+  // Final render wrapper catches Todo/Calendar render paths after all legacy v2.8x wrappers.
+  if(typeof render==='function'){
+    const baseRender105=render;
+    window.render=function(){
+      baseRender105();
+      requestAnimationFrame(normalizeFocusLayout);
+    };
+  }
+  window.normalizeFocusLayout=normalizeFocusLayout;
+  // Re-apply after initial page render and after delayed calendar Focus injection.
+  requestAnimationFrame(normalizeFocusLayout);
+  setTimeout(normalizeFocusLayout,80);
 })();
 </script>
 </body></html>
