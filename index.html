@@ -8,7 +8,7 @@
 <link rel="manifest" href="./manifest.json">
 <link rel="apple-touch-icon" href="./icon-180.png">
 <link rel="icon" href="./icon-192.png" type="image/png">
-<title>Todo · v2.122</title>
+<title>Todo · v2.123</title>
 <style>
 :root{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#171717;background:#f5f5f7;--line:#e7e7eb;--muted:#777;--accent:#111}*{box-sizing:border-box}body{margin:0;background:#f5f5f7;overscroll-behavior:none}.app{max-width:1100px;margin:auto;min-height:100vh;background:#fff;padding-bottom:68px}.head{position:sticky;top:0;background:rgba(255,255,255,.96);backdrop-filter:blur(12px);padding:12px 14px;border-bottom:1px solid var(--line);z-index:30}.headtop{display:flex;align-items:center;justify-content:space-between;gap:8px}.head h1{margin:0;font-size:21px}.tabs,.seg{display:flex;gap:6px;margin-top:10px;overflow:auto}.tabs button,.seg button,.chip{border:0;border-radius:10px;padding:8px 11px;background:#eee;white-space:nowrap}.active{background:#111!important;color:#fff}.content{padding:12px}.group{margin:18px 0}.group h3{font-size:14px;margin:0 0 6px}.task{display:flex;align-items:center;gap:10px;padding:13px 7px;border-bottom:1px solid #eee;touch-action:pan-y}.check{width:23px;height:23px;cursor:pointer;border:2px solid #aaa;border-radius:50%;flex:none}.done .check{background:#111}.done .title{text-decoration:line-through;opacity:.45}.taskmain{flex:1;min-width:0}.title{font-weight:600}.meta{font-size:12px;color:#777;margin-top:3px}.badge{font-size:12px}.fab{position:fixed;right:18px;bottom:88px;width:56px;height:56px;border-radius:50%;border:0;background:#111;color:#fff;font-size:30px;z-index:20;box-shadow:0 5px 20px #0002}.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(1100px,100%);height:70px;background:#fff;border-top:1px solid #ddd;display:flex;z-index:40;padding-bottom:env(safe-area-inset-bottom)}.nav button{flex:1;border:0;background:white;font-size:13px}.nav .active{color:#fff!important;background:var(--primary,#3478f6)!important}.card{background:#f5f5f7;border-radius:16px;padding:14px;margin-bottom:12px}.row{display:flex;gap:10px;align-items:center}.row>*{flex:1}.field{margin:12px 0}.field label{display:block;font-size:12px;color:#666;margin-bottom:5px}.field input,.field textarea,.field select{width:100%;padding:12px;border:1px solid #ddd;border-radius:12px;background:#fff}.primary,.danger{border:0;border-radius:12px;padding:12px 16px}.primary{background:#111;color:#fff}.danger{background:#eee}.hidden{display:none!important}.empty{text-align:center;color:#888;padding:35px 10px}
 /* Google Calendar-like week/day timeline */
@@ -691,120 +691,12 @@ html,body{height:100%;overflow:hidden}
 .review-actions .btn{min-width:0}
 </style>
 
-<style id="v2-118-stable-first-paint">
-/* v2.122: eliminate first-paint jumps.
-   The app keeps a stable viewport from the first paint; navigation has one
-   fixed height and Focus is positioned from the header height without animation. */
-html,body{height:100%;overflow:hidden!important}
-.app{height:100dvh;min-height:100dvh;overflow:hidden!important}
-@media(max-width:799px){
-  .app{padding-bottom:82px!important}
-  .nav{
-    height:82px!important;
-    min-height:82px!important;
-    box-sizing:border-box!important;
-    padding-bottom:env(safe-area-inset-bottom)!important;
-    transition:none!important;
-    animation:none!important;
-  }
-  .nav button{height:100%!important;transition:none!important;animation:none!important}
-}
-@media(min-width:800px){
-  .nav{transition:none!important;animation:none!important}
-}
-.focus-fixed-root{
-  transition:none!important;
-  animation:none!important;
-  transform:none!important;
-}
-.focus-fixed-root .goals-focus{
-  transition:none!important;
-  animation:none!important;
-}
-</style>
-<script id="v2-118-first-paint-stabilizer">
-(function(){
-  const mark='__v118StablePaint';
-  if(window[mark]) return;
-  window[mark]=true;
-
-  function stabilize(){
-    const app=document.querySelector('.app');
-    const head=app?.querySelector(':scope>.head');
-    const nav=document.querySelector('.nav');
-    if(!app) return;
-
-    /* Freeze the navigation bar's resolved height before revealing it. */
-    if(nav){
-      const h=window.innerWidth<800 ? 82 : nav.getBoundingClientRect().height;
-      if(window.innerWidth<800) nav.style.setProperty('height','82px','important');
-      nav.style.setProperty('min-height',String(h)+'px','important');
-    }
-
-    /* Resolve Focus position before the first visible frame. */
-    const root=app.querySelector(':scope>.focus-fixed-root');
-    if(root && typeof page!=='undefined' && (page==='todo'||page==='calendar') && head){
-      root.style.setProperty('top',head.getBoundingClientRect().bottom+'px','important');
-      root.style.setProperty('transition','none','important');
-    }
-
-    app.classList.add('v118-ready');
-  }
-
-  /* No fade/animation: just make the final geometry exist before first paint. */
-  if(document.readyState==='loading'){
-    document.addEventListener('DOMContentLoaded',stabilize,{once:true});
-  }else stabilize();
-  window.addEventListener('resize',stabilize,{passive:true});
-})();
-</script>
 
 
-<style id="v2-119-final-focus-no-jump">
-html,body{height:100%!important;overflow:hidden!important}
-.app{height:100dvh!important;min-height:100dvh!important;overflow:hidden!important}
-.app>.head{position:relative!important;z-index:200!important}
-.app>.focus-fixed-root{position:fixed!important;left:0!important;right:0!important;top:var(--focus-top,0px)!important;display:none;margin:0!important;padding:0!important;z-index:190!important;pointer-events:none!important;transition:none!important;animation:none!important;transform:none!important}
-.app>.focus-fixed-root .goals-focus{margin:0!important;transition:none!important;animation:none!important}
-#main.content.focus-fixed-offset{padding-top:var(--focus-space,0px)!important;box-sizing:border-box!important}
-@media(min-width:800px){.app>.focus-fixed-root{left:236px!important}}
-@media(max-width:799px){.nav{height:82px!important;min-height:82px!important;box-sizing:border-box!important;padding-bottom:env(safe-area-inset-bottom)!important;transition:none!important;animation:none!important}.nav button{height:100%!important;transition:none!important;animation:none!important}}
-</style>
-<script id="v2-119-final-focus-no-jump-js">
-(function(){
-  const baseTodo=window.__baseRenderTodo;
-  const baseCal=window.__baseRenderCalendar;
-  function syncFocus(){
-    const app=document.querySelector('.app'),main=document.getElementById('main'),head=app?.querySelector(':scope>.head');
-    if(!app||!main||!head)return;
-    let root=app.querySelector(':scope>.focus-fixed-root');
-    if(!root){root=document.createElement('div');root.className='focus-fixed-root';app.appendChild(root)}
-    const fixed=(typeof page!=='undefined'&&(page==='todo'||page==='calendar'));
-    if(!fixed){root.style.display='none';root.innerHTML='';main.classList.remove('focus-fixed-offset');main.style.removeProperty('--focus-space');return}
-    main.querySelectorAll('.goals-focus').forEach(x=>x.remove());
-    const html=typeof goalFocusBar==='function'?goalFocusBar():'';
-    root.innerHTML=html;
-    const top=Math.round(head.getBoundingClientRect().bottom);
-    root.style.setProperty('--focus-top',top+'px');
-    root.style.display='block';
-    const fh=Math.ceil(root.querySelector('.goals-focus')?.getBoundingClientRect().height||0);
-    main.classList.add('focus-fixed-offset');
-    main.style.setProperty('--focus-space',(fh+6)+'px');
-  }
-  if(baseTodo)window.renderTodo=function(){baseTodo();syncFocus()};
-  if(baseCal)window.renderCalendar=function(options={}){baseCal(options);syncFocus()};
-  window.render=function(){
-    if(typeof captureCalendarView==='function')captureCalendarView();
-    document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===page));
-    $('#fab')?.classList.toggle('hidden',page==='settings');
-    $('#heading').textContent=page==='todo'?'Todo':page==='calendar'?'日历':'设置';
-    if(page==='todo')renderTodo();else if(page==='calendar')renderCalendar();else renderSettings();
-    syncFocus();
-  };
-  window.addEventListener('resize',syncFocus,{passive:true});
-  window.addEventListener('orientationchange',syncFocus,{passive:true});
-})();
-</script>
+
+
+
+
 
 
 <style id="v2-120-focus-first-paint">
@@ -826,7 +718,7 @@ html,body{height:100%!important;overflow:hidden!important}
 
 
 <style id="v2-121-focus-visible-no-jump">
-/* v2.122: Focus is visible in Todo/Calendar only. Earlier v2.118 rules set
+/* v2.123: Focus is visible in Todo/Calendar only. Earlier v2.118 rules set
    display:none!important; override them here. Geometry is established before reveal. */
 .app>.focus-fixed-root{display:none!important;visibility:hidden!important;opacity:0!important;transition:none!important;animation:none!important;transform:none!important;pointer-events:none!important;}
 .app>.focus-fixed-root.v121-ready{display:block!important;visibility:visible!important;opacity:1!important;}
@@ -1213,7 +1105,7 @@ function toggleCalendarSelect(i){selectMode=true;selected.has(i)?selected.delete
 function drawCreating(col,c,startHour,rowH){let old=col.querySelector('.creating');if(old)old.remove();let el=document.createElement('div');el.className='creating';let top=(c.start-startHour*60)/60*rowH,h=(c.end-c.start)/60*rowH;el.style.top=top+'px';el.style.height=Math.max(24,h)+'px';el.textContent=timeStr(c.start)+'–'+timeStr(c.end);col.appendChild(el)}
 
 
-/* v2.122: unified task importance ordering for Month view and reviews.
+/* v2.123: unified task importance ordering for Month view and reviews.
    Priority: Important+Urgent > Important > Urgent > Other. */
 function taskPriority(t){
   return t?.important && t?.urgent ? 0 : t?.important ? 1 : t?.urgent ? 2 : 3;
@@ -1517,73 +1409,7 @@ function moveOccurrence(master,occDate,newDate,newStart,newEnd){
   save();
 }
 function toggleCalendarSelect(i){selectMode=true;selected.has(i)?selected.delete(i):selected.add(i);renderCalendar()}
-function renderMonth(){
-  const y=calDate.getFullYear(),m=calDate.getMonth();
-  const first=new Date(y,m,1),start=(first.getDay()+6)%7;
-  const days=new Date(y,m+1,0).getDate();
-
-  // Month view: importance is the primary order. Time is only a tie-breaker.
-  const importanceOf=t=>{
-    const imp=!!t?.important, urg=!!t?.urgent;
-    if(imp&&urg)return 0;
-    if(imp)return 1;
-    if(urg)return 2;
-    return 3;
-  };
-  const timeOf=t=>{
-    const v=t?.start ?? t?.startTime ?? t?.time ?? '';
-    if(typeof timeMin==='function') return timeMin(v);
-    const m=String(v).match(/^(\d{1,2}):(\d{2})/);
-    return m?Number(m[1])*60+Number(m[2]):99999;
-  };
-  const titleOf=t=>String(t?.title||'');
-  const sortMonth=(a,b)=>{
-    const p=importanceOf(a)-importanceOf(b);
-    if(p)return p;
-    const tm=timeOf(a)-timeOf(b);
-    if(tm)return tm;
-    return titleOf(a).localeCompare(titleOf(b),'zh-Hans');
-  };
-
-  let html=`<div class="calbar"><button class="navbtn" onclick="copyMonth()">📋 复制本月</button><div class="caltitle">${y}年${m+1}月</div><button class="navbtn" onclick="pasteCalendar()" ${clipboard.length?'':'disabled'}>📌 粘贴${clipboard.length?` ${clipboard.length}`:''}</button></div><div class="hint">点击日期进入日视图；长按事项可进入批量选择</div><div class="month-scroll"><div class="month">`;
-
-  for(let i=0;i<start;i++)html+='<div></div>';
-
-  for(let n=1;n<=days;n++){
-    const ds=fmt(new Date(y,m,n));
-
-    // Completed tasks are excluded before sorting/rendering.
-    let dayTasks=calendarEventsForDate(ds)
-      .filter(t=>t && !t.completed)
-      .map(t=>{
-        // Recurring occurrences may carry the master id; inherit importance
-        // from the master if the occurrence itself does not contain it.
-        if(t._masterId){
-          const master=tasks.find(x=>x.id===t._masterId);
-          if(master){
-            return Object.assign({},master,t,{
-              important: t.important ?? master.important,
-              urgent: t.urgent ?? master.urgent
-            });
-          }
-        }
-        return t;
-      })
-      .sort(sortMonth);
-
-    html+=`<div class="day" onclick="calDate=parseDate('${ds}');calMode='day';selectMode=false;selected.clear();render()"><b>${n}</b>`;
-
-    dayTasks.slice(0,4).forEach(t=>{
-      const key=instanceKey(t),mid=t._masterId||t.id;
-      html+=`<div class="mini ${selected.has(key)?'selected':''}" onclick="if(selected.size){event.stopPropagation();toggleCalendarSelect('${esc(key)}')}else{event.stopPropagation();openOccurrenceEditor(tasks.find(x=>x.id==='${esc(mid)}'),'${esc(t._occurrenceDate||t.date||ds)}')}" oncontextmenu="event.preventDefault();toggleCalendarSelect('${esc(key)}')">${esc(t.title)}</div>`;
-    });
-
-    html+='</div>';
-  }
-
-  $('#main').innerHTML=html+'</div></div>';
-  renderBulk();
-}
+function renderMonth(){let y=calDate.getFullYear(),m=calDate.getMonth(),first=new Date(y,m,1),start=(first.getDay()+6)%7,days=new Date(y,m+1,0).getDate(),html=`<div class="calbar"><button class="navbtn" onclick="copyMonth()">📋 复制本月</button><div class="caltitle">${y}年${m+1}月</div><button class="navbtn" onclick="pasteCalendar()" ${clipboard.length?'':'disabled'}>📌 粘贴${clipboard.length?` ${clipboard.length}`:''}</button></div><div class="hint">点击日期进入日视图；长按事项可进入批量选择</div><div class="month-scroll"><div class="month">`;for(let i=0;i<start;i++)html+='<div></div>';for(let n=1;n<=days;n++){let ds=fmt(new Date(y,m,n));let a=calendarEventsForDate(ds).filter(t=>!t.completed).sort((a,b)=>{const pa=priority(a),pb=priority(b);return pa-pb||(timeMin(a.start)-timeMin(b.start))||String(a.title||'').localeCompare(String(b.title||''));});html+=`<div class="day" onclick="calDate=parseDate('${ds}');calMode='day';selectMode=false;selected.clear();render()"><b>${n}</b>${a.slice(0,4).map(t=>`<div class="mini ${selected.has(instanceKey(t))?'selected':''}" onclick="if(selected.size){event.stopPropagation();toggleCalendarSelect('${esc(instanceKey(t))}')};else{event.stopPropagation();openOccurrenceEditor(tasks.find(x=>x.id==='${esc(t._masterId||t.id)}'),'${esc(t._occurrenceDate||t.date)}')}" oncontextmenu="event.preventDefault();toggleCalendarSelect('${esc(instanceKey(t))}')">${esc(t.title)}</div>`).join('')}</div>`}$('#main').innerHTML=html+'</div></div>';renderBulk()}
 </script>
 
 
@@ -2909,7 +2735,7 @@ function reviewTaskRate(doneCount,pendingCount){const total=doneCount+pendingCou
 
 
 <style id="v2-113-focus-authoritative">
-/* v2.122: corrected Focus vertical anchoring. The fixed root is positioned below the full header.
+/* v2.123: corrected Focus vertical anchoring. The fixed root is positioned below the full header.
    Todo/Calendar: Focus is viewport-fixed; #main is the ONLY scrolling surface.
    Goals: unchanged normal-flow Focus. */
 html,body{height:100%!important;overflow:hidden!important}
@@ -2934,7 +2760,7 @@ html,body{height:100%!important;overflow:hidden!important}
 </style>
 <script id="v2-113-focus-authoritative-js">
 (function(){
-  /* v2.122: keep one Focus root alive across page/view switches.
+  /* v2.123: keep one Focus root alive across page/view switches.
      Recreating the fixed node caused a one-frame jump; the root is now
      reused and only its contents/position are updated. */
   const realGoalFocusBar = window.goalFocusBar;
@@ -3024,4 +2850,35 @@ body:has(.nav button[data-page="goals"].active) .focus-fixed-root{display:none!i
   new MutationObserver(cleanGoalsFocus).observe(document.body,{childList:true,subtree:true});
 })();
 </script>
+
+<script id="v2-123-calendar-events-priority-wrapper">
+(function(){
+  if(window.__v123CalendarPriorityWrapped)return;
+  window.__v123CalendarPriorityWrapped=true;
+  const original=window.calendarEventsForDate;
+  if(typeof original!=='function')return;
+
+  const score=t=>{
+    const important=!!(t&&t.important), urgent=!!(t&&t.urgent);
+    return important&&urgent?0:important?1:urgent?2:3;
+  };
+  const mins=t=>{
+    const v=t?.start??t?.startTime??t?.time??'';
+    const m=String(v).match(/^(\d{1,2}):(\d{2})/);
+    return m?Number(m[1])*60+Number(m[2]):99999;
+  };
+
+  window.calendarEventsForDate=function(ds){
+    const result=original.call(this,ds)||[];
+    return result.slice().sort((a,b)=>{
+      const pa=score(a),pb=score(b);
+      if(pa!==pb)return pa-pb;
+      const ta=mins(a),tb=mins(b);
+      if(ta!==tb)return ta-tb;
+      return String(a?.title||'').localeCompare(String(b?.title||''),'zh-Hans');
+    });
+  };
+})();
+</script>
+
 </body></html>
