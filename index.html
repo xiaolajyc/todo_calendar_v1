@@ -8,7 +8,7 @@
 <link rel="manifest" href="./manifest.json">
 <link rel="apple-touch-icon" href="./icon-180.png">
 <link rel="icon" href="./icon-192.png" type="image/png">
-<title>Todo · v2.124</title>
+<title>Todo · v2.125</title>
 <style>
 :root{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#171717;background:#f5f5f7;--line:#e7e7eb;--muted:#777;--accent:#111}*{box-sizing:border-box}body{margin:0;background:#f5f5f7;overscroll-behavior:none}.app{max-width:1100px;margin:auto;min-height:100vh;background:#fff;padding-bottom:68px}.head{position:sticky;top:0;background:rgba(255,255,255,.96);backdrop-filter:blur(12px);padding:12px 14px;border-bottom:1px solid var(--line);z-index:30}.headtop{display:flex;align-items:center;justify-content:space-between;gap:8px}.head h1{margin:0;font-size:21px}.tabs,.seg{display:flex;gap:6px;margin-top:10px;overflow:auto}.tabs button,.seg button,.chip{border:0;border-radius:10px;padding:8px 11px;background:#eee;white-space:nowrap}.active{background:#111!important;color:#fff}.content{padding:12px}.group{margin:18px 0}.group h3{font-size:14px;margin:0 0 6px}.task{display:flex;align-items:center;gap:10px;padding:13px 7px;border-bottom:1px solid #eee;touch-action:pan-y}.check{width:23px;height:23px;cursor:pointer;border:2px solid #aaa;border-radius:50%;flex:none}.done .check{background:#111}.done .title{text-decoration:line-through;opacity:.45}.taskmain{flex:1;min-width:0}.title{font-weight:600}.meta{font-size:12px;color:#777;margin-top:3px}.badge{font-size:12px}.fab{position:fixed;right:18px;bottom:88px;width:56px;height:56px;border-radius:50%;border:0;background:#111;color:#fff;font-size:30px;z-index:20;box-shadow:0 5px 20px #0002}.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(1100px,100%);height:70px;background:#fff;border-top:1px solid #ddd;display:flex;z-index:40;padding-bottom:env(safe-area-inset-bottom)}.nav button{flex:1;border:0;background:white;font-size:13px}.nav .active{color:#fff!important;background:var(--primary,#3478f6)!important}.card{background:#f5f5f7;border-radius:16px;padding:14px;margin-bottom:12px}.row{display:flex;gap:10px;align-items:center}.row>*{flex:1}.field{margin:12px 0}.field label{display:block;font-size:12px;color:#666;margin-bottom:5px}.field input,.field textarea,.field select{width:100%;padding:12px;border:1px solid #ddd;border-radius:12px;background:#fff}.primary,.danger{border:0;border-radius:12px;padding:12px 16px}.primary{background:#111;color:#fff}.danger{background:#eee}.hidden{display:none!important}.empty{text-align:center;color:#888;padding:35px 10px}
 /* Google Calendar-like week/day timeline */
@@ -706,6 +706,24 @@ html,body{height:100%;overflow:hidden}
 
 
 
+
+<style id="v2-125-focus-sticky">
+/* Focus is part of the page flow and sticky inside the scrolling content.
+   No fixed-position JS, no RAF, no geometry calculation, no first-paint jump. */
+.goals-focus{
+  position:sticky!important;
+  top:0!important;
+  z-index:80!important;
+  margin-top:0!important;
+  margin-bottom:8px!important;
+  transform:none!important;
+  transition:none!important;
+  animation:none!important;
+  background:var(--bg,#fff)!important;
+}
+.focus-fixed-root{display:none!important}
+</style>
+
 </head><body><div class="app"><header class="head"><div class="headtop"><h1 id="heading"><span id="headingText">Todo</span></h1><div id="headActions"></div></div><div id="subtabs" class="tabs"></div></header><main id="main" class="content"></main><button id="fab" class="fab">+</button><div id="bulk" class="bulk hidden"></div><nav class="nav">
 <button data-page="todo" class="active"><span class="navicon todoicon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 8l1.5 1.5L12 7"/><path d="M13.5 8H17"/><path d="M8 13l1.5 1.5L12 12"/><path d="M13.5 13H17"/></svg></span><span>Todo</span></button>
 <button data-page="calendar"><span class="navicon calendaricon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="16" rx="2.5"/><path d="M7 3v4M17 3v4M3.5 9.5h17"/><path d="M7.5 13h.01M12 13h.01M16.5 13h.01M7.5 17h.01M12 17h.01M16.5 17h.01"/></svg></span><span>日历</span></button>
@@ -1044,7 +1062,7 @@ function toggleCalendarSelect(i){selectMode=true;selected.has(i)?selected.delete
 function drawCreating(col,c,startHour,rowH){let old=col.querySelector('.creating');if(old)old.remove();let el=document.createElement('div');el.className='creating';let top=(c.start-startHour*60)/60*rowH,h=(c.end-c.start)/60*rowH;el.style.top=top+'px';el.style.height=Math.max(24,h)+'px';el.textContent=timeStr(c.start)+'–'+timeStr(c.end);col.appendChild(el)}
 
 
-/* v2.124: unified task importance ordering for Month view and reviews.
+/* v2.125: unified task importance ordering for Month view and reviews.
    Priority: Important+Urgent > Important > Urgent > Other. */
 function taskPriority(t){
   return t?.important && t?.urgent ? 0 : t?.important ? 1 : t?.urgent ? 2 : 3;
@@ -1352,33 +1370,29 @@ function renderMonth(){
   const y=calDate.getFullYear(),m=calDate.getMonth(),first=new Date(y,m,1);
   const start=(first.getDay()+6)%7,days=new Date(y,m+1,0).getDate();
 
-  // Month-only ordering. Do not use the calendar timeline's chronological order.
-  const pOf=t=>{
-    const important=t?.important===true, urgent=t?.urgent===true;
-    return important&&urgent?0:important?1:urgent?2:3;
+  const score=t=>{
+    const i=!!t?.important,u=!!t?.urgent;
+    return i&&u?0:i?1:u?2:3;
   };
-  const tOf=t=>{
+  const minutes=t=>{
     const v=String(t?.start||'');
-    const mm=v.match(/^(\d{1,2}):(\d{2})$/);
-    return mm?Number(mm[1])*60+Number(mm[2]):9999;
+    const q=v.match(/^(\d{1,2}):(\d{2})$/);
+    return q?Number(q[1])*60+Number(q[2]):99999;
   };
-  const cmp=(a,b)=>{
-    const p=pOf(a)-pOf(b); if(p)return p;
-    const q=tOf(a)-tOf(b); if(q)return q;
+  const compare=(a,b)=>{
+    const p=score(a)-score(b);
+    if(p)return p;
+    const tm=minutes(a)-minutes(b);
+    if(tm)return tm;
     return String(a?.title||'').localeCompare(String(b?.title||''),'zh-Hans');
   };
 
-  let html=`<div class="calbar"><button class="navbtn" onclick="copyMonth()">📋 复制本月</button><div class="caltitle">${y}年${m+1}月</div><button class="navbtn" onclick="pasteCalendar()" ${clipboard.length?'':'disabled'}>📌 粘贴${clipboard.length?` ${clipboard.length}`:''}</button></div><div class="hint">点击日期进入日视图；月视图按重要性显示任务</div><div class="month-scroll"><div class="month">`;
-
-  for(let i=0;i<start;i++)html+='<div></div>';
-
-  for(let n=1;n<=days;n++){
-    const ds=fmt(new Date(y,m,n));
-    let list=calendarEventsForDate(ds)
-      .filter(t=>t && t.start && !t.completed)
+  // Build occurrences for each day, then sort the final display list.
+  const tasksForDay=ds=>{
+    const out=calendarEventsForDate(ds)||[];
+    return out
+      .filter(t=>t && !t.completed)
       .map(t=>{
-        // Ensure occurrence priority always comes from the master when the
-        // occurrence itself did not persist the field.
         if(t._masterId){
           const master=tasks.find(x=>x.id===t._masterId);
           if(master){
@@ -1390,8 +1404,14 @@ function renderMonth(){
         }
         return t;
       })
-      .sort(cmp);
+      .sort(compare);
+  };
 
+  let html=`<div class="calbar"><button class="navbtn" onclick="copyMonth()">📋 复制本月</button><div class="caltitle">${y}年${m+1}月</div><button class="navbtn" onclick="pasteCalendar()" ${clipboard.length?'':'disabled'}>📌 粘贴${clipboard.length?` ${clipboard.length}`:''}</button></div><div class="hint">月视图按重要性显示未完成事项</div><div class="month-scroll"><div class="month">`;
+
+  for(let i=0;i<start;i++)html+='<div></div>';
+  for(let n=1;n<=days;n++){
+    const ds=fmt(new Date(y,m,n)),list=tasksForDay(ds);
     html+=`<div class="day" onclick="calDate=parseDate('${ds}');calMode='day';selectMode=false;selected.clear();render()"><b>${n}</b>`;
     list.slice(0,4).forEach(t=>{
       const key=instanceKey(t),mid=t._masterId||t.id;
@@ -1399,7 +1419,6 @@ function renderMonth(){
     });
     html+='</div>';
   }
-
   $('#main').innerHTML=html+'</div></div>';
   renderBulk();
 }
@@ -2704,7 +2723,7 @@ function reviewTaskRate(doneCount,pendingCount){const total=doneCount+pendingCou
 
 
 <style id="v2-113-focus-authoritative">
-/* v2.124: corrected Focus vertical anchoring. The fixed root is positioned below the full header.
+/* v2.125: corrected Focus vertical anchoring. The fixed root is positioned below the full header.
    Todo/Calendar: Focus is viewport-fixed; #main is the ONLY scrolling surface.
    Goals: unchanged normal-flow Focus. */
 html,body{height:100%!important;overflow:hidden!important}
@@ -2750,86 +2769,27 @@ body:has(.nav button[data-page="goals"].active) .focus-fixed-root{display:none!i
 
 
 
-<style id="v2-124-focus-authoritative">
-/* One Focus layer. It never participates in #main's scroll flow. */
-.app>.focus-fixed-root{
-  position:fixed!important;
-  left:0!important;
-  right:0!important;
-  z-index:55!important;
-  margin:0!important;
-  padding:0!important;
-  display:block!important;
-  visibility:visible!important;
-  opacity:1!important;
-  transform:none!important;
-  transition:none!important;
-  animation:none!important;
-  pointer-events:none!important;
-}
-.app>.focus-fixed-root .goals-focus{
-  pointer-events:auto!important;
-  transition:none!important;
-  animation:none!important;
-}
-.app>.focus-fixed-root .goal-focus-card{
-  transform:none!important;
-  transition:none!important;
-}
-#main.content.v124-focus-offset{
-  box-sizing:border-box!important;
-}
-@media(min-width:800px){
-  .app>.focus-fixed-root{left:236px!important}
-}
-</style>
-<script id="v2-124-focus-authoritative-js">
-(function(){
-  const rootKey='__v124FocusRoot';
-  function root(){
-    const app=document.querySelector('.app'); if(!app)return null;
-    if(!window[rootKey] || !window[rootKey].isConnected){
-      const r=document.createElement('div');
-      r.className='focus-fixed-root';
-      app.appendChild(r);
-      window[rootKey]=r;
-    }
-    return window[rootKey];
-  }
-  function markup(){
-    const y=typeof firstOpen==='function'?firstOpen('year'):null;
-    const m=typeof firstOpen==='function'?firstOpen('month'):null;
-    const year=typeof goalYear==='function'?goalYear():new Date().getFullYear();
-    const escg=typeof escGoal==='function'?escGoal:(x=>String(x??''));
-    return `<div class="goals-focus" aria-label="Focus"><div class="goal-focus-card"><div class="goal-focus-label">🎯 ${year} 年 Focus</div><div class="goal-focus-title ${y?'':'goal-focus-empty'}">${escg(y?.title||'年度目标已全部完成')}</div></div><div class="goal-focus-card month"><div class="goal-focus-label">📅 本月 Focus</div><div class="goal-focus-title ${m?'':'goal-focus-empty'}">${escg(m?.title||'本月目标已全部完成')}</div></div></div>`;
-  }
-  function sync(){
-    const app=document.querySelector('.app'),head=app?.querySelector(':scope>.head'),main=document.getElementById('main');
-    if(!app||!head||!main)return;
-    const r=root();
-    const show=typeof page!=='undefined'&&(page==='todo'||page==='calendar');
-    if(!show){
-      r.style.display='none';
-      r.innerHTML='';
-      main.classList.remove('v124-focus-offset');
-      return;
-    }
-    // Remove any accidental flow copies.
-    main.querySelectorAll('.goals-focus').forEach(el=>el.remove());
-    r.innerHTML=markup();
-    const top=Math.round(head.getBoundingClientRect().bottom);
-    r.style.top=top+'px';
-    const h=Math.ceil(r.querySelector('.goals-focus')?.getBoundingClientRect().height||0);
-    main.classList.add('v124-focus-offset');
-    main.style.paddingTop=(h+6)+'px';
-  }
 
-  // Run after the app has been parsed, before normal user interaction.
-  window.__v124SyncFocus=sync;
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',sync,{once:true});
-  else sync();
-  window.addEventListener('resize',sync,{passive:true});
-  window.addEventListener('orientationchange',sync,{passive:true});
+
+
+
+<script id="v2-125-focus-finalizer">
+(function(){
+  function clean(){
+    document.querySelectorAll('.app>.focus-fixed-root').forEach(x=>x.remove());
+    const main=document.getElementById('main');
+    if(main){
+      const bars=main.querySelectorAll('.goals-focus');
+      bars.forEach((b,i)=>{if(i>0)b.remove()});
+    }
+  }
+  const oldRender=window.render;
+  if(typeof oldRender==='function'){
+    window.render=function(){
+      oldRender.apply(this,arguments);
+      clean();
+    };
+  }
 })();
 </script>
 
