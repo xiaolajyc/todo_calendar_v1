@@ -905,6 +905,43 @@ html,body{height:100%!important;overflow:hidden!important}
   }
 }
 </style>
+
+<style id="v2-127-mobile-month-fill-height">
+@media(max-width:799px){
+  /* 手机月视图：日历区域纵向填满主内容区，5/6周自动均分高度 */
+  #main.content:has(.month-scroll){
+    display:flex!important;
+    flex-direction:column!important;
+    overflow:hidden!important;
+    min-height:0!important;
+  }
+  #main.content:has(.month-scroll) .calbar{
+    flex:none!important;
+  }
+  #main.content:has(.month-scroll) > .hint{
+    flex:none!important;
+  }
+  #main.content:has(.month-scroll) .month-scroll{
+    flex:1 1 auto!important;
+    min-height:0!important;
+    height:auto!important;
+    overflow:hidden!important;
+    display:flex!important;
+    flex-direction:column!important;
+  }
+  #main.content:has(.month-scroll) .month-scroll .month{
+    flex:1 1 auto!important;
+    min-height:0!important;
+    height:100%!important;
+    grid-auto-rows:minmax(0,1fr)!important;
+    align-content:stretch!important;
+  }
+  #main.content:has(.month-scroll) .month-scroll .day{
+    min-height:0!important;
+    height:auto!important;
+  }
+}
+</style>
 </head><body><div class="app"><header class="head"><div class="headtop"><h1 id="heading"><span id="headingText">Todo</span></h1><div id="headActions"></div></div><div id="subtabs" class="tabs"></div></header><main id="main" class="content"></main><button id="fab" class="fab">+</button><div id="bulk" class="bulk hidden"></div><nav class="nav">
 <button data-page="todo" class="active"><span class="navicon todoicon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 8l1.5 1.5L12 7"/><path d="M13.5 8H17"/><path d="M8 13l1.5 1.5L12 12"/><path d="M13.5 13H17"/></svg></span><span>Todo</span></button>
 <button data-page="calendar"><span class="navicon calendaricon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="16" rx="2.5"/><path d="M7 3v4M17 3v4M3.5 9.5h17"/><path d="M7.5 13h.01M12 13h.01M16.5 13h.01M7.5 17h.01M12 17h.01M16.5 17h.01"/></svg></span><span>日历</span></button>
