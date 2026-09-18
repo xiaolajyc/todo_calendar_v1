@@ -8,7 +8,7 @@
 <link rel="manifest" href="./manifest.json">
 <link rel="apple-touch-icon" href="./icon-180.png">
 <link rel="icon" href="./icon-192.png" type="image/png">
-<title>Todo · v2.125</title>
+<title>Todo · v2.121</title>
 <style>
 :root{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#171717;background:#f5f5f7;--line:#e7e7eb;--muted:#777;--accent:#111}*{box-sizing:border-box}body{margin:0;background:#f5f5f7;overscroll-behavior:none}.app{max-width:1100px;margin:auto;min-height:100vh;background:#fff;padding-bottom:68px}.head{position:sticky;top:0;background:rgba(255,255,255,.96);backdrop-filter:blur(12px);padding:12px 14px;border-bottom:1px solid var(--line);z-index:30}.headtop{display:flex;align-items:center;justify-content:space-between;gap:8px}.head h1{margin:0;font-size:21px}.tabs,.seg{display:flex;gap:6px;margin-top:10px;overflow:auto}.tabs button,.seg button,.chip{border:0;border-radius:10px;padding:8px 11px;background:#eee;white-space:nowrap}.active{background:#111!important;color:#fff}.content{padding:12px}.group{margin:18px 0}.group h3{font-size:14px;margin:0 0 6px}.task{display:flex;align-items:center;gap:10px;padding:13px 7px;border-bottom:1px solid #eee;touch-action:pan-y}.check{width:23px;height:23px;cursor:pointer;border:2px solid #aaa;border-radius:50%;flex:none}.done .check{background:#111}.done .title{text-decoration:line-through;opacity:.45}.taskmain{flex:1;min-width:0}.title{font-weight:600}.meta{font-size:12px;color:#777;margin-top:3px}.badge{font-size:12px}.fab{position:fixed;right:18px;bottom:88px;width:56px;height:56px;border-radius:50%;border:0;background:#111;color:#fff;font-size:30px;z-index:20;box-shadow:0 5px 20px #0002}.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(1100px,100%);height:70px;background:#fff;border-top:1px solid #ddd;display:flex;z-index:40;padding-bottom:env(safe-area-inset-bottom)}.nav button{flex:1;border:0;background:white;font-size:13px}.nav .active{color:#fff!important;background:var(--primary,#3478f6)!important}.card{background:#f5f5f7;border-radius:16px;padding:14px;margin-bottom:12px}.row{display:flex;gap:10px;align-items:center}.row>*{flex:1}.field{margin:12px 0}.field label{display:block;font-size:12px;color:#666;margin-bottom:5px}.field input,.field textarea,.field select{width:100%;padding:12px;border:1px solid #ddd;border-radius:12px;background:#fff}.primary,.danger{border:0;border-radius:12px;padding:12px 16px}.primary{background:#111;color:#fff}.danger{background:#eee}.hidden{display:none!important}.empty{text-align:center;color:#888;padding:35px 10px}
 /* Google Calendar-like week/day timeline */
@@ -691,38 +691,189 @@ html,body{height:100%;overflow:hidden}
 .review-actions .btn{min-width:0}
 </style>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<style id="v2-125-focus-sticky">
-/* Focus is part of the page flow and sticky inside the scrolling content.
-   No fixed-position JS, no RAF, no geometry calculation, no first-paint jump. */
-.goals-focus{
-  position:sticky!important;
-  top:0!important;
-  z-index:80!important;
-  margin-top:0!important;
-  margin-bottom:8px!important;
-  transform:none!important;
+<style id="v2-118-stable-first-paint">
+/* v2.121: eliminate first-paint jumps.
+   The app keeps a stable viewport from the first paint; navigation has one
+   fixed height and Focus is positioned from the header height without animation. */
+html,body{height:100%;overflow:hidden!important}
+.app{height:100dvh;min-height:100dvh;overflow:hidden!important}
+@media(max-width:799px){
+  .app{padding-bottom:82px!important}
+  .nav{
+    height:82px!important;
+    min-height:82px!important;
+    box-sizing:border-box!important;
+    padding-bottom:env(safe-area-inset-bottom)!important;
+    transition:none!important;
+    animation:none!important;
+  }
+  .nav button{height:100%!important;transition:none!important;animation:none!important}
+}
+@media(min-width:800px){
+  .nav{transition:none!important;animation:none!important}
+}
+.focus-fixed-root{
   transition:none!important;
   animation:none!important;
-  background:var(--bg,#fff)!important;
+  transform:none!important;
 }
-.focus-fixed-root{display:none!important}
+.focus-fixed-root .goals-focus{
+  transition:none!important;
+  animation:none!important;
+}
 </style>
+<script id="v2-118-first-paint-stabilizer">
+(function(){
+  const mark='__v118StablePaint';
+  if(window[mark]) return;
+  window[mark]=true;
+
+  function stabilize(){
+    const app=document.querySelector('.app');
+    const head=app?.querySelector(':scope>.head');
+    const nav=document.querySelector('.nav');
+    if(!app) return;
+
+    /* Freeze the navigation bar's resolved height before revealing it. */
+    if(nav){
+      const h=window.innerWidth<800 ? 82 : nav.getBoundingClientRect().height;
+      if(window.innerWidth<800) nav.style.setProperty('height','82px','important');
+      nav.style.setProperty('min-height',String(h)+'px','important');
+    }
+
+    /* Resolve Focus position before the first visible frame. */
+    const root=app.querySelector(':scope>.focus-fixed-root');
+    if(root && typeof page!=='undefined' && (page==='todo'||page==='calendar') && head){
+      root.style.setProperty('top',head.getBoundingClientRect().bottom+'px','important');
+      root.style.setProperty('transition','none','important');
+    }
+
+    app.classList.add('v118-ready');
+  }
+
+  /* No fade/animation: just make the final geometry exist before first paint. */
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',stabilize,{once:true});
+  }else stabilize();
+  window.addEventListener('resize',stabilize,{passive:true});
+})();
+</script>
+
+
+<style id="v2-119-final-focus-no-jump">
+html,body{height:100%!important;overflow:hidden!important}
+.app{height:100dvh!important;min-height:100dvh!important;overflow:hidden!important}
+.app>.head{position:relative!important;z-index:200!important}
+.app>.focus-fixed-root{position:fixed!important;left:0!important;right:0!important;top:var(--focus-top,0px)!important;display:none;margin:0!important;padding:0!important;z-index:190!important;pointer-events:none!important;transition:none!important;animation:none!important;transform:none!important}
+.app>.focus-fixed-root .goals-focus{margin:0!important;transition:none!important;animation:none!important}
+#main.content.focus-fixed-offset{padding-top:var(--focus-space,0px)!important;box-sizing:border-box!important}
+@media(min-width:800px){.app>.focus-fixed-root{left:236px!important}}
+@media(max-width:799px){.nav{height:82px!important;min-height:82px!important;box-sizing:border-box!important;padding-bottom:env(safe-area-inset-bottom)!important;transition:none!important;animation:none!important}.nav button{height:100%!important;transition:none!important;animation:none!important}}
+</style>
+<script id="v2-119-final-focus-no-jump-js">
+(function(){
+  const baseTodo=window.__baseRenderTodo;
+  const baseCal=window.__baseRenderCalendar;
+  function syncFocus(){
+    const app=document.querySelector('.app'),main=document.getElementById('main'),head=app?.querySelector(':scope>.head');
+    if(!app||!main||!head)return;
+    let root=app.querySelector(':scope>.focus-fixed-root');
+    if(!root){root=document.createElement('div');root.className='focus-fixed-root';app.appendChild(root)}
+    const fixed=(typeof page!=='undefined'&&(page==='todo'||page==='calendar'));
+    if(!fixed){root.style.display='none';root.innerHTML='';main.classList.remove('focus-fixed-offset');main.style.removeProperty('--focus-space');return}
+    main.querySelectorAll('.goals-focus').forEach(x=>x.remove());
+    const html=typeof goalFocusBar==='function'?goalFocusBar():'';
+    root.innerHTML=html;
+    const top=Math.round(head.getBoundingClientRect().bottom);
+    root.style.setProperty('--focus-top',top+'px');
+    root.style.display='block';
+    const fh=Math.ceil(root.querySelector('.goals-focus')?.getBoundingClientRect().height||0);
+    main.classList.add('focus-fixed-offset');
+    main.style.setProperty('--focus-space',(fh+6)+'px');
+  }
+  if(baseTodo)window.renderTodo=function(){baseTodo();syncFocus()};
+  if(baseCal)window.renderCalendar=function(options={}){baseCal(options);syncFocus()};
+  window.render=function(){
+    if(typeof captureCalendarView==='function')captureCalendarView();
+    document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===page));
+    $('#fab')?.classList.toggle('hidden',page==='settings');
+    $('#heading').textContent=page==='todo'?'Todo':page==='calendar'?'日历':'设置';
+    if(page==='todo')renderTodo();else if(page==='calendar')renderCalendar();else renderSettings();
+    syncFocus();
+  };
+  window.addEventListener('resize',syncFocus,{passive:true});
+  window.addEventListener('orientationchange',syncFocus,{passive:true});
+})();
+</script>
+
+
+<style id="v2-120-focus-first-paint">
+.app>.focus-fixed-root{visibility:hidden!important;transition:none!important;animation:none!important}
+.app>.focus-fixed-root.focus-positioned{visibility:visible!important}
+</style>
+<script id="v2-120-focus-first-paint-js">
+(function(){
+  function mark(){
+    const r=document.querySelector('.app>.focus-fixed-root');
+    if(r && (typeof page==='undefined'||page==='todo'||page==='calendar')) r.classList.add('focus-positioned');
+  }
+  const oldInstall=window.__focusInstall120;
+  const run=()=>{mark()};
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',run,{once:true});else run();
+  window.addEventListener('resize',run,{passive:true});
+})();
+</script>
+
+
+<style id="v2-121-focus-visible-no-jump">
+/* v2.121: Focus is visible in Todo/Calendar only. Earlier v2.118 rules set
+   display:none!important; override them here. Geometry is established before reveal. */
+.app>.focus-fixed-root{display:none!important;visibility:hidden!important;opacity:0!important;transition:none!important;animation:none!important;transform:none!important;pointer-events:none!important;}
+.app>.focus-fixed-root.v121-ready{display:block!important;visibility:visible!important;opacity:1!important;}
+.app>.focus-fixed-root .goals-focus{transition:none!important;animation:none!important;margin:0!important;}
+#main.content.v121-focus-offset{box-sizing:border-box!important;}
+</style>
+<script id="v2-121-focus-visible-no-jump-js">
+(function(){
+  function focusMarkup(){
+    try{
+      const y=firstOpen('year'),m=firstOpen('month');
+      return `<div class="goals-focus" aria-label="Focus"><div class="goal-focus-card"><div class="goal-focus-label">🎯 ${goalYear()} 年 Focus</div><div class="goal-focus-title ${y?'':'goal-focus-empty'}" title="${escGoal(y?.title||'')}">${escGoal(y?.title||'年度目标已全部完成')}</div></div><div class="goal-focus-card month"><div class="goal-focus-label">📅 本月 Focus</div><div class="goal-focus-title ${m?'':'goal-focus-empty'}" title="${escGoal(m?.title||'')}">${escGoal(m?.title||'本月目标已全部完成')}</div></div></div>`;
+    }catch(e){return ''}
+  }
+  function sync(){
+    const app=document.querySelector('.app'),head=app?.querySelector(':scope>.head'),main=document.getElementById('main');
+    if(!app||!head||!main)return;
+    let root=app.querySelector(':scope>.focus-fixed-root');
+    if(!root){root=document.createElement('div');root.className='focus-fixed-root';app.appendChild(root)}
+    const fixed=typeof page!=='undefined'&&(page==='todo'||page==='calendar');
+    if(!fixed){root.classList.remove('v121-ready');root.innerHTML='';main.classList.remove('v121-focus-offset');main.style.removeProperty('padding-top');return}
+    main.querySelectorAll('.goals-focus').forEach(x=>x.remove());
+    root.classList.remove('v121-ready');
+    root.innerHTML=focusMarkup();
+    const top=Math.round(head.getBoundingClientRect().bottom);
+    root.style.setProperty('top',top+'px','important');
+    root.style.setProperty('left',window.innerWidth>=800?'236px':'0px','important');
+    root.style.setProperty('right','0px','important');
+    root.style.setProperty('display','block','important');
+    const h=Math.ceil(root.querySelector('.goals-focus')?.getBoundingClientRect().height||0);
+    main.classList.add('v121-focus-offset');
+    main.style.setProperty('padding-top',(h+6)+'px','important');
+    /* Reveal only after top + height are both resolved. */
+    root.classList.add('v121-ready');
+  }
+  window.__syncFocusV121=sync;
+  const oldRender=window.render;
+  if(oldRender&&!window.__v121Render){window.__v121Render=true;window.render=function(){oldRender();sync()}}
+  const oldTodo=window.renderTodo;
+  if(oldTodo&&!window.__v121Todo){window.__v121Todo=true;window.renderTodo=function(){oldTodo();sync()}}
+  const oldCal=window.renderCalendar;
+  if(oldCal&&!window.__v121Cal){window.__v121Cal=true;window.renderCalendar=function(o={}){oldCal(o);sync()}}
+  window.addEventListener('resize',sync,{passive:true});
+  window.addEventListener('orientationchange',sync,{passive:true});
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',sync,{once:true});else sync();
+})();
+</script>
 
 </head><body><div class="app"><header class="head"><div class="headtop"><h1 id="heading"><span id="headingText">Todo</span></h1><div id="headActions"></div></div><div id="subtabs" class="tabs"></div></header><main id="main" class="content"></main><button id="fab" class="fab">+</button><div id="bulk" class="bulk hidden"></div><nav class="nav">
 <button data-page="todo" class="active"><span class="navicon todoicon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 8l1.5 1.5L12 7"/><path d="M13.5 8H17"/><path d="M8 13l1.5 1.5L12 12"/><path d="M13.5 13H17"/></svg></span><span>Todo</span></button>
@@ -1062,7 +1213,7 @@ function toggleCalendarSelect(i){selectMode=true;selected.has(i)?selected.delete
 function drawCreating(col,c,startHour,rowH){let old=col.querySelector('.creating');if(old)old.remove();let el=document.createElement('div');el.className='creating';let top=(c.start-startHour*60)/60*rowH,h=(c.end-c.start)/60*rowH;el.style.top=top+'px';el.style.height=Math.max(24,h)+'px';el.textContent=timeStr(c.start)+'–'+timeStr(c.end);col.appendChild(el)}
 
 
-/* v2.125: unified task importance ordering for Month view and reviews.
+/* v2.121: unified task importance ordering for Month view and reviews.
    Priority: Important+Urgent > Important > Urgent > Other. */
 function taskPriority(t){
   return t?.important && t?.urgent ? 0 : t?.important ? 1 : t?.urgent ? 2 : 3;
@@ -1366,62 +1517,7 @@ function moveOccurrence(master,occDate,newDate,newStart,newEnd){
   save();
 }
 function toggleCalendarSelect(i){selectMode=true;selected.has(i)?selected.delete(i):selected.add(i);renderCalendar()}
-function renderMonth(){
-  const y=calDate.getFullYear(),m=calDate.getMonth(),first=new Date(y,m,1);
-  const start=(first.getDay()+6)%7,days=new Date(y,m+1,0).getDate();
-
-  const score=t=>{
-    const i=!!t?.important,u=!!t?.urgent;
-    return i&&u?0:i?1:u?2:3;
-  };
-  const minutes=t=>{
-    const v=String(t?.start||'');
-    const q=v.match(/^(\d{1,2}):(\d{2})$/);
-    return q?Number(q[1])*60+Number(q[2]):99999;
-  };
-  const compare=(a,b)=>{
-    const p=score(a)-score(b);
-    if(p)return p;
-    const tm=minutes(a)-minutes(b);
-    if(tm)return tm;
-    return String(a?.title||'').localeCompare(String(b?.title||''),'zh-Hans');
-  };
-
-  // Build occurrences for each day, then sort the final display list.
-  const tasksForDay=ds=>{
-    const out=calendarEventsForDate(ds)||[];
-    return out
-      .filter(t=>t && !t.completed)
-      .map(t=>{
-        if(t._masterId){
-          const master=tasks.find(x=>x.id===t._masterId);
-          if(master){
-            return {...t,
-              important:t.important===true || master.important===true,
-              urgent:t.urgent===true || master.urgent===true
-            };
-          }
-        }
-        return t;
-      })
-      .sort(compare);
-  };
-
-  let html=`<div class="calbar"><button class="navbtn" onclick="copyMonth()">📋 复制本月</button><div class="caltitle">${y}年${m+1}月</div><button class="navbtn" onclick="pasteCalendar()" ${clipboard.length?'':'disabled'}>📌 粘贴${clipboard.length?` ${clipboard.length}`:''}</button></div><div class="hint">月视图按重要性显示未完成事项</div><div class="month-scroll"><div class="month">`;
-
-  for(let i=0;i<start;i++)html+='<div></div>';
-  for(let n=1;n<=days;n++){
-    const ds=fmt(new Date(y,m,n)),list=tasksForDay(ds);
-    html+=`<div class="day" onclick="calDate=parseDate('${ds}');calMode='day';selectMode=false;selected.clear();render()"><b>${n}</b>`;
-    list.slice(0,4).forEach(t=>{
-      const key=instanceKey(t),mid=t._masterId||t.id;
-      html+=`<div class="mini ${selected.has(key)?'selected':''}" onclick="if(selected.size){event.stopPropagation();toggleCalendarSelect('${esc(key)}')}else{event.stopPropagation();openOccurrenceEditor(tasks.find(x=>x.id==='${esc(mid)}'),'${esc(t._occurrenceDate||t.date||ds)}')}" oncontextmenu="event.preventDefault();toggleCalendarSelect('${esc(key)}')">${esc(t.title)}</div>`;
-    });
-    html+='</div>';
-  }
-  $('#main').innerHTML=html+'</div></div>';
-  renderBulk();
-}
+function renderMonth(){let y=calDate.getFullYear(),m=calDate.getMonth(),first=new Date(y,m,1),start=(first.getDay()+6)%7,days=new Date(y,m+1,0).getDate(),html=`<div class="calbar"><button class="navbtn" onclick="copyMonth()">📋 复制本月</button><div class="caltitle">${y}年${m+1}月</div><button class="navbtn" onclick="pasteCalendar()" ${clipboard.length?'':'disabled'}>📌 粘贴${clipboard.length?` ${clipboard.length}`:''}</button></div><div class="hint">点击日期进入日视图；长按事项可进入批量选择</div><div class="month-scroll"><div class="month">`;for(let i=0;i<start;i++)html+='<div></div>';for(let n=1;n<=days;n++){let ds=fmt(new Date(y,m,n));let a=calendarEventsForDate(ds).filter(t=>!t.completed).sort((a,b)=>{const pa=priority(a),pb=priority(b);return pa-pb||(timeMin(a.start)-timeMin(b.start))||String(a.title||'').localeCompare(String(b.title||''));});html+=`<div class="day" onclick="calDate=parseDate('${ds}');calMode='day';selectMode=false;selected.clear();render()"><b>${n}</b>${a.slice(0,4).map(t=>`<div class="mini ${selected.has(instanceKey(t))?'selected':''}" onclick="if(selected.size){event.stopPropagation();toggleCalendarSelect('${esc(instanceKey(t))}')};else{event.stopPropagation();openOccurrenceEditor(tasks.find(x=>x.id==='${esc(t._masterId||t.id)}'),'${esc(t._occurrenceDate||t.date)}')}" oncontextmenu="event.preventDefault();toggleCalendarSelect('${esc(instanceKey(t))}')">${esc(t.title)}</div>`).join('')}</div>`}$('#main').innerHTML=html+'</div></div>';renderBulk()}
 </script>
 
 
@@ -2439,7 +2535,31 @@ renderCalendar=function(options={}){
   .goal-focus-title{font-size:13px!important}
 }
 </style>
-
+<script id="v2-85-final-focus">
+/* V2.85: inject Focus after the calendar has finished rendering, regardless of day/week/month mode. */
+function ensureCalendarFocus(){
+  if(page!=='calendar')return;
+  const main=$('#main'); if(!main)return;
+  main.querySelectorAll('.goals-focus').forEach((el,i)=>{if(i>0)el.remove()});
+  if(!main.querySelector('.goals-focus')) main.insertAdjacentHTML('afterbegin',goalFocusBar());
+}
+const __renderCalendarV85=renderCalendar;
+renderCalendar=function(options={}){
+  __renderCalendarV85(options);
+  ensureCalendarFocus();
+  requestAnimationFrame(()=>ensureCalendarFocus());
+  setTimeout(()=>ensureCalendarFocus(),60);
+};
+/* The heading text is now a child span so the small version label stays visible. */
+const __baseRenderV85=render;
+render=function(){
+  __baseRenderV85();
+  const h=$('#heading');
+  if(h){
+    h.innerHTML=`<span id="headingText">${page==='todo'?'Todo':page==='calendar'?'日历':page==='goals'?'目标':'设置'}</span>`;
+  }
+};
+</script>
 
 
 <style id="v2-86-final-layout">
@@ -2723,7 +2843,7 @@ function reviewTaskRate(doneCount,pendingCount){const total=doneCount+pendingCou
 
 
 <style id="v2-113-focus-authoritative">
-/* v2.125: corrected Focus vertical anchoring. The fixed root is positioned below the full header.
+/* v2.121: corrected Focus vertical anchoring. The fixed root is positioned below the full header.
    Todo/Calendar: Focus is viewport-fixed; #main is the ONLY scrolling surface.
    Goals: unchanged normal-flow Focus. */
 html,body{height:100%!important;overflow:hidden!important}
@@ -2746,7 +2866,80 @@ html,body{height:100%!important;overflow:hidden!important}
   .app>.focus-fixed-root{left:236px!important}
 }
 </style>
-
+<script id="v2-113-focus-authoritative-js">
+(function(){
+  /* v2.121: keep one Focus root alive across page/view switches.
+     Recreating the fixed node caused a one-frame jump; the root is now
+     reused and only its contents/position are updated. */
+  const realGoalFocusBar = window.goalFocusBar;
+  window.goalFocusBar = function(){
+    if(typeof page!=='undefined' && (page==='todo'||page==='calendar')) return '';
+    return realGoalFocusBar ? realGoalFocusBar() : '';
+  };
+  function removeFlowFocus(){
+    const main=document.getElementById('main');
+    if(main) main.querySelectorAll('.goals-focus').forEach(el=>el.remove());
+  }
+  function getRoot(){return document.querySelector('.app>.focus-fixed-root')}
+  function ensureRoot(){
+    const app=document.querySelector('.app');
+    if(!app) return null;
+    let root=getRoot();
+    if(!root){root=document.createElement('div');root.className='focus-fixed-root';app.appendChild(root)}
+    return root;
+  }
+  function positionRoot(root,head,main){
+    const r=root?.querySelector('.goals-focus');
+    if(!r||!head||!main)return;
+    const headBottom=head.getBoundingClientRect().bottom;
+    root.style.setProperty('top',headBottom+'px','important');
+    const h=r.getBoundingClientRect().height;
+    main.classList.add('focus-fixed-offset');
+    main.style.setProperty('padding-top',(h+8)+'px','important');
+  }
+  function install(){
+    const app=document.querySelector('.app');
+    const head=app?.querySelector(':scope>.head');
+    const main=document.getElementById('main');
+    if(!app||!head||!main)return;
+    const fixed=(page==='todo'||page==='calendar');
+    if(!fixed){
+      const root=getRoot();
+      if(root)root.style.display='none';
+      main.classList.remove('focus-fixed-offset');
+      main.style.removeProperty('padding-top');
+      return;
+    }
+    removeFlowFocus();
+    const root=ensureRoot();
+    root.style.display='block';
+    /* Update existing root in place: no remove/reinsert, no visual jump. */
+    const html=realGoalFocusBar ? realGoalFocusBar() : '';
+    if(root.innerHTML!==html) root.innerHTML=html;
+    positionRoot(root,head,main);
+  }
+  const observer=new MutationObserver(()=>{
+    if(page==='todo'||page==='calendar'){
+      const main=document.getElementById('main');
+      if(main)main.querySelectorAll('.goals-focus').forEach(el=>el.remove());
+    }
+  });
+  const start=()=>{
+    const main=document.getElementById('main');
+    if(main)observer.observe(main,{childList:true,subtree:true});
+    install();
+  };
+  const oldRender=window.render;
+  if(oldRender&&!window.__v116Render){window.__v116Render=true;window.render=function(){oldRender();install()}}
+  const oldTodo=window.renderTodo;
+  if(oldTodo&&!window.__v116Todo){window.__v116Todo=true;window.renderTodo=function(){oldTodo();install()}}
+  const oldCal=window.renderCalendar;
+  if(oldCal&&!window.__v116Cal){window.__v116Cal=true;window.renderCalendar=function(options={}){oldCal(options);install()}}
+  window.addEventListener('resize',()=>{if(page==='todo'||page==='calendar')install()},{passive:true});
+  window.addEventListener('orientationchange',()=>install(),{passive:true});
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
+})();
+</script>
 
 <style id="v2-115-goals-no-focus">
 /* Goals page: Focus is not displayed here. Focus is shown only on Todo/Calendar. */
@@ -2765,32 +2958,4 @@ body:has(.nav button[data-page="goals"].active) .focus-fixed-root{display:none!i
   new MutationObserver(cleanGoalsFocus).observe(document.body,{childList:true,subtree:true});
 })();
 </script>
-
-
-
-
-
-
-
-
-<script id="v2-125-focus-finalizer">
-(function(){
-  function clean(){
-    document.querySelectorAll('.app>.focus-fixed-root').forEach(x=>x.remove());
-    const main=document.getElementById('main');
-    if(main){
-      const bars=main.querySelectorAll('.goals-focus');
-      bars.forEach((b,i)=>{if(i>0)b.remove()});
-    }
-  }
-  const oldRender=window.render;
-  if(typeof oldRender==='function'){
-    window.render=function(){
-      oldRender.apply(this,arguments);
-      clean();
-    };
-  }
-})();
-</script>
-
 </body></html>
