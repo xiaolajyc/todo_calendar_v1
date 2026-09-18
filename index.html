@@ -691,75 +691,10 @@ html,body{height:100%;overflow:hidden}
 .review-actions .btn{min-width:0}
 </style>
 
-<style id="v2-118-stable-first-paint">
-/* v2.118: eliminate first-paint jumps.
-   The app keeps a stable viewport from the first paint; navigation has one
-   fixed height and Focus is positioned from the header height without animation. */
-html,body{height:100%;overflow:hidden!important}
-.app{height:100dvh;min-height:100dvh;overflow:hidden!important}
-@media(max-width:799px){
-  .app{padding-bottom:82px!important}
-  .nav{
-    height:82px!important;
-    min-height:82px!important;
-    box-sizing:border-box!important;
-    padding-bottom:env(safe-area-inset-bottom)!important;
-    transition:none!important;
-    animation:none!important;
-  }
-  .nav button{height:100%!important;transition:none!important;animation:none!important}
-}
-@media(min-width:800px){
-  .nav{transition:none!important;animation:none!important}
-}
-.focus-fixed-root{
-  transition:none!important;
-  animation:none!important;
-  transform:none!important;
-}
-.focus-fixed-root .goals-focus{
-  transition:none!important;
-  animation:none!important;
-}
-</style>
-<script id="v2-118-first-paint-stabilizer">
-(function(){
-  const mark='__v118StablePaint';
-  if(window[mark]) return;
-  window[mark]=true;
 
-  function stabilize(){
-    const app=document.querySelector('.app');
-    const head=app?.querySelector(':scope>.head');
-    const nav=document.querySelector('.nav');
-    if(!app) return;
 
-    /* Freeze the navigation bar's resolved height before revealing it. */
-    if(nav){
-      const h=window.innerWidth<800 ? 82 : nav.getBoundingClientRect().height;
-      if(window.innerWidth<800) nav.style.setProperty('height','82px','important');
-      nav.style.setProperty('min-height',String(h)+'px','important');
-    }
 
-    /* Resolve Focus position before the first visible frame. */
-    const root=app.querySelector(':scope>.focus-fixed-root');
-    if(root && typeof page!=='undefined' && (page==='todo'||page==='calendar') && head){
-      root.style.setProperty('top',head.getBoundingClientRect().bottom+'px','important');
-      root.style.setProperty('transition','none','important');
-    }
-
-    app.classList.add('v118-ready');
-  }
-
-  /* No fade/animation: just make the final geometry exist before first paint. */
-  if(document.readyState==='loading'){
-    document.addEventListener('DOMContentLoaded',stabilize,{once:true});
-  }else stabilize();
-  window.addEventListener('resize',stabilize,{passive:true});
-})();
-</script>
-
-<style id="v2-120-review-rate">.review-rate{font-size:13px;font-weight:700;opacity:.78;margin:4px 0 8px}</style></head><body><div class="app"><header class="head"><div class="headtop"><h1 id="heading"><span id="headingText">Todo</span></h1><div id="headActions"></div></div><div id="subtabs" class="tabs"></div></header><main id="main" class="content"></main><button id="fab" class="fab">+</button><div id="bulk" class="bulk hidden"></div><nav class="nav">
+</head><body><div class="app"><header class="head"><div class="headtop"><h1 id="heading"><span id="headingText">Todo</span></h1><div id="headActions"></div></div><div id="subtabs" class="tabs"></div></header><main id="main" class="content"></main><button id="fab" class="fab">+</button><div id="bulk" class="bulk hidden"></div><nav class="nav">
 <button data-page="todo" class="active"><span class="navicon todoicon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 8l1.5 1.5L12 7"/><path d="M13.5 8H17"/><path d="M8 13l1.5 1.5L12 12"/><path d="M13.5 13H17"/></svg></span><span>Todo</span></button>
 <button data-page="calendar"><span class="navicon calendaricon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="16" rx="2.5"/><path d="M7 3v4M17 3v4M3.5 9.5h17"/><path d="M7.5 13h.01M12 13h.01M16.5 13h.01M7.5 17h.01M12 17h.01M16.5 17h.01"/></svg></span><span>日历</span></button>
 <button data-page="goals"><span class="navicon goalsicon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1.5"/></svg></span><span>目标</span></button>
@@ -1164,8 +1099,8 @@ function copyOne(i){let t=tasks.find(x=>x.id===i);if(t){clipboard=[{...t,id:id()
 function removeTask(i){if(confirm('删除此事项？')){tasks=tasks.filter(t=>t.id!==i);save();render()}}
 function renderSettings(){
   /* v2.95: version information belongs in Settings, not beside the page title. */
-  const VERSION_INFO_HTML = '<div class="settings-card version-info-card"><div class="settings-title">版本信息</div><div class="settings-row"><span>Todo 日历</span><b>v2.105</b></div></div>';
-$('#subtabs').innerHTML='';$('#headActions').innerHTML='';$('#main').innerHTML=`<div class="card"><b>版本信息</b><p>Todo 日历 v2.109</p></div><div class="card"><b>每日开始时间</b><p>06:30（今天/逾期和每日刷新边界）</p></div><div class="card"><b>默认事件时长</b><p>60 分钟</p></div><div class="card"><button class="primary" onclick="exportData()">导出 JSON</button> <button class="danger" onclick="clipboard=[];render()">清空复制板</button> <label class="danger">导入 JSON<input type="file" accept="application/json" hidden onchange="importData(this)"></label></div><div class="card"><b>本地数据</b><p>${tasks.length} 个事项。当前数据保存在浏览器本地。</p><button class="danger" style="margin-top:8px;width:100%;color:#c62828" onclick="clearAllData()">⚠️ 清除全部数据</button></div>`}
+  const VERSION_INFO_HTML = '<div class="settings-card version-info-card"><div class="settings-title">版本信息</div><div class="settings-row"><span>Todo 日历</span><b>v2.121</b></div></div>';
+$('#subtabs').innerHTML='';$('#headActions').innerHTML='';$('#main').innerHTML=`<div class="card"><b>版本信息</b><p>Todo 日历 v2.121</p></div><div class="card"><b>每日开始时间</b><p>06:30（今天/逾期和每日刷新边界）</p></div><div class="card"><b>默认事件时长</b><p>60 分钟</p></div><div class="card"><button class="primary" onclick="exportData()">导出 JSON</button> <button class="danger" onclick="clipboard=[];render()">清空复制板</button> <label class="danger">导入 JSON<input type="file" accept="application/json" hidden onchange="importData(this)"></label></div><div class="card"><b>本地数据</b><p>${tasks.length} 个事项。当前数据保存在浏览器本地。</p><button class="danger" style="margin-top:8px;width:100%;color:#c62828" onclick="clearAllData()">⚠️ 清除全部数据</button></div>`}
 function clearAllData(){
   if(!confirm('第一次确认：确定要清除全部 Todo、日历事项和本地数据吗？此操作不可撤销。'))return;
   if(!confirm('第二次确认：再次确认要永久删除全部数据吗？'))return;
@@ -1174,11 +1109,11 @@ function clearAllData(){
   weekZoom=100;dayZoom=100;render();
 }
 function exportData(){
-  const backup={version:'2.105',tasks:cloneObj(tasks),goals:cloneObj(goals||{year:[],month:[]}),exportedAt:new Date().toISOString()};
+  const backup={version:'2.121',tasks:cloneObj(tasks),goals:cloneObj(goals||{year:[],month:[]}),exportedAt:new Date().toISOString()};
   let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(backup,null,2)],{type:'application/json'}));a.download='todo-calendar-backup-v2.105.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500)
 }
 function importData(el){let r=new FileReader();r.onload=()=>{try{let x=JSON.parse(r.result);if(Array.isArray(x)){tasks=x}else if(x&&Array.isArray(x.tasks)){tasks=x.tasks;if(x.goals&&typeof x.goals==='object'){goals={year:Array.isArray(x.goals.year)?x.goals.year.slice(0,3):[],month:Array.isArray(x.goals.month)?x.goals.month.slice(0,3):[]};saveGoals()}}else throw 0;save();render()}catch{alert('文件格式错误')}};if(el.files[0])r.readAsText(el.files[0])}
-document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>{captureCalendarView();const next=b.dataset.page;if(next==='calendar'&&!calendarViewInitialized&&calMode==='week')weekCenterRequested=true;page=next;selectMode=false;selected.clear();render()});$('#fab').onclick=()=>newTask();render();
+document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>{captureCalendarView();const next=b.dataset.page;if(next==='calendar'&&!calendarViewInitialized&&calMode==='week')weekCenterRequested=true;page=next;selectMode=false;selected.clear();render()});$('#fab').onclick=()=>newTask();window.__todoInitialRenderPending=true;
 </script>
 <script>
 document.addEventListener('selectstart', function(e){
@@ -1401,7 +1336,7 @@ function moveOccurrence(master,occDate,newDate,newStart,newEnd){
   save();
 }
 function toggleCalendarSelect(i){selectMode=true;selected.has(i)?selected.delete(i):selected.add(i);renderCalendar()}
-function renderMonth(){let y=calDate.getFullYear(),m=calDate.getMonth(),first=new Date(y,m,1),start=(first.getDay()+6)%7,days=new Date(y,m+1,0).getDate(),html=`<div class="calbar"><button class="navbtn" onclick="copyMonth()">📋 复制本月</button><div class="caltitle">${y}年${m+1}月</div><button class="navbtn" onclick="pasteCalendar()" ${clipboard.length?'':'disabled'}>📌 粘贴${clipboard.length?` ${clipboard.length}`:''}</button></div><div class="hint">点击日期进入日视图；重复事项可单独编辑、删除或拖动</div><div class="month-scroll"><div class="month">`;for(let i=0;i<start;i++)html+='<div></div>';for(let n=1;n<=days;n++){let ds=fmt(new Date(y,m,n)),a=sortTasksByImportance(calendarEventsForDate(ds).filter(t=>!t.completed),'date');html+=`<div class="day" onclick="calDate=parseDate('${ds}');calMode='day';selectMode=false;selected.clear();render()"><b>${n}</b>${a.slice(0,4).map(t=>`<div class="mini ${selected.has(instanceKey(t))?'selected':''}" onclick="if(selected.size){event.stopPropagation();toggleCalendarSelect('${esc(instanceKey(t))}')};else{event.stopPropagation();openOccurrenceEditor(tasks.find(x=>x.id==='${esc(t._masterId||t.id)}'),'${esc(t._occurrenceDate||t.date)}') }" oncontextmenu="event.preventDefault();toggleCalendarSelect('${esc(instanceKey(t))}')">${esc(t.title)}</div>`).join('')}</div>`}$('#main').innerHTML=html+'</div></div>';renderBulk()}
+function renderMonth(){let y=calDate.getFullYear(),m=calDate.getMonth(),first=new Date(y,m,1),start=(first.getDay()+6)%7,days=new Date(y,m+1,0).getDate(),html=`<div class="calbar"><button class="navbtn" onclick="copyMonth()">📋 复制本月</button><div class="caltitle">${y}年${m+1}月</div><button class="navbtn" onclick="pasteCalendar()" ${clipboard.length?'':'disabled'}>📌 粘贴${clipboard.length?` ${clipboard.length}`:''}</button></div><div class="hint">点击日期进入日视图；重复事项可单独编辑、删除或拖动</div><div class="month-scroll"><div class="month">`;for(let i=0;i<start;i++)html+='<div></div>';for(let n=1;n<=days;n++){let ds=fmt(new Date(y,m,n)),a=sortTasksByImportance(calendarEventsForDate(ds).filter(t=>!t.completed),'date');html+=`<div class="day" onclick="calDate=parseDate('${ds}');calMode='day';selectMode=false;selected.clear();render()"><b>${n}</b>${a.slice(0,4).map(t=>`<div class="mini ${selected.has(instanceKey(t))?'selected':''}" onclick="if(selected.size){event.stopPropagation();toggleCalendarSelect('${esc(instanceKey(t))}')};else{event.stopPropagation();openOccurrenceEditor(tasks.find(x=>x.id==='${esc(t._masterId||t.id)}'),'${esc(t._occurrenceDate||t.date)}')}" oncontextmenu="event.preventDefault();toggleCalendarSelect('${esc(instanceKey(t))}')">${esc(t.title)}</div>`).join('')}</div>`}$('#main').innerHTML=html+'</div></div>';renderBulk()}
 </script>
 
 
@@ -2308,7 +2243,7 @@ function reviewRateText(done,pending){
   return `任务完成率 ${pct}%（${d}/${total}）`;
 }
 
-function renderMonthlyReview(mk=monthKey()){window.__reviewMonth=mk;const r=getReviews()[mk]||{},pending=monthTasks(mk),done=completedInMonth(mk),delayed=pending.filter(t=>Number(t.deferCount||0)>0).sort((a,b)=>(b.deferCount||0)-(a.deferCount||0)).slice(0,5);const ya=goals.year,ma=monthGoals(mk),yd=ya.filter(g=>g.done).length,md=ma.filter(g=>g.done).length;$('#heading').textContent='月度回顾';$('#subtabs').innerHTML='';$('#headActions').innerHTML='';$('#fab').classList.add('hidden');$('#main').innerHTML=`<div class="goals-page"><div class="goals-hero"><h2>📝 ${mk} 月度回顾 <small class="review-status ${r.completed?'review-done':'review-pending'}">${r.completed?'✓ 已完成':'○ 尚未完成'}</small></h2><p>大部分内容自动生成，你只需要看看这个月发生了什么，并决定未完成事项下一步怎么处理。</p></div><div class="goal-review-card"><h3>🎯 目标</h3><div class="review-stat"><span>年度目标</span><b>${pct3(ya)}</b></div><div class="review-stat"><span>月度目标</span><b>${pct3(ma)}</b></div></div><div class="goal-review-card"><h3>✓ 本月完成</h3><div class="review-stat"><span>完成 Todo</span><b>${done.length}</b></div>${done.slice(0,10).map(t=>`<div class="review-stat"><span>✓ ${esc(t.title)}</span><span>${esc(String(t.completedAt||'').slice(0,10))}</span></div>`).join('')||'<div class="empty">本月还没有完成记录</div>'}</div><div class="goal-review-card"><h3>○ 尚未完成</h3><div class="review-stat"><span>本月计划但未完成</span><b>${pending.length}</b></div>${pending.slice(0,10).map(t=>`<div class="review-stat"><span>${esc(t.title)}</span><button class="btn small" onclick="shiftTaskToNextMonth('${t.id}')">移到下月</button></div>`).join('')||'<div class="empty">全部完成 🎉</div>'}</div><div class="goal-review-card"><h3>🔄 反复延期</h3>${delayed.map(t=>`<div class="review-stat"><span>${esc(t.title)}</span><b>${t.deferCount} 次</b></div>`).join('')||'<div class="empty">暂无反复延期</div>'}</div><div class="goal-review-card"><h3>🔥 本月 Focus</h3><div class="review-stat"><span>年度</span><b>${esc(firstOpen('year')?.title||'全部完成 🎉')}</b></div><div class="review-stat"><span>本月</span><b>${esc(monthGoals(mk).find(g=>!g.done)?.title||'全部完成 🎉')}</b></div></div><div class="goal-review-card"><h3>📝 给这个月留一句话</h3><textarea id="monthlyReviewNote" class="review-note" placeholder="这个月最值得肯定自己的事情是……">${esc(r.note||'')}</textarea><div class="review-actions"><button type="button" class="btn" onclick="openGoalsCurrentMonth()">← 返回目标</button><button type="button" class="btn" onclick="completeMonthlyReview()">✓ 完成回顾</button></div></div></div>`}
+function renderMonthlyReview(mk=monthKey()){window.__reviewMonth=mk;const r=getReviews()[mk]||{},pending=sortTasksByImportance(monthTasks(mk).filter(t=>t&&t.id&&!recurring(t)&&!t.completed),'date'),done=sortTasksByImportance(completedInMonth(mk).filter(t=>t&&t.id&&t.title&&!recurring(t)),'completed'),delayed=pending.filter(t=>Number(t.deferCount||0)>0).sort((a,b)=>(b.deferCount||0)-(a.deferCount||0)).slice(0,5);const ya=goals.year,ma=monthGoals(mk),yd=ya.filter(g=>g.done).length,md=ma.filter(g=>g.done).length;$('#heading').textContent='月度回顾';$('#subtabs').innerHTML='';$('#headActions').innerHTML='';$('#fab').classList.add('hidden');$('#main').innerHTML=`<div class="goals-page"><div class="goals-hero"><h2>📝 ${mk} 月度回顾 <small class="review-status ${r.completed?'review-done':'review-pending'}">${r.completed?'✓ 已完成':'○ 尚未完成'}</small></h2><p>大部分内容自动生成，你只需要看看这个月发生了什么，并决定未完成事项下一步怎么处理。</p></div><div class="goal-review-card"><h3>🎯 目标</h3><div class="review-stat"><span>年度目标</span><b>${pct3(ya)}</b></div><div class="review-stat"><span>月度目标</span><b>${pct3(ma)}</b></div></div><div class="goal-review-card"><h3>✓ 本月完成</h3><div class="review-stat"><span>任务完成率</span><b>${((done.length+pending.length)?Math.round(done.length*100/(done.length+pending.length)):0)}%</b></div><div class="review-stat"><span>完成 Todo</span><b>${done.length}</b></div>${done.slice(0,10).map(t=>`<div class="review-stat"><span>✓ ${esc(t.title)}</span><span>${esc(String(t.completedAt||'').slice(0,10))}</span></div>`).join('')||'<div class="empty">本月还没有完成记录</div>'}</div><div class="goal-review-card"><h3>○ 尚未完成</h3><div class="review-stat"><span>本月计划但未完成</span><b>${pending.length}</b></div>${pending.slice(0,10).map(t=>`<div class="review-stat"><span>${esc(t.title)}</span><button class="btn small" onclick="shiftTaskToNextMonth('${t.id}')">移到下月</button></div>`).join('')||'<div class="empty">全部完成 🎉</div>'}</div><div class="goal-review-card"><h3>🔄 反复延期</h3>${delayed.map(t=>`<div class="review-stat"><span>${esc(t.title)}</span><b>${t.deferCount} 次</b></div>`).join('')||'<div class="empty">暂无反复延期</div>'}</div><div class="goal-review-card"><h3>🔥 本月 Focus</h3><div class="review-stat"><span>年度</span><b>${esc(firstOpen('year')?.title||'全部完成 🎉')}</b></div><div class="review-stat"><span>本月</span><b>${esc(monthGoals(mk).find(g=>!g.done)?.title||'全部完成 🎉')}</b></div></div><div class="goal-review-card"><h3>📝 给这个月留一句话</h3><textarea id="monthlyReviewNote" class="review-note" placeholder="这个月最值得肯定自己的事情是……">${esc(r.note||'')}</textarea><div class="review-actions"><button type="button" class="btn" onclick="openGoalsCurrentMonth()">← 返回目标</button><button type="button" class="btn" onclick="completeMonthlyReview()">✓ 完成回顾</button></div></div></div>`}
 function saveMonthlyReview(){const mk=window.__reviewMonth||monthKey(),r=getReviews();const old=r[mk]||{};r[mk]={...old,note:$('#monthlyReviewNote')?.value||'',completed:!!old.completed};saveReviews(r);renderMonthlyReview(mk);alert('月度回顾已保存')}
 function completeMonthlyReview(){const mk=window.__reviewMonth||monthKey(),r=getReviews();r[mk]={...(r[mk]||{}),note:$('#monthlyReviewNote')?.value||'',completed:true,completedAt:new Date().toISOString()};saveReviews(r);renderMonthlyReview(mk);alert('月度回顾已完成')}
 function shiftTaskToNextMonth(id){
@@ -2326,42 +2261,10 @@ function shiftTaskToNextMonth(id){
 .goal-row{align-items:flex-start!important}.goal-check{width:24px;height:24px;flex:0 0 24px;border:1px solid #cbd4df;border-radius:7px;background:#fff;font-size:14px;line-height:22px;padding:0;margin-top:1px}.goal-done .goal-check{background:var(--primary);color:#fff;border-color:var(--primary)}
 .goal-main{min-width:0;flex:1}.goal-text.done{text-decoration:line-through;opacity:.48}.goal-okr{margin-top:7px;padding:7px 9px;border-radius:10px;background:#f7f9fc;border:1px solid #e7ebf2}.goal-okr-head{display:flex;justify-content:space-between;align-items:center;font-size:11px;font-weight:700;color:#687386}.goal-okr-head button{border:0;background:none;color:var(--primary);font-weight:700}.goal-kr{display:flex;align-items:center;gap:6px;padding:4px 0;font-size:12px}.goal-kr.done{text-decoration:line-through;opacity:.48}.goal-kr-box{width:15px;height:15px;display:grid;place-items:center;border:1px solid #aeb8c5;border-radius:4px;flex:0 0 15px}.goal-kr.done .goal-kr-box{background:var(--primary);color:#fff;border-color:var(--primary)}.goal-kr button{border:0;background:none;color:#8792a2;padding:2px 4px}.goal-kr span:nth-child(2){flex:1;min-width:0}.goal-review-card{margin:12px 0;padding:14px;border-radius:14px;background:#fff;border:1px solid #e5eaf0;box-shadow:0 3px 12px rgba(30,50,80,.05)}.goal-review-card h3{margin:0 0 9px;font-size:15px}.review-stat{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 0;border-bottom:1px solid #eef1f5;font-size:13px}.review-stat:last-child{border-bottom:0}.review-note{width:100%;box-sizing:border-box;min-height:78px;padding:9px;border:1px solid #dce2ea;border-radius:10px;resize:vertical}.review-actions{display:flex;gap:8px;margin-top:8px}.review-actions button{flex:1}.goal-review-entry{margin-top:12px}.goal-review-entry .goal-add{width:100%}
 </style>
-<style id="v2-82-focus-compact">
-/* V2.82: compact Focus bar. Keep both Top 1 visible without stealing calendar space. */
-.goals-focus{display:grid;grid-template-columns:1fr 1fr;gap:0;margin:0 0 10px;padding:0;border:1px solid #e3eaf3;border-radius:14px;background:#fff;box-shadow:0 4px 14px rgba(45,60,90,.045);overflow:hidden}
-.goal-focus-card{min-height:0;height:54px;box-sizing:border-box;border:0!important;border-radius:0!important;padding:8px 14px!important;display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-rows:16px 22px;column-gap:9px;align-items:center;box-shadow:none!important;overflow:hidden}
-.goal-focus-card.month{border-left:1px solid #e8edf4!important}
-.goal-focus-label{grid-column:1/2;grid-row:1/3;margin:0!important;display:flex;align-items:center;font-size:11px!important;white-space:nowrap;color:#df5963!important}
-.goal-focus-card.month .goal-focus-label{color:#347ce1!important}
-.goal-focus-title{grid-column:2;grid-row:1/3;font-size:15px!important;line-height:20px!important;font-weight:800!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;padding:0!important;min-width:0}
-.goal-focus-sub{display:none!important}
-@media(min-width:1000px){
-  .goals-focus{margin-bottom:12px}
-  .goal-focus-card:hover{transform:none!important;box-shadow:none!important}
-  .app>.content{padding-top:14px}
-}
-@media(max-width:799px){
-  .goals-focus{grid-template-columns:1fr;gap:0;margin-bottom:9px;border-radius:12px}
-  .goal-focus-card{height:44px;padding:6px 11px!important;grid-template-rows:1fr}
-  .goal-focus-card.month{border-left:0!important;border-top:1px solid #e8edf4!important}
-  .goal-focus-label{font-size:10px!important}
-  .goal-focus-title{font-size:14px!important}
-}
-</style>
 
 
-<style id="v2-83-week-header-focus">
-/* V2.83: compact weekly date header. */
-@media(min-width:800px){
-  .timeline-wrap:has(.week-grid) .dayhead{height:40px!important;padding-top:4px!important;font-size:10px!important;line-height:1.1!important}
-  .timeline-wrap:has(.week-grid) .dayhead strong{font-size:13px!important;margin-top:1px!important}
-  .timeline-wrap:has(.week-grid) .dayhead.today strong{width:22px!important;height:22px!important;line-height:22px!important}
-}
-@media(max-width:799px){
-  .timeline-wrap:has(.week-grid) .dayhead{height:42px!important;padding-top:4px!important}
-  .timeline-wrap:has(.week-grid) .dayhead strong{font-size:13px!important;margin-top:1px!important}
-}
-</style>
+
+
 <script>
 /* V2.83: guarantee the compact Focus bar (including Month Focus) on week/day calendar views. */
 const __renderCalendarV83Base=renderCalendar;
@@ -2426,31 +2329,7 @@ renderCalendar=function(options={}){
   .goal-focus-title{font-size:13px!important}
 }
 </style>
-<script id="v2-85-final-focus">
-/* V2.85: inject Focus after the calendar has finished rendering, regardless of day/week/month mode. */
-function ensureCalendarFocus(){
-  if(page!=='calendar')return;
-  const main=$('#main'); if(!main)return;
-  main.querySelectorAll('.goals-focus').forEach((el,i)=>{if(i>0)el.remove()});
-  if(!main.querySelector('.goals-focus')) main.insertAdjacentHTML('afterbegin',goalFocusBar());
-}
-const __renderCalendarV85=renderCalendar;
-renderCalendar=function(options={}){
-  __renderCalendarV85(options);
-  ensureCalendarFocus();
-  requestAnimationFrame(()=>ensureCalendarFocus());
-  setTimeout(()=>ensureCalendarFocus(),60);
-};
-/* The heading text is now a child span so the small version label stays visible. */
-const __baseRenderV85=render;
-render=function(){
-  __baseRenderV85();
-  const h=$('#heading');
-  if(h){
-    h.innerHTML=`<span id="headingText">${page==='todo'?'Todo':page==='calendar'?'日历':page==='goals'?'目标':'设置'}</span>`;
-  }
-};
-</script>
+
 
 
 <style id="v2-86-final-layout">
@@ -2635,10 +2514,10 @@ function getAnnualReviews(){try{return JSON.parse(localStorage.getItem(ANNUAL_RE
 function saveAnnualReviews(x){localStorage.setItem(ANNUAL_REVIEW_DB,JSON.stringify(x))}
 function renderAnnualReview(yr=annualKey()){
   window.__annualReviewYear=yr; const r=getAnnualReviews()[yr]||{}; const ys=goals.year, yd=ys.filter(g=>g.done).length;
-  const done=tasks.filter(t=>t.completed&&String(t.completedAt||'').slice(0,4)===yr);
-  const pending=tasks.filter(t=>t.date&&String(t.date).slice(0,4)===yr&&!t.completed&&!recurring(t));
+  const done=sortTasksByImportance(tasks.filter(t=>t&&t.id&&t.title&&t.completed&&!recurring(t)&&String(t.completedAt||'').slice(0,4)===yr),'completed');
+  const pending=sortTasksByImportance(tasks.filter(t=>t&&t.id&&t.title&&t.date&&String(t.date).slice(0,4)===yr&&!t.completed&&!recurring(t)),'date');
   $('#heading').textContent='年度回顾';$('#subtabs').innerHTML='';$('#headActions').innerHTML='';$('#fab').classList.add('hidden');
-  $('#main').innerHTML=`<div class="goals-page"><div class="goals-hero"><h2>📊 ${yr} 年度回顾 <small class="review-status ${r.completed?'review-done':'review-pending'}">${r.completed?'✓ 已完成':'○ 尚未完成'}</small></h2><p>年度目标、任务完成情况和年度总结。</p></div><div class="goal-review-card"><h3>🎯 年度目标</h3><div class="review-stat"><span>年度目标</span><b>${pct3(ys)}</b></div></div><div class="goal-review-card"><h3>✓ 年度完成</h3><div class="review-stat"><span>完成 Todo</span><b>${done.length}</b></div>${done.slice(0,20).map(t=>`<div class="review-stat"><span>✓ ${esc(t.title)}</span><span>${esc(String(t.completedAt||'').slice(0,10))}</span></div>`).join('')||'<div class="empty">本年度还没有完成记录</div>'}</div><div class="goal-review-card"><h3>○ 尚未完成</h3><div class="review-stat"><span>年度计划但未完成</span><b>${pending.length}</b></div>${pending.slice(0,20).map(t=>`<div class="review-stat"><span>${esc(t.title)}</span></div>`).join('')||'<div class="empty">全部完成 🎉</div>'}</div><div class="goal-review-card"><h3>📝 给这一年留一句话</h3><textarea id="annualReviewNote" class="review-note" placeholder="这一年最值得记录的事情是……">${esc(r.note||'')}</textarea><div class="review-actions"><button type="button" class="btn" onclick="openGoalsCurrentMonth()">← 返回目标</button><button type="button" class="btn primary" onclick="completeAnnualReview()">✓ 完成回顾</button></div></div></div>`;
+  $('#main').innerHTML=`<div class="goals-page"><div class="goals-hero"><h2>📊 ${yr} 年度回顾 <small class="review-status ${r.completed?'review-done':'review-pending'}">${r.completed?'✓ 已完成':'○ 尚未完成'}</small></h2><p>年度目标、任务完成情况和年度总结。</p></div><div class="goal-review-card"><h3>🎯 年度目标</h3><div class="review-stat"><span>年度目标</span><b>${pct3(ys)}</b></div></div><div class="goal-review-card"><h3>✓ 年度完成</h3><div class="review-stat"><span>任务完成率</span><b>${((done.length+pending.length)?Math.round(done.length*100/(done.length+pending.length)):0)}%</b></div><div class="review-stat"><span>完成 Todo</span><b>${done.length}</b></div>${done.slice(0,20).map(t=>`<div class="review-stat"><span>✓ ${esc(t.title)}</span><span>${esc(String(t.completedAt||'').slice(0,10))}</span></div>`).join('')||'<div class="empty">本年度还没有完成记录</div>'}</div><div class="goal-review-card"><h3>○ 尚未完成</h3><div class="review-stat"><span>年度计划但未完成</span><b>${pending.length}</b></div>${pending.slice(0,20).map(t=>`<div class="review-stat"><span>${esc(t.title)}</span></div>`).join('')||'<div class="empty">全部完成 🎉</div>'}</div><div class="goal-review-card"><h3>📝 给这一年留一句话</h3><textarea id="annualReviewNote" class="review-note" placeholder="这一年最值得记录的事情是……">${esc(r.note||'')}</textarea><div class="review-actions"><button type="button" class="btn" onclick="openGoalsCurrentMonth()">← 返回目标</button><button type="button" class="btn primary" onclick="completeAnnualReview()">✓ 完成回顾</button></div></div></div>`;
 }
 function saveAnnualReview(){const yr=window.__annualReviewYear||annualKey(),r=getAnnualReviews();r[yr]={...(r[yr]||{}),note:$('#annualReviewNote')?.value||'',completed:!!r[yr]?.completed};saveAnnualReviews(r);renderAnnualReview(yr);alert('年度回顾已保存')}
 function completeAnnualReview(){const yr=window.__annualReviewYear||annualKey(),r=getAnnualReviews();r[yr]={...(r[yr]||{}),note:$('#annualReviewNote')?.value||'',completed:true,completedAt:new Date().toISOString()};saveAnnualReviews(r);renderAnnualReview(yr);alert('年度回顾已完成')}
@@ -2736,120 +2615,97 @@ function openReviewMonth(mk){window.__reviewMonth=mk;renderMonthlyReview(mk)}
 
 
 
-<style id="v2-113-focus-authoritative">
-/* v2.118: corrected Focus vertical anchoring. The fixed root is positioned below the full header.
-   Todo/Calendar: Focus is viewport-fixed; #main is the ONLY scrolling surface.
-   Goals: unchanged normal-flow Focus. */
+
+
+
+
+
+
+<style id="v2-121-clean-focus">
 html,body{height:100%!important;overflow:hidden!important}
 .app{height:100dvh!important;min-height:100dvh!important;overflow:hidden!important}
-.app>.head{position:sticky!important;top:0!important;z-index:60!important}
+.app.v121-booting{visibility:hidden!important}
 .app>.focus-fixed-root{
-  position:fixed!important;
-  left:0!important;right:0!important;
-  margin:0!important;padding:0!important;
-  z-index:100!important;
-  pointer-events:none!important;
+  position:fixed!important;left:0!important;right:0!important;
+  top:var(--focus-top,0px)!important;margin:0!important;padding:0!important;
+  z-index:150!important;display:none;pointer-events:none!important;
+  transition:none!important;animation:none!important;transform:none!important;
 }
-.app>.focus-fixed-root .goals-focus{pointer-events:auto!important;margin:0!important}
-#main.content.focus-fixed-offset{
-  padding-top:0!important;
-  box-sizing:border-box!important;
+.app>.focus-fixed-root .goals-focus{
+  pointer-events:auto!important;margin:0!important;
+  transition:none!important;animation:none!important;
 }
-#main.content.focus-fixed-offset>*:first-child{margin-top:0!important}
-@media(min-width:800px){
-  .app>.focus-fixed-root{left:236px!important}
+#main.content.v121-focus-space{box-sizing:border-box!important}
+@media(min-width:800px){.app>.focus-fixed-root{left:236px!important}}
+@media(max-width:799px){
+  .nav{height:82px!important;min-height:82px!important;box-sizing:border-box!important;
+       padding-bottom:env(safe-area-inset-bottom)!important;transition:none!important;animation:none!important}
+  .nav button{height:100%!important;transition:none!important;animation:none!important}
 }
 </style>
-<script id="v2-113-focus-authoritative-js">
+<script id="v2-121-clean-focus-js">
 (function(){
-  /* v2.118: keep one Focus root alive across page/view switches.
-     Recreating the fixed node caused a one-frame jump; the root is now
-     reused and only its contents/position are updated. */
-  const realGoalFocusBar = window.goalFocusBar;
-  window.goalFocusBar = function(){
-    if(typeof page!=='undefined' && (page==='todo'||page==='calendar')) return '';
-    return realGoalFocusBar ? realGoalFocusBar() : '';
-  };
-  function removeFlowFocus(){
-    const main=document.getElementById('main');
-    if(main) main.querySelectorAll('.goals-focus').forEach(el=>el.remove());
+  const app=()=>document.querySelector('.app');
+  const main=()=>document.getElementById('main');
+  const head=()=>app()?.querySelector(':scope>.head');
+
+  function getRoot(){
+    const a=app(); if(!a)return null;
+    let r=a.querySelector(':scope>.focus-fixed-root');
+    if(!r){r=document.createElement('div');r.className='focus-fixed-root';a.appendChild(r)}
+    return r;
   }
-  function getRoot(){return document.querySelector('.app>.focus-fixed-root')}
-  function ensureRoot(){
-    const app=document.querySelector('.app');
-    if(!app) return null;
-    let root=getRoot();
-    if(!root){root=document.createElement('div');root.className='focus-fixed-root';app.appendChild(root)}
-    return root;
-  }
-  function positionRoot(root,head,main){
-    const r=root?.querySelector('.goals-focus');
-    if(!r||!head||!main)return;
-    const headBottom=head.getBoundingClientRect().bottom;
-    root.style.setProperty('top',headBottom+'px','important');
-    const h=r.getBoundingClientRect().height;
-    main.classList.add('focus-fixed-offset');
-    main.style.setProperty('padding-top',(h+8)+'px','important');
-  }
-  function install(){
-    const app=document.querySelector('.app');
-    const head=app?.querySelector(':scope>.head');
-    const main=document.getElementById('main');
-    if(!app||!head||!main)return;
-    const fixed=(page==='todo'||page==='calendar');
+  function syncFocus(){
+    const a=app(),m=main(),h=head(); if(!a||!m||!h)return;
+    const fixed=(typeof page!=='undefined'&&(page==='todo'||page==='calendar'));
+    const r=getRoot(); if(!r)return;
     if(!fixed){
-      const root=getRoot();
-      if(root)root.style.display='none';
-      main.classList.remove('focus-fixed-offset');
-      main.style.removeProperty('padding-top');
+      r.style.display='none'; r.innerHTML='';
+      m.classList.remove('v121-focus-space');
+      m.style.removeProperty('--focus-space');
       return;
     }
-    removeFlowFocus();
-    const root=ensureRoot();
-    root.style.display='block';
-    /* Update existing root in place: no remove/reinsert, no visual jump. */
-    const html=realGoalFocusBar ? realGoalFocusBar() : '';
-    if(root.innerHTML!==html) root.innerHTML=html;
-    positionRoot(root,head,main);
+    /* Remove only flow copies; the persistent root is never removed. */
+    m.querySelectorAll('.goals-focus').forEach(x=>x.remove());
+    const markup=typeof goalFocusBar==='function'?goalFocusBar():'';
+    r.innerHTML=markup;
+    const top=Math.round(h.getBoundingClientRect().bottom);
+    r.style.setProperty('--focus-top',top+'px');
+    r.style.display='block';
+    const fh=Math.ceil(r.querySelector('.goals-focus')?.getBoundingClientRect().height||0);
+    m.classList.add('v121-focus-space');
+    m.style.setProperty('--focus-space',(fh+6)+'px');
+    m.style.paddingTop=(fh+6)+'px';
   }
-  const observer=new MutationObserver(()=>{
-    if(page==='todo'||page==='calendar'){
-      const main=document.getElementById('main');
-      if(main)main.querySelectorAll('.goals-focus').forEach(el=>el.remove());
-    }
-  });
-  const start=()=>{
-    const main=document.getElementById('main');
-    if(main)observer.observe(main,{childList:true,subtree:true});
-    install();
-  };
-  const oldRender=window.render;
-  if(oldRender&&!window.__v116Render){window.__v116Render=true;window.render=function(){oldRender();requestAnimationFrame(install)}}
-  const oldTodo=window.renderTodo;
-  if(oldTodo&&!window.__v116Todo){window.__v116Todo=true;window.renderTodo=function(){oldTodo();requestAnimationFrame(install)}}
-  const oldCal=window.renderCalendar;
-  if(oldCal&&!window.__v116Cal){window.__v116Cal=true;window.renderCalendar=function(options={}){oldCal(options);requestAnimationFrame(install)}}
-  window.addEventListener('resize',()=>{if(page==='todo'||page==='calendar')requestAnimationFrame(install)},{passive:true});
-  window.addEventListener('orientationchange',()=>setTimeout(install,120),{passive:true});
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
-})();
-</script>
 
-<style id="v2-115-goals-no-focus">
-/* Goals page: Focus is not displayed here. Focus is shown only on Todo/Calendar. */
-body:has(.nav button[data-page="goals"].active) .focus-fixed-root{display:none!important}
-</style>
-<script id="v2-115-goals-no-focus-js">
-(function(){
-  function cleanGoalsFocus(){
-    if(typeof page!=="undefined" && page==="goals") {
-      document.querySelectorAll(".goals-focus, .app>.focus-fixed-root").forEach(el=>el.remove());
-      const main=document.getElementById("main");
-      if(main){main.classList.remove("focus-fixed-offset");main.style.removeProperty("padding-top");}
-    }
+  /* Wrap the single existing render function. No requestAnimationFrame,
+     timeout, animation or remove/reinsert cycle. */
+  const oldRender=window.render;
+  if(oldRender&&!window.__v121RenderWrapped){
+    window.__v121RenderWrapped=true;
+    window.render=function(){
+      oldRender();
+      syncFocus();
+    };
   }
-  cleanGoalsFocus();
-  new MutationObserver(cleanGoalsFocus).observe(document.body,{childList:true,subtree:true});
+
+  const boot=()=>{
+    const a=app(); if(!a)return;
+    a.classList.add('v121-booting');
+    /* Initial render now happens only after every legacy function is defined. */
+    if(window.__todoInitialRenderPending){
+      window.__todoInitialRenderPending=false;
+      window.render();
+    }else{
+      syncFocus();
+    }
+    /* Geometry is now final; reveal without an intermediate visible frame. */
+    a.classList.remove('v121-booting');
+  };
+
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});
+  else boot();
+  window.addEventListener('resize',syncFocus,{passive:true});
 })();
 </script>
 </body></html>
