@@ -8,7 +8,7 @@
 <link rel="manifest" href="./manifest.json">
 <link rel="apple-touch-icon" href="./icon-180.png">
 <link rel="icon" href="./icon-192.png" type="image/png">
-<title>v2.141 · Todo · v2.138</title>
+<title>v2.144 · Todo</title>
 <style>
 :root{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#171717;background:#f5f5f7;--line:#e7e7eb;--muted:#777;--accent:#111}*{box-sizing:border-box}body{margin:0;background:#f5f5f7;overscroll-behavior:none}.app{max-width:1100px;margin:auto;min-height:100vh;background:#fff;padding-bottom:68px}.head{position:sticky;top:0;background:rgba(255,255,255,.96);backdrop-filter:blur(12px);padding:12px 14px;border-bottom:1px solid var(--line);z-index:30}.headtop{display:flex;align-items:center;justify-content:space-between;gap:8px}.head h1{margin:0;font-size:21px}.tabs,.seg{display:flex;gap:6px;margin-top:10px;overflow:auto}.tabs button,.seg button,.chip{border:0;border-radius:10px;padding:8px 11px;background:#eee;white-space:nowrap}.active{background:#111!important;color:#fff}.content{padding:12px}.group{margin:18px 0}.group h3{font-size:14px;margin:0 0 6px}.task{display:flex;align-items:center;gap:10px;padding:13px 7px;border-bottom:1px solid #eee;touch-action:pan-y}.check{width:23px;height:23px;cursor:pointer;border:2px solid #aaa;border-radius:50%;flex:none}.done .check{background:#111}.done .title{text-decoration:line-through;opacity:.45}.taskmain{flex:1;min-width:0}.title{font-weight:600}.meta{font-size:12px;color:#777;margin-top:3px}.badge{font-size:12px}.fab{position:fixed;right:18px;bottom:88px;width:56px;height:56px;border-radius:50%;border:0;background:#111;color:#fff;font-size:30px;z-index:20;box-shadow:0 5px 20px #0002}.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(1100px,100%);height:70px;background:#fff;border-top:1px solid #ddd;display:flex;z-index:40;padding-bottom:env(safe-area-inset-bottom)}.nav button{flex:1;border:0;background:white;font-size:13px}.nav .active{color:#fff!important;background:var(--primary,#3478f6)!important}.card{background:#f5f5f7;border-radius:16px;padding:14px;margin-bottom:12px}.row{display:flex;gap:10px;align-items:center}.row>*{flex:1}.field{margin:12px 0}.field label{display:block;font-size:12px;color:#666;margin-bottom:5px}.field input,.field textarea,.field select{width:100%;padding:12px;border:1px solid #ddd;border-radius:12px;background:#fff}.primary,.danger{border:0;border-radius:12px;padding:12px 16px}.primary{background:#111;color:#fff}.danger{background:#eee}.hidden{display:none!important}.empty{text-align:center;color:#888;padding:35px 10px}
 /* Google Calendar-like week/day timeline */
@@ -1309,6 +1309,78 @@ body.page-calendar #main{
 })();
 </script>
 
+
+<style id="v2-144-xiaomi6-focus-final">
+/* v2.144: Xiaomi 6 document-scroll mode — Focus must anchor below the
+   actually visible Todo filter row, not the full header box.  Some legacy
+   Chromium builds report an inflated sticky-header height, which previously
+   placed the fixed Focus bar in the middle of the Todo list. */
+@media(max-width:799px){
+  html.legacy-x6-scroll body:not(.legacy-calendar-page) .app>.focus-fixed-root{
+    position:fixed!important;
+    left:0!important;right:0!important;
+    z-index:490!important;
+    margin:0!important;padding:0!important;
+    pointer-events:none!important;
+    display:block!important;
+  }
+  html.legacy-x6-scroll body:not(.legacy-calendar-page) .app>.focus-fixed-root .goals-focus{
+    pointer-events:auto!important;
+    margin:0 0 7px!important;
+  }
+  html.legacy-x6-scroll body:not(.legacy-calendar-page) #main.content.focus-fixed-offset{
+    padding-top:0!important;
+    margin-top:0!important;
+  }
+}
+</style>
+<script id="v2-144-xiaomi6-focus-final-js">
+(function(){
+  function syncX6Focus(){
+    if(window.innerWidth>=800 || typeof page==='undefined') return;
+    var root=document.querySelector('.app>.focus-fixed-root');
+    var main=document.getElementById('main');
+    if(!root || !main) return;
+    if(page!=='todo') return;
+    var sub=document.getElementById('subtabs');
+    var head=document.querySelector('.app>.head');
+    /* The Todo filter row is the real visible bottom edge of the mobile
+       header. Do not trust head.getBoundingClientRect().bottom on old
+       Chromium: sticky/flex layout can report an inflated height. */
+    var rect=sub && sub.children.length ? sub.getBoundingClientRect() : null;
+    var top=rect ? Math.round(rect.bottom) : Math.round(head?.getBoundingClientRect().bottom || 0);
+    if(top<0) top=0;
+    var h=root.querySelector('.goals-focus')?.getBoundingClientRect().height || 0;
+    root.style.setProperty('top',top+'px','important');
+    root.style.setProperty('height',Math.ceil(h)+'px','important');
+    root.style.setProperty('display','block','important');
+    /* In document-scroll mode the document itself supplies the vertical
+       space. The fixed Focus must never add padding to #main. */
+    main.classList.remove('focus-fixed-offset');
+    main.style.removeProperty('--focus-space');
+    main.style.removeProperty('padding-top');
+  }
+  function run(){syncX6Focus();setTimeout(syncX6Focus,50);setTimeout(syncX6Focus,180);}
+  function install(){
+    run();
+    window.addEventListener('resize',run,false);
+    window.addEventListener('orientationchange',function(){setTimeout(run,150)},false);
+    window.addEventListener('scroll',function(){
+      if(typeof page==='undefined'||page!=='todo')return;
+      /* Keep the bar pinned under the sticky filter row while the document
+         scrolls; this is cheap and avoids legacy sticky-layout drift. */
+      syncX6Focus();
+    },{passive:true});
+    var main=document.getElementById('main');
+    if(main){new MutationObserver(run).observe(main,{childList:true,subtree:true});}
+    var nav=document.querySelector('.nav');
+    if(nav){new MutationObserver(run).observe(nav,{subtree:true,attributes:true,attributeFilter:['class']});}
+    setTimeout(run,400);
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install,{once:true});
+  else install();
+})();
+</script>
 </head><body><div class="app"><header class="head"><div class="headtop"><h1 id="heading"><span id="headingText">Todo</span></h1><div id="headActions"></div></div><div id="subtabs" class="tabs"></div></header><main id="main" class="content"></main><button id="fab" class="fab">+</button><div id="bulk" class="bulk hidden"></div><nav class="nav">
 <button data-page="todo" class="active"><span class="navicon todoicon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 8l1.5 1.5L12 7"/><path d="M13.5 8H17"/><path d="M8 13l1.5 1.5L12 12"/><path d="M13.5 13H17"/></svg></span><span>Todo</span></button>
 <button data-page="calendar"><span class="navicon calendaricon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="16" rx="2.5"/><path d="M7 3v4M17 3v4M3.5 9.5h17"/><path d="M7.5 13h.01M12 13h.01M16.5 13h.01M7.5 17h.01M12 17h.01M16.5 17h.01"/></svg></span><span>日历</span></button>
@@ -1741,8 +1813,8 @@ function copyOne(i){let t=tasks.find(x=>x.id===i);if(t){clipboard=[{...t,id:id()
 function removeTask(i){if(confirm('删除此事项？')){tasks=tasks.filter(t=>t.id!==i);save();render()}}
 function renderSettings(){
   /* v2.95: version information belongs in Settings, not beside the page title. */
-  const VERSION_INFO_HTML = '<div class="settings-card version-info-card"><div class="settings-title">版本信息</div><div class="settings-row"><span>Todo 日历</span><b>v2.143</b></div></div>';
-$('#subtabs').innerHTML='';$('#headActions').innerHTML='';$('#main').innerHTML=`<div class="card"><b>版本信息</b><p>Todo 日历 v2.141</p></div><div class="card"><b>每日开始时间</b><p>06:30（今天/逾期和每日刷新边界）</p></div><div class="card"><b>默认事件时长</b><p>60 分钟</p></div><div class="card"><div class="settings-data-actions"><button class="primary" onclick="exportData()">导出 JSON</button><button class="danger" onclick="clipboard=[];render()">清空复制板</button><label class="danger">导入 JSON<input type="file" accept="application/json" hidden onchange="importData(this)"></label></div></div><div class="card drive-sync-card"><b>Google Drive 云同步</b><p id="driveStatus" style="margin:7px 0;color:#718096">正在检查 Google Drive…</p><div class="row"><button class="primary" id="driveConnectBtn" onclick="driveConnect()">连接 Google Drive</button><button class="danger" id="driveDisconnectBtn" onclick="driveDisconnect()">断开</button></div><div class="row" style="margin-top:8px"><button class="primary" id="driveUploadBtn" onclick="driveUpload()">☁️ 上传/同步</button><button class="danger" id="driveDownloadBtn" onclick="driveDownload()">⬇️ 从云端恢复</button></div><label style="display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13px"><input id="driveAutoSync" type="checkbox" onchange="driveSetAutoSync(this.checked)"> 数据修改后自动同步</label><div id="driveDetail" style="font-size:11px;color:#8a94a6;margin-top:8px;line-height:1.45"></div></div><div class="card"><b>本地数据</b><p>${tasks.length} 个事项。当前数据保存在浏览器本地。</p><button class="danger" style="margin-top:8px;width:100%;color:#c62828" onclick="clearAllData()">⚠️ 清除全部数据</button></div>`}
+  const VERSION_INFO_HTML = '<div class="settings-card version-info-card"><div class="settings-title">版本信息</div><div class="settings-row"><span>Todo 日历</span><b>v2.144</b></div></div>';
+$('#subtabs').innerHTML='';$('#headActions').innerHTML='';$('#main').innerHTML=`<div class="card"><b>版本信息</b><p>Todo 日历 v2.144</p></div><div class="card"><b>每日开始时间</b><p>06:30（今天/逾期和每日刷新边界）</p></div><div class="card"><b>默认事件时长</b><p>60 分钟</p></div><div class="card"><div class="settings-data-actions"><button class="primary" onclick="exportData()">导出 JSON</button><button class="danger" onclick="clipboard=[];render()">清空复制板</button><label class="danger">导入 JSON<input type="file" accept="application/json" hidden onchange="importData(this)"></label></div></div><div class="card drive-sync-card"><b>Google Drive 云同步</b><p id="driveStatus" style="margin:7px 0;color:#718096">正在检查 Google Drive…</p><div class="row"><button class="primary" id="driveConnectBtn" onclick="driveConnect()">连接 Google Drive</button><button class="danger" id="driveDisconnectBtn" onclick="driveDisconnect()">断开</button></div><div class="row" style="margin-top:8px"><button class="primary" id="driveUploadBtn" onclick="driveUpload()">☁️ 上传/同步</button><button class="danger" id="driveDownloadBtn" onclick="driveDownload()">⬇️ 从云端恢复</button></div><label style="display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13px"><input id="driveAutoSync" type="checkbox" onchange="driveSetAutoSync(this.checked)"> 数据修改后自动同步</label><div id="driveDetail" style="font-size:11px;color:#8a94a6;margin-top:8px;line-height:1.45"></div></div><div class="card"><b>本地数据</b><p>${tasks.length} 个事项。当前数据保存在浏览器本地。</p><button class="danger" style="margin-top:8px;width:100%;color:#c62828" onclick="clearAllData()">⚠️ 清除全部数据</button></div>`}
 function clearAllData(){
   if(!confirm('第一次确认：确定要清除全部 Todo、日历事项和本地数据吗？此操作不可撤销。'))return;
   if(!confirm('第二次确认：再次确认要永久删除全部数据吗？'))return;
