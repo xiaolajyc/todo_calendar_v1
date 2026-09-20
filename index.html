@@ -8,7 +8,7 @@
 <link rel="manifest" href="./manifest.json">
 <link rel="apple-touch-icon" href="./icon-180.png">
 <link rel="icon" href="./icon-192.png" type="image/png">
-<title>Todo · v2.138</title>
+<title>v2.141 · Todo · v2.138</title>
 <style>
 :root{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#171717;background:#f5f5f7;--line:#e7e7eb;--muted:#777;--accent:#111}*{box-sizing:border-box}body{margin:0;background:#f5f5f7;overscroll-behavior:none}.app{max-width:1100px;margin:auto;min-height:100vh;background:#fff;padding-bottom:68px}.head{position:sticky;top:0;background:rgba(255,255,255,.96);backdrop-filter:blur(12px);padding:12px 14px;border-bottom:1px solid var(--line);z-index:30}.headtop{display:flex;align-items:center;justify-content:space-between;gap:8px}.head h1{margin:0;font-size:21px}.tabs,.seg{display:flex;gap:6px;margin-top:10px;overflow:auto}.tabs button,.seg button,.chip{border:0;border-radius:10px;padding:8px 11px;background:#eee;white-space:nowrap}.active{background:#111!important;color:#fff}.content{padding:12px}.group{margin:18px 0}.group h3{font-size:14px;margin:0 0 6px}.task{display:flex;align-items:center;gap:10px;padding:13px 7px;border-bottom:1px solid #eee;touch-action:pan-y}.check{width:23px;height:23px;cursor:pointer;border:2px solid #aaa;border-radius:50%;flex:none}.done .check{background:#111}.done .title{text-decoration:line-through;opacity:.45}.taskmain{flex:1;min-width:0}.title{font-weight:600}.meta{font-size:12px;color:#777;margin-top:3px}.badge{font-size:12px}.fab{position:fixed;right:18px;bottom:88px;width:56px;height:56px;border-radius:50%;border:0;background:#111;color:#fff;font-size:30px;z-index:20;box-shadow:0 5px 20px #0002}.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(1100px,100%);height:70px;background:#fff;border-top:1px solid #ddd;display:flex;z-index:40;padding-bottom:env(safe-area-inset-bottom)}.nav button{flex:1;border:0;background:white;font-size:13px}.nav .active{color:#fff!important;background:var(--primary,#3478f6)!important}.card{background:#f5f5f7;border-radius:16px;padding:14px;margin-bottom:12px}.row{display:flex;gap:10px;align-items:center}.row>*{flex:1}.field{margin:12px 0}.field label{display:block;font-size:12px;color:#666;margin-bottom:5px}.field input,.field textarea,.field select{width:100%;padding:12px;border:1px solid #ddd;border-radius:12px;background:#fff}.primary,.danger{border:0;border-radius:12px;padding:12px 16px}.primary{background:#111;color:#fff}.danger{background:#eee}.hidden{display:none!important}.empty{text-align:center;color:#888;padding:35px 10px}
 /* Google Calendar-like week/day timeline */
@@ -1520,7 +1520,7 @@ function clearAllData(){
 }
 function exportData(){
   const backup={
-    version:'2.141',
+    version:'2.129',
     tasks:cloneObj(tasks),
     goals:cloneObj(goals||{year:[],monthByKey:{}}),
     monthlyReviews:cloneObj(getReviews()),
@@ -1529,7 +1529,7 @@ function exportData(){
   };
   let a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([JSON.stringify(backup,null,2)],{type:'application/json'}));
-  a.download='todo-calendar-backup-v2.141.json';
+  a.download='todo-calendar-backup-v2.138.json';
   a.click();
   setTimeout(()=>URL.revokeObjectURL(a.href),1500)
 }
@@ -3548,85 +3548,116 @@ body:has(.nav button[data-page="settings"].active) #main.content.focus-fixed-off
 </script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 
-<script id="v2-141-event-tap-guard-js">
-/* v2.141: prevent rapid repeated taps on week-view events from opening the editor twice.
-   This is especially important for recurring events on older/mobile Chromium/WebView.
-   The guard is intentionally scoped to calendar-event editor entry only; it does not
-   change normal form buttons, saving, cancelling, or multi-select behavior. */
-(function(){
-  if(window.__v2141EventEditorGuard)return;
-  window.__v2141EventEditorGuard=true;
 
-  let lastTapAt=0;
-  let lastTapKey='';
-  const TAP_GAP=450;
+
+<script id="v2-141-recurring-editor-rapid-tap-fix">
+/* v2.141: robust guard for rapid repeated taps on recurring events.
+   A single physical tap can generate multiple pointer/click callbacks when
+   several legacy gesture layers coexist. On mobile, prompt() also blocks JS
+   while the event queue continues to accumulate. The guard prevents queued
+   callbacks from reopening the recurrence prompt or interacting with the new
+   editor immediately after it is rendered. */
+(function(){
+  if(window.__v2141RecurringEditorFix)return;
+  window.__v2141RecurringEditorFix=true;
+
+  let editorTransitionUntil=0;
+  let lastEditorKey='';
+  let lastEditorOpenAt=0;
+  let editorOpening=false;
+  const SAME_TAP_GAP=700;
+  const POST_EDITOR_BLOCK=450;
+
+  function now(){return Date.now();}
+  function editorIsVisible(){return document.body.classList.contains('event-editor-open') || !!document.getElementById('fNotes');}
 
   const originalOpen=window.openOccurrenceEditor;
   if(typeof originalOpen==='function'){
     window.openOccurrenceEditor=function(master,occDate){
       if(!master)return;
-      /* If an editor is already on screen, ignore any trailing pointer/click event
-         generated by the same physical tap or a very fast second tap. */
-      if(document.body.classList.contains('event-editor-open'))return;
-
       const key=String(master.id||'')+'@@'+String(occDate||'');
-      const now=Date.now();
-      if(key===lastTapKey && now-lastTapAt<TAP_GAP)return;
-      lastTapKey=key;
-      lastTapAt=now;
+      const t=now();
 
-      return originalOpen.apply(this,arguments);
+      /* Another gesture callback from the same physical tap. */
+      if(editorOpening)return;
+      if(editorIsVisible() && t<editorTransitionUntil)return;
+      if(key===lastEditorKey && t-lastEditorOpenAt<SAME_TAP_GAP)return;
+
+      editorOpening=true;
+      lastEditorKey=key;
+      lastEditorOpenAt=t;
+      editorTransitionUntil=t+POST_EDITOR_BLOCK;
+
+      try{
+        /* Keep the lock active while prompt() is open. This is important on
+           iOS/Android where multiple pointerup listeners may be waiting. */
+        return originalOpen.apply(this,arguments);
+      }finally{
+        editorOpening=false;
+        editorTransitionUntil=Math.max(editorTransitionUntil,now()+POST_EDITOR_BLOCK);
+      }
     };
   }
 
-  /* A second pointerdown can arrive before the first pointerup has finished.
-     Block it at capture phase when the event editor is already being opened. */
+  /* Block stale pointer/click events produced by the tap that opened the
+     editor. Do not block keyboard/input events inside the editor. */
   document.addEventListener('pointerdown',function(e){
-    if(!document.body.classList.contains('event-editor-open'))return;
-    const ev=e.target.closest?.('.event');
-    if(!ev)return;
+    if(now()>editorTransitionUntil)return;
+    if(!editorIsVisible())return;
+    const target=e.target;
+    if(target && (target.closest?.('#main') || target.closest?.('.event-editor') || target.matches?.('input,textarea,select,button'))){
+      /* The opening tap must not land on the newly-created form. */
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+    }
+  },true);
+
+  document.addEventListener('click',function(e){
+    if(now()>editorTransitionUntil)return;
+    if(!editorIsVisible())return;
     e.preventDefault();
     e.stopPropagation();
     e.stopImmediatePropagation();
   },true);
 
-  /* Prevent the synthetic click immediately following a pointerup from being
-     interpreted as another calendar action. The normal-mode event handlers use
-     pointerup as the single source of truth for opening the editor. */
-  document.addEventListener('click',function(e){
-    if(document.body.classList.contains('event-editor-open')){
-      const ev=e.target.closest?.('.event');
-      if(ev){
-        e.preventDefault();
-        e.stopPropagation();
-        e.stopImmediatePropagation();
-      }
-    }
+  /* Prevent legacy calendar handlers from processing a second pointerup while
+     the editor transition lock is active. */
+  document.addEventListener('pointerup',function(e){
+    if(now()>editorTransitionUntil)return;
+    if(!editorIsVisible())return;
+    e.preventDefault();
+    e.stopPropagation();
+    e.stopImmediatePropagation();
   },true);
 
-  /* Clear the short duplicate-tap lock after returning to the calendar. */
+  /* After Cancel/Save, allow a fresh deliberate tap immediately, but discard
+     the old event's duplicate state. */
+  function resetEditorTapLock(){
+    editorTransitionUntil=0;
+    editorOpening=false;
+    lastEditorKey='';
+    lastEditorOpenAt=0;
+  }
   const oldCancel=window.cancelEventEditor;
   if(typeof oldCancel==='function'&&!window.__v2141CancelWrapped){
     window.__v2141CancelWrapped=true;
     window.cancelEventEditor=function(){
       const r=oldCancel.apply(this,arguments);
-      lastTapAt=0;
-      lastTapKey='';
+      setTimeout(resetEditorTapLock,80);
       return r;
     };
   }
-
-  /* Saving an event also returns to the calendar; allow the same event to be
-     selected again after the render completes. */
   const oldCommit=window.commit;
   if(typeof oldCommit==='function'&&!window.__v2141CommitWrapped){
     window.__v2141CommitWrapped=true;
     window.commit=function(){
       const r=oldCommit.apply(this,arguments);
-      setTimeout(()=>{lastTapAt=0;lastTapKey='';},0);
+      setTimeout(resetEditorTapLock,80);
       return r;
     };
   }
 })();
 </script>
+
 </body></html>
