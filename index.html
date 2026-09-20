@@ -1218,15 +1218,42 @@ function centerTimelineToday(){
   set();requestAnimationFrame(()=>{set();setTimeout(set,50)});
 }
 
+/* v2.139: preserve calendar viewport while entering/leaving event editor.
+   iOS Safari can recreate the timeline after the editor is dismissed; relying only
+   on the live scroll event can therefore lose the horizontal/vertical position. */
+let editorReturnState=null;
 function rememberCalendarScroll(){
   const w=document.querySelector('.timeline-wrap');
   if(w) calScroll={left:w.scrollLeft,top:w.scrollTop};
+  editorReturnState={
+    page: typeof page!=='undefined'?page:null,
+    mode: typeof calMode!=='undefined'?calMode:null,
+    date: typeof calDate!=='undefined'?new Date(calDate):null,
+    left:Number(calScroll.left)||0,
+    top:Number(calScroll.top)||0
+  };
 }
 function restoreCalendarScroll(){
-  requestAnimationFrame(()=>{
+  const st=editorReturnState;
+  if(!st)return;
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
     const w=document.querySelector('.timeline-wrap');
-    if(w){w.scrollLeft=calScroll.left||0;w.scrollTop=calScroll.top||0;}
-  });
+    if(w){
+      w.scrollLeft=st.left;
+      w.scrollTop=st.top;
+      calScroll={left:w.scrollLeft,top:w.scrollTop};
+    }
+  }));
+}
+function cancelEventEditor(){
+  const st=editorReturnState;
+  editingOccurrence=null;
+  if(st?.page)page=st.page;
+  if(st?.mode)calMode=st.mode;
+  if(st?.date)calDate=new Date(st.date);
+  render();
+  if(st?.page==='calendar')restoreCalendarScroll();
+  editorReturnState=null;
 }
 
 function renderCalendar(options={}){
@@ -1381,7 +1408,7 @@ function pasteCalendar(){
 }
 
 function newTask(date=today(),start='',end=''){editTask(null,{date,start,end})}
-function editTask(i,p={}){rememberCalendarScroll();let old=i?tasks.find(x=>x.id===i):null;let t=old||{id:id(),title:'',date:p.date??today(),start:p.start||'',end:p.end||'',important:false,urgent:false,completed:false,notes:'',repeat:'none'};$('#subtabs').innerHTML='';$('#headActions').innerHTML='';$('#heading').textContent=i?'编辑事项':'新事项';$('#main').innerHTML=`<div class="field"><label>事项</label><input id="fTitle" value="${esc(t.title)}" autofocus></div><div class="field"><label>日期</label><input id="fDate" type="date" value="${t.date||''}"></div><div class="row"><div class="field"><label>开始</label><input id="fStart" type="time" value="${t.start||''}"></div><div class="field"><label>结束</label><input id="fEnd" type="time" value="${t.end||''}"></div></div><div class="row"><button id="imp" class="chip ${t.important?'active':''}" onclick="this.classList.toggle('active')">⭐ 重要</button><button id="urg" class="chip ${t.urgent?'active':''}" onclick="this.classList.toggle('active')">⚡ 紧急</button></div><div class="field"><label>重复</label><select id="fRepeat" onchange="toggleCustomRepeat()"><option value="none">不重复</option><option value="daily">每天</option><option value="weekdays">工作日</option><option value="weekly">每周</option><option value="monthly">每月</option><option value="yearly">每年</option><option value="custom">自定义</option></select></div><div id="customRepeat" class="card hidden" style="padding:12px;margin-top:-4px"><div class="row"><div class="field"><label>每隔</label><input id="rInterval" type="number" min="1" max="99" value="1"></div><div class="field"><label>单位</label><select id="rUnit"><option value="day">天</option><option value="week">周</option><option value="month">月</option><option value="year">年</option></select></div></div><div class="field"><label>每周重复日</label><div id="rWeekdays" class="tabs" style="margin-top:0">${['一','二','三','四','五','六','日'].map((d,i)=>`<button type="button" class="chip" data-wd="${i}" onclick="this.classList.toggle('active')">周${d}</button>`).join('')}</div></div><div class="field"><label>结束方式</label><select id="rEndType" onchange="updateRepeatEndField()"><option value="forever">一直重复</option><option value="count">重复次数</option><option value="date">结束日期</option></select></div><div class="field" id="rEndValueWrap"></div></div><div class="field"><label>备注</label><textarea id="fNotes">${esc(t.notes||'')}</textarea></div><div class="row"><button class="primary" onclick="commit('${i||''}','${t.id}')">保存</button>${i?`<button class="danger" onclick="copyOne('${i}')">📋复制</button><button class="danger" onclick="removeTask('${i}')">删除</button>`:''}<button class="danger" onclick="render()">取消</button></div>`;$('#fRepeat').value=(typeof t.repeat==='string'?t.repeat:(t.repeat?.type==='custom'?'custom':'none'));if(typeof t.repeat==='object'&&t.repeat?.type==='custom'){$('#rInterval').value=t.repeat.interval||1;$('#rUnit').value=t.repeat.unit||'day';$('#rEndType').value=t.repeat.endType||'forever';toggleCustomRepeat();updateRepeatEndField();if(t.repeat.weekdays)t.repeat.weekdays.forEach(i=>document.querySelector(`#rWeekdays [data-wd="${i}"]`)?.classList.add('active'));}else toggleCustomRepeat();}
+function editTask(i,p={}){rememberCalendarScroll();let old=i?tasks.find(x=>x.id===i):null;let t=old||{id:id(),title:'',date:p.date??today(),start:p.start||'',end:p.end||'',important:false,urgent:false,completed:false,notes:'',repeat:'none'};$('#subtabs').innerHTML='';$('#headActions').innerHTML='';$('#heading').textContent=i?'编辑事项':'新事项';$('#main').innerHTML=`<div class="field"><label>事项</label><input id="fTitle" value="${esc(t.title)}" autofocus></div><div class="field"><label>日期</label><input id="fDate" type="date" value="${t.date||''}"></div><div class="row"><div class="field"><label>开始</label><input id="fStart" type="time" value="${t.start||''}"></div><div class="field"><label>结束</label><input id="fEnd" type="time" value="${t.end||''}"></div></div><div class="row"><button id="imp" class="chip ${t.important?'active':''}" onclick="this.classList.toggle('active')">⭐ 重要</button><button id="urg" class="chip ${t.urgent?'active':''}" onclick="this.classList.toggle('active')">⚡ 紧急</button></div><div class="field"><label>重复</label><select id="fRepeat" onchange="toggleCustomRepeat()"><option value="none">不重复</option><option value="daily">每天</option><option value="weekdays">工作日</option><option value="weekly">每周</option><option value="monthly">每月</option><option value="yearly">每年</option><option value="custom">自定义</option></select></div><div id="customRepeat" class="card hidden" style="padding:12px;margin-top:-4px"><div class="row"><div class="field"><label>每隔</label><input id="rInterval" type="number" min="1" max="99" value="1"></div><div class="field"><label>单位</label><select id="rUnit"><option value="day">天</option><option value="week">周</option><option value="month">月</option><option value="year">年</option></select></div></div><div class="field"><label>每周重复日</label><div id="rWeekdays" class="tabs" style="margin-top:0">${['一','二','三','四','五','六','日'].map((d,i)=>`<button type="button" class="chip" data-wd="${i}" onclick="this.classList.toggle('active')">周${d}</button>`).join('')}</div></div><div class="field"><label>结束方式</label><select id="rEndType" onchange="updateRepeatEndField()"><option value="forever">一直重复</option><option value="count">重复次数</option><option value="date">结束日期</option></select></div><div class="field" id="rEndValueWrap"></div></div><div class="field"><label>备注</label><textarea id="fNotes">${esc(t.notes||'')}</textarea></div><div class="row"><button class="primary" onclick="commit('${i||''}','${t.id}')">保存</button>${i?`<button class="danger" onclick="copyOne('${i}')">📋复制</button><button class="danger" onclick="removeTask('${i}')">删除</button>`:''}<button class="danger" onclick="cancelEventEditor()">取消</button></div>`;$('#fRepeat').value=(typeof t.repeat==='string'?t.repeat:(t.repeat?.type==='custom'?'custom':'none'));if(typeof t.repeat==='object'&&t.repeat?.type==='custom'){$('#rInterval').value=t.repeat.interval||1;$('#rUnit').value=t.repeat.unit||'day';$('#rEndType').value=t.repeat.endType||'forever';toggleCustomRepeat();updateRepeatEndField();if(t.repeat.weekdays)t.repeat.weekdays.forEach(i=>document.querySelector(`#rWeekdays [data-wd="${i}"]`)?.classList.add('active'));}else toggleCustomRepeat();}
 function toggleCustomRepeat(){
   const box=$('#customRepeat');if(!box)return;
   const custom=$('#fRepeat').value==='custom';box.classList.toggle('hidden',!custom);
@@ -1402,7 +1429,7 @@ function copyOne(i){let t=tasks.find(x=>x.id===i);if(t){clipboard=[{...t,id:id()
 function removeTask(i){if(confirm('删除此事项？')){tasks=tasks.filter(t=>t.id!==i);save();render()}}
 function renderSettings(){
   /* v2.95: version information belongs in Settings, not beside the page title. */
-  const VERSION_INFO_HTML = '<div class="settings-card version-info-card"><div class="settings-title">版本信息</div><div class="settings-row"><span>Todo 日历</span><b>v2.138</b></div></div>';
+  const VERSION_INFO_HTML = '<div class="settings-card version-info-card"><div class="settings-title">版本信息</div><div class="settings-row"><span>Todo 日历</span><b>v2.139</b></div></div>';
 $('#subtabs').innerHTML='';$('#headActions').innerHTML='';$('#main').innerHTML=`<div class="card"><b>版本信息</b><p>Todo 日历 v2.138</p></div><div class="card"><b>每日开始时间</b><p>06:30（今天/逾期和每日刷新边界）</p></div><div class="card"><b>默认事件时长</b><p>60 分钟</p></div><div class="card"><div class="settings-data-actions"><button class="primary" onclick="exportData()">导出 JSON</button><button class="danger" onclick="clipboard=[];render()">清空复制板</button><label class="danger">导入 JSON<input type="file" accept="application/json" hidden onchange="importData(this)"></label></div></div><div class="card drive-sync-card"><b>Google Drive 云同步</b><p id="driveStatus" style="margin:7px 0;color:#718096">正在检查 Google Drive…</p><div class="row"><button class="primary" id="driveConnectBtn" onclick="driveConnect()">连接 Google Drive</button><button class="danger" id="driveDisconnectBtn" onclick="driveDisconnect()">断开</button></div><div class="row" style="margin-top:8px"><button class="primary" id="driveUploadBtn" onclick="driveUpload()">☁️ 上传/同步</button><button class="danger" id="driveDownloadBtn" onclick="driveDownload()">⬇️ 从云端恢复</button></div><label style="display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13px"><input id="driveAutoSync" type="checkbox" onchange="driveSetAutoSync(this.checked)"> 数据修改后自动同步</label><div id="driveDetail" style="font-size:11px;color:#8a94a6;margin-top:8px;line-height:1.45"></div></div><div class="card"><b>本地数据</b><p>${tasks.length} 个事项。当前数据保存在浏览器本地。</p><button class="danger" style="margin-top:8px;width:100%;color:#c62828" onclick="clearAllData()">⚠️ 清除全部数据</button></div>`}
 function clearAllData(){
   if(!confirm('第一次确认：确定要清除全部 Todo、日历事项和本地数据吗？此操作不可撤销。'))return;
@@ -1639,7 +1666,7 @@ function openOccurrenceDelete(master,occDate){if(!recurring(master)){if(confirm(
 function occurrencesBefore(t,ds){let n=0,d=t.date,guard=0;while(d<ds&&guard++<100000){if(occursRaw(t,d)&&endAllows(t,d))n++;d=addDays(d,1)}return n;}
 function truncateSeries(master,fromDate){const before=addDays(fromDate,-1),r=typeof master.repeat==='object'?cloneObj(master.repeat):{type:master.repeat};if(r.type==='none')return;if(r.endType==='date')r.endValue=before;else if(r.endType==='count')r.endValue=Math.max(0,occurrencesBefore(master,fromDate));else{r.endType='date';r.endValue=before;}master.repeat=r;ensureRec(master).deleted=ensureRec(master).deleted.filter(d=>d<fromDate);}
 let editingOccurrence=null;
-function editTask(i,p={}){rememberCalendarScroll();let master=i?tasks.find(x=>x.id===i):null;let t=master?cloneObj(master):{id:id(),title:'',date:p.date??today(),start:p.start||'',end:p.end||'',important:false,urgent:false,completed:false,notes:'',repeat:'none'};const eo=editingOccurrence;if(eo&&master&&eo.masterId===master.id){const inst=occurrenceData(master,eo.date);if(inst)t={...t,...cloneObj(inst),date:inst.date,start:inst.start,end:inst.end,important:inst.important,urgent:inst.urgent,notes:inst.notes||''};}$('#subtabs').innerHTML='';$('#headActions').innerHTML='';$('#heading').textContent=i?'编辑事项':'新事项';$('#main').innerHTML=`<div class="field"><label>事项</label><input id="fTitle" value="${esc(t.title)}" autofocus></div><div class="field"><label>日期</label><input id="fDate" type="date" value="${t.date||''}"></div><div class="row"><div class="field"><label>开始</label><input id="fStart" type="time" value="${t.start||''}"></div><div class="field"><label>结束</label><input id="fEnd" type="time" value="${t.end||''}"></div></div><div class="row"><button id="imp" class="chip ${t.important?'active':''}" onclick="this.classList.toggle('active')">⭐ 重要</button><button id="urg" class="chip ${t.urgent?'active':''}" onclick="this.classList.toggle('active')">⚡ 紧急</button></div><div class="field"><label>重复</label><select id="fRepeat" onchange="toggleCustomRepeat()"><option value="none">不重复</option><option value="daily">每天</option><option value="weekdays">工作日</option><option value="weekly">每周</option><option value="monthly">每月</option><option value="yearly">每年</option><option value="custom">自定义</option></select></div><div id="customRepeat" class="card hidden" style="padding:12px;margin-top:-4px"><div class="row"><div class="field"><label>每隔</label><input id="rInterval" type="number" min="1" max="99" value="1"></div><div class="field"><label>单位</label><select id="rUnit"><option value="day">天</option><option value="week">周</option><option value="month">月</option><option value="year">年</option></select></div></div><div class="field"><label>每周重复日</label><div id="rWeekdays" class="tabs" style="margin-top:0">${['一','二','三','四','五','六','日'].map((d,i)=>`<button type="button" class="chip" data-wd="${i}" onclick="this.classList.toggle('active')">周${d}</button>`).join('')}</div></div><div class="field"><label>结束方式</label><select id="rEndType" onchange="updateRepeatEndField()"><option value="forever">一直重复</option><option value="count">重复次数</option><option value="date">结束日期</option></select></div><div class="field" id="rEndValueWrap"></div></div><div class="field"><label>备注</label><textarea id="fNotes">${esc(t.notes||'')}</textarea></div><div class="row"><button class="primary" onclick="commit('${i||''}','${t.id}')">保存</button>${i?`<button class="danger" onclick="copyOne('${i}')">📋复制</button><button class="danger" onclick="removeTask('${i}')">删除</button>`:''}<button class="danger" onclick="editingOccurrence=null;render()">取消</button></div>`;$('#fRepeat').value=(typeof t.repeat==='string'?t.repeat:(t.repeat?.type||'none'));if(typeof t.repeat==='object'&&t.repeat?.type==='custom'){$('#rInterval').value=t.repeat.interval||1;$('#rUnit').value=t.repeat.unit||'day';$('#rEndType').value=t.repeat.endType||'forever';toggleCustomRepeat();updateRepeatEndField();if(t.repeat.weekdays)t.repeat.weekdays.forEach(i=>document.querySelector(`#rWeekdays [data-wd="${i}"]`)?.classList.add('active'));}else toggleCustomRepeat();}
+function editTask(i,p={}){rememberCalendarScroll();let master=i?tasks.find(x=>x.id===i):null;let t=master?cloneObj(master):{id:id(),title:'',date:p.date??today(),start:p.start||'',end:p.end||'',important:false,urgent:false,completed:false,notes:'',repeat:'none'};const eo=editingOccurrence;if(eo&&master&&eo.masterId===master.id){const inst=occurrenceData(master,eo.date);if(inst)t={...t,...cloneObj(inst),date:inst.date,start:inst.start,end:inst.end,important:inst.important,urgent:inst.urgent,notes:inst.notes||''};}$('#subtabs').innerHTML='';$('#headActions').innerHTML='';$('#heading').textContent=i?'编辑事项':'新事项';$('#main').innerHTML=`<div class="field"><label>事项</label><input id="fTitle" value="${esc(t.title)}" autofocus></div><div class="field"><label>日期</label><input id="fDate" type="date" value="${t.date||''}"></div><div class="row"><div class="field"><label>开始</label><input id="fStart" type="time" value="${t.start||''}"></div><div class="field"><label>结束</label><input id="fEnd" type="time" value="${t.end||''}"></div></div><div class="row"><button id="imp" class="chip ${t.important?'active':''}" onclick="this.classList.toggle('active')">⭐ 重要</button><button id="urg" class="chip ${t.urgent?'active':''}" onclick="this.classList.toggle('active')">⚡ 紧急</button></div><div class="field"><label>重复</label><select id="fRepeat" onchange="toggleCustomRepeat()"><option value="none">不重复</option><option value="daily">每天</option><option value="weekdays">工作日</option><option value="weekly">每周</option><option value="monthly">每月</option><option value="yearly">每年</option><option value="custom">自定义</option></select></div><div id="customRepeat" class="card hidden" style="padding:12px;margin-top:-4px"><div class="row"><div class="field"><label>每隔</label><input id="rInterval" type="number" min="1" max="99" value="1"></div><div class="field"><label>单位</label><select id="rUnit"><option value="day">天</option><option value="week">周</option><option value="month">月</option><option value="year">年</option></select></div></div><div class="field"><label>每周重复日</label><div id="rWeekdays" class="tabs" style="margin-top:0">${['一','二','三','四','五','六','日'].map((d,i)=>`<button type="button" class="chip" data-wd="${i}" onclick="this.classList.toggle('active')">周${d}</button>`).join('')}</div></div><div class="field"><label>结束方式</label><select id="rEndType" onchange="updateRepeatEndField()"><option value="forever">一直重复</option><option value="count">重复次数</option><option value="date">结束日期</option></select></div><div class="field" id="rEndValueWrap"></div></div><div class="field"><label>备注</label><textarea id="fNotes">${esc(t.notes||'')}</textarea></div><div class="row"><button class="primary" onclick="commit('${i||''}','${t.id}')">保存</button>${i?`<button class="danger" onclick="copyOne('${i}')">📋复制</button><button class="danger" onclick="removeTask('${i}')">删除</button>`:''}<button class="danger" onclick="cancelEventEditor()">取消</button></div>`;$('#fRepeat').value=(typeof t.repeat==='string'?t.repeat:(t.repeat?.type||'none'));if(typeof t.repeat==='object'&&t.repeat?.type==='custom'){$('#rInterval').value=t.repeat.interval||1;$('#rUnit').value=t.repeat.unit||'day';$('#rEndType').value=t.repeat.endType||'forever';toggleCustomRepeat();updateRepeatEndField();if(t.repeat.weekdays)t.repeat.weekdays.forEach(i=>document.querySelector(`#rWeekdays [data-wd="${i}"]`)?.classList.add('active'));}else toggleCustomRepeat();}
 function commit(old,newid){const x={id:newid,title:$('#fTitle').value.trim(),date:$('#fDate').value||null,start:$('#fStart').value,end:$('#fEnd').value,important:$('#imp').classList.contains('active'),urgent:$('#urg').classList.contains('active'),completed:false,notes:$('#fNotes').value,repeat:getRepeatValue()};if(!x.title)return alert('请输入事项名称');const eo=editingOccurrence;if(old&&eo&&eo.masterId===old){const m=tasks.find(t=>t.id===old);if(eo.mode===1){const ex=ensureRec(m);const patch={title:x.title,start:x.start,end:x.end,important:x.important,urgent:x.urgent,notes:x.notes,date:x.date};if(repeatType(m)!=='none'&&x.repeat!=='none')patch.repeat=x.repeat;ex.overrides[eo.date]=patch;}else if(eo.mode===2){truncateSeries(m,eo.date);x.id=id();x.date=eo.date;x.completed=false;x.exceptions={deleted:[],completed:[],overrides:{}};tasks.push(x);}else{Object.assign(m,x,{id:m.id,completed:m.completed,completedAt:m.completedAt,exceptions:m.exceptions});}editingOccurrence=null;save();render();return;}if(old){let o=tasks.find(t=>t.id===old);Object.assign(o,x,{id:o.id,completed:o.completed,completedAt:o.completedAt,exceptions:o.exceptions});}else tasks.push(x);editingOccurrence=null;save();render();}
 function copyOne(i){let f=findInstance(i),t=f?.instance;if(t){clipboard=[{...cloneObj(t),id:id(),_key:undefined,_masterId:undefined,_occurrenceDate:undefined,_series:undefined}];alert('已复制，可粘贴。');render()}}
 function removeTask(i){const f=findInstance(i);if(f)openOccurrenceDelete(f.master,f.instance._occurrenceDate);}
@@ -3294,7 +3321,6 @@ body:has(.nav button[data-page="settings"].active) #main.content.focus-fixed-off
 </script>
 
 <script id="v2-136-google-drive-sync">
-/* v2.139 — Google Drive: silently restore OAuth authorization after reload/expiry. */
 /* v2.138 — Multi-select: add the incomplete action to the bulk toolbar. */
 /* v2.136 — Google Drive sync. Uses Google Identity Services + the narrow drive.file scope. */
 (function(){
@@ -3304,7 +3330,7 @@ body:has(.nav button[data-page="settings"].active) #main.content.focus-fixed-off
   const DRIVE_META_KEY='todoCalendarDriveFileId';
   const DRIVE_AUTO_KEY='todoCalendarDriveAutoSync';
   const DRIVE_STATE_KEY='todoCalendarDriveConnected';
-  const state={token:null,expiresAt:0,tokenClient:null,ready:false,loading:false,busy:false,silentRestoring:false,fileId:localStorage.getItem(DRIVE_META_KEY)||null};
+  const state={token:null,expiresAt:0,tokenClient:null,ready:false,loading:false,busy:false,fileId:localStorage.getItem(DRIVE_META_KEY)||null};
   let autoTimer=null;
 
   function loadGIS(){
@@ -3317,43 +3343,6 @@ body:has(.nav button[data-page="settings"].active) #main.content.focus-fixed-off
     state.tokenClient=google.accounts.oauth2.initTokenClient({client_id:DRIVE_CLIENT_ID,scope:DRIVE_SCOPE,callback:()=>{}});
     state.ready=true;
     updateDriveUI();
-    // GIS access tokens are intentionally not persisted by the browser.
-    // If this device has already granted drive.file, silently obtain a fresh
-    // short-lived token after every page/PWA restart instead of asking the
-    // user to log in again. No consent popup is requested here.
-    if(localStorage.getItem(DRIVE_STATE_KEY)==='1') silentRestore();
-  }
-  async function silentRestore(){
-    if(state.token||state.loading||state.silentRestoring||!state.ready)return;
-    state.silentRestoring=true;
-    setDriveMessage('正在恢复 Google Drive 授权…');
-    try{
-      await new Promise((resolve,reject)=>{
-        state.tokenClient.callback=resp=>{
-          if(resp?.error){reject(new Error(resp.error_description||resp.error));return}
-          state.token=resp.access_token;
-          state.expiresAt=Date.now()+Math.max(30,Number(resp.expires_in||3600)-60)*1000;
-          localStorage.setItem(DRIVE_STATE_KEY,'1');
-          resolve(state.token);
-        };
-        state.tokenClient.requestAccessToken({prompt:''});
-      });
-      updateDriveUI();
-      // Recover the Drive file id if this browser profile does not have it.
-      if(!state.fileId){
-        try{const cloud=await findDriveFile();if(cloud){state.fileId=cloud.id;localStorage.setItem(DRIVE_META_KEY,cloud.id)}}catch(e){console.warn('Silent Drive restore file lookup failed',e)}
-      }
-      setDriveMessage('Google Drive 已自动恢复连接。');
-    }catch(e){
-      console.warn('Silent Google Drive restore unavailable:',e);
-      // Keep the connected preference, but do not open an interactive login
-      // popup automatically. The user can explicitly reconnect if needed.
-      setDriveMessage('Google Drive 授权需要重新确认时，请点击“连接 Google Drive”。');
-    }finally{
-      state.silentRestoring=false;
-      updateDriveUI();
-      if(state.token&&localStorage.getItem(DRIVE_AUTO_KEY)==='1') window.__driveScheduleSync?.();
-    }
   }
   window.driveConnect=function(){
     if(!state.ready){loadGIS();setDriveMessage('正在加载 Google 登录组件…');return}
@@ -3383,35 +3372,16 @@ body:has(.nav button[data-page="settings"].active) #main.content.focus-fixed-off
     return new Promise((resolve,reject)=>{
       const wait=()=>{
         if(!state.ready){setTimeout(wait,100);return}
-        state.tokenClient.callback=resp=>{
-          if(resp?.error){reject(new Error(resp.error_description||resp.error));return}
-          state.token=resp.access_token;
-          state.expiresAt=Date.now()+Math.max(30,Number(resp.expires_in||3600)-60)*1000;
-          localStorage.setItem(DRIVE_STATE_KEY,'1');
-          updateDriveUI();
-          resolve(state.token);
-        };
-        // Empty prompt = silent reauthorization when consent already exists.
-        // This is the important part that prevents a fresh login prompt after
-        // every PWA/browser restart.
+        state.tokenClient.callback=resp=>{if(resp?.error){reject(new Error(resp.error_description||resp.error));return}state.token=resp.access_token;state.expiresAt=Date.now()+Math.max(30,Number(resp.expires_in||3600)-60)*1000;localStorage.setItem(DRIVE_STATE_KEY,'1');updateDriveUI();resolve(state.token)};
         state.tokenClient.requestAccessToken({prompt:''});
       };wait();
     });
   }
   async function driveFetch(url,opts={}){
-    let token=await accessToken();
-    const makeRequest=async t=>{
-      const headers=new Headers(opts.headers||{});headers.set('Authorization','Bearer '+t);
-      return fetch(url,{...opts,headers});
-    };
-    let res=await makeRequest(token);
-    if(res.status===401){
-      // Token may have expired between accessToken() and fetch(). Refresh once
-      // silently before surfacing an authentication error to the user.
-      state.token=null;state.expiresAt=0;
-      token=await accessToken();
-      res=await makeRequest(token);
-    }
+    const token=await accessToken();
+    const headers=new Headers(opts.headers||{});headers.set('Authorization','Bearer '+token);
+    const res=await fetch(url,{...opts,headers});
+    if(res.status===401){state.token=null;state.expiresAt=0;throw new Error('Google 授权已过期，请重新连接。')}
     if(!res.ok){let msg='HTTP '+res.status;try{const x=await res.json();msg=x.error?.message||msg}catch(e){}throw new Error(msg)}
     return res;
   }
@@ -3422,7 +3392,7 @@ body:has(.nav button[data-page="settings"].active) #main.content.focus-fixed-off
     return data.files?.sort((a,b)=>String(b.modifiedTime).localeCompare(String(a.modifiedTime)))[0]||null;
   }
   function buildBackup(){
-    return {format:'todo-calendar-drive-v1',appVersion:'2.139',tasks:cloneObj(tasks),goals:cloneObj(goals||{year:[],monthByKey:{}}),monthlyReviews:cloneObj(getReviews()),annualReviews:cloneObj(getAnnualReviews()),exportedAt:new Date().toISOString()};
+    return {format:'todo-calendar-drive-v1',appVersion:'2.136',tasks:cloneObj(tasks),goals:cloneObj(goals||{year:[],monthByKey:{}}),monthlyReviews:cloneObj(getReviews()),annualReviews:cloneObj(getAnnualReviews()),exportedAt:new Date().toISOString()};
   }
   function applyBackup(x){
     if(!x||!Array.isArray(x.tasks))throw new Error('云端文件格式不正确');
@@ -3485,22 +3455,15 @@ body:has(.nav button[data-page="settings"].active) #main.content.focus-fixed-off
   }
   function updateDriveUI(){
     const connected=!!state.token;
-    const restoring=state.silentRestoring;
     const b=document.getElementById('driveConnectBtn'),d=document.getElementById('driveDisconnectBtn'),u=document.getElementById('driveUploadBtn'),r=document.getElementById('driveDownloadBtn'),a=document.getElementById('driveAutoSync'),detail=document.getElementById('driveDetail');
-    if(b)b.disabled=connected||state.busy||restoring;
-    if(d)d.disabled=!connected||state.busy||restoring;
-    if(u)u.disabled=!connected||state.busy||restoring;
-    if(r)r.disabled=!connected||state.busy||restoring;
-    if(a){a.checked=localStorage.getItem(DRIVE_AUTO_KEY)==='1';a.disabled=!connected||state.busy||restoring}
-    if(detail)detail.textContent=connected?'当前账号已授权 drive.file；云端文件：'+(state.fileId?'已关联':'尚未关联')+'。自动同步为本机开关。':(localStorage.getItem(DRIVE_STATE_KEY)==='1'?'已保存 Google Drive 授权，正在尝试自动恢复。':'需要先连接 Google Drive。');
+    if(b)b.disabled=connected||state.busy;
+    if(d)d.disabled=!connected||state.busy;
+    if(u)u.disabled=!connected||state.busy;
+    if(r)r.disabled=!connected||state.busy;
+    if(a){a.checked=localStorage.getItem(DRIVE_AUTO_KEY)==='1';a.disabled=!connected||state.busy}
+    if(detail)detail.textContent=connected?'当前账号已授权 drive.file；云端文件：'+(state.fileId?'已关联':'尚未关联')+'。自动同步为本机开关。':'需要先连接 Google Drive。';
   }
-  window.addEventListener('load',()=>{
-    loadGIS();
-    setTimeout(()=>{
-      if(localStorage.getItem(DRIVE_STATE_KEY)==='1'&&!state.token&&!state.ready)setDriveMessage('正在恢复 Google Drive 授权…');
-      updateDriveUI();
-    },500);
-  });
+  window.addEventListener('load',()=>{loadGIS();setTimeout(()=>{if(localStorage.getItem(DRIVE_STATE_KEY)==='1')setDriveMessage('可以连接 Google Drive；点击“连接 Google Drive”重新授权。');updateDriveUI()},500)});
 })();
 </script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
