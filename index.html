@@ -8,7 +8,7 @@
 <link rel="manifest" href="./manifest.json">
 <link rel="apple-touch-icon" href="./icon-180.png">
 <link rel="icon" href="./icon-192.png" type="image/png">
-<title>v2.141 · Todo · v2.138</title>
+<title>v2.142 · Todo</title>
 <style>
 :root{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#171717;background:#f5f5f7;--line:#e7e7eb;--muted:#777;--accent:#111}*{box-sizing:border-box}body{margin:0;background:#f5f5f7;overscroll-behavior:none}.app{max-width:1100px;margin:auto;min-height:100vh;background:#fff;padding-bottom:68px}.head{position:sticky;top:0;background:rgba(255,255,255,.96);backdrop-filter:blur(12px);padding:12px 14px;border-bottom:1px solid var(--line);z-index:30}.headtop{display:flex;align-items:center;justify-content:space-between;gap:8px}.head h1{margin:0;font-size:21px}.tabs,.seg{display:flex;gap:6px;margin-top:10px;overflow:auto}.tabs button,.seg button,.chip{border:0;border-radius:10px;padding:8px 11px;background:#eee;white-space:nowrap}.active{background:#111!important;color:#fff}.content{padding:12px}.group{margin:18px 0}.group h3{font-size:14px;margin:0 0 6px}.task{display:flex;align-items:center;gap:10px;padding:13px 7px;border-bottom:1px solid #eee;touch-action:pan-y}.check{width:23px;height:23px;cursor:pointer;border:2px solid #aaa;border-radius:50%;flex:none}.done .check{background:#111}.done .title{text-decoration:line-through;opacity:.45}.taskmain{flex:1;min-width:0}.title{font-weight:600}.meta{font-size:12px;color:#777;margin-top:3px}.badge{font-size:12px}.fab{position:fixed;right:18px;bottom:88px;width:56px;height:56px;border-radius:50%;border:0;background:#111;color:#fff;font-size:30px;z-index:20;box-shadow:0 5px 20px #0002}.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(1100px,100%);height:70px;background:#fff;border-top:1px solid #ddd;display:flex;z-index:40;padding-bottom:env(safe-area-inset-bottom)}.nav button{flex:1;border:0;background:white;font-size:13px}.nav .active{color:#fff!important;background:var(--primary,#3478f6)!important}.card{background:#f5f5f7;border-radius:16px;padding:14px;margin-bottom:12px}.row{display:flex;gap:10px;align-items:center}.row>*{flex:1}.field{margin:12px 0}.field label{display:block;font-size:12px;color:#666;margin-bottom:5px}.field input,.field textarea,.field select{width:100%;padding:12px;border:1px solid #ddd;border-radius:12px;background:#fff}.primary,.danger{border:0;border-radius:12px;padding:12px 16px}.primary{background:#111;color:#fff}.danger{background:#eee}.hidden{display:none!important}.empty{text-align:center;color:#888;padding:35px 10px}
 /* Google Calendar-like week/day timeline */
@@ -1509,8 +1509,8 @@ function copyOne(i){let t=tasks.find(x=>x.id===i);if(t){clipboard=[{...t,id:id()
 function removeTask(i){if(confirm('删除此事项？')){tasks=tasks.filter(t=>t.id!==i);save();render()}}
 function renderSettings(){
   /* v2.95: version information belongs in Settings, not beside the page title. */
-  const VERSION_INFO_HTML = '<div class="settings-card version-info-card"><div class="settings-title">版本信息</div><div class="settings-row"><span>Todo 日历</span><b>v2.141</b></div></div>';
-$('#subtabs').innerHTML='';$('#headActions').innerHTML='';$('#main').innerHTML=`<div class="card"><b>版本信息</b><p>Todo 日历 v2.141</p></div><div class="card"><b>每日开始时间</b><p>06:30（今天/逾期和每日刷新边界）</p></div><div class="card"><b>默认事件时长</b><p>60 分钟</p></div><div class="card"><div class="settings-data-actions"><button class="primary" onclick="exportData()">导出 JSON</button><button class="danger" onclick="clipboard=[];render()">清空复制板</button><label class="danger">导入 JSON<input type="file" accept="application/json" hidden onchange="importData(this)"></label></div></div><div class="card drive-sync-card"><b>Google Drive 云同步</b><p id="driveStatus" style="margin:7px 0;color:#718096">正在检查 Google Drive…</p><div class="row"><button class="primary" id="driveConnectBtn" onclick="driveConnect()">连接 Google Drive</button><button class="danger" id="driveDisconnectBtn" onclick="driveDisconnect()">断开</button></div><div class="row" style="margin-top:8px"><button class="primary" id="driveUploadBtn" onclick="driveUpload()">☁️ 上传/同步</button><button class="danger" id="driveDownloadBtn" onclick="driveDownload()">⬇️ 从云端恢复</button></div><label style="display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13px"><input id="driveAutoSync" type="checkbox" onchange="driveSetAutoSync(this.checked)"> 数据修改后自动同步</label><div id="driveDetail" style="font-size:11px;color:#8a94a6;margin-top:8px;line-height:1.45"></div></div><div class="card"><b>本地数据</b><p>${tasks.length} 个事项。当前数据保存在浏览器本地。</p><button class="danger" style="margin-top:8px;width:100%;color:#c62828" onclick="clearAllData()">⚠️ 清除全部数据</button></div>`}
+  const VERSION_INFO_HTML = '<div class="settings-card version-info-card"><div class="settings-title">版本信息</div><div class="settings-row"><span>Todo 日历</span><b>v2.142</b></div></div>';
+$('#subtabs').innerHTML='';$('#headActions').innerHTML='';$('#main').innerHTML=`<div class="card"><b>版本信息</b><p>Todo 日历 v2.142</p></div><div class="card"><b>每日开始时间</b><p>06:30（今天/逾期和每日刷新边界）</p></div><div class="card"><b>默认事件时长</b><p>60 分钟</p></div><div class="card"><div class="settings-data-actions"><button class="primary" onclick="exportData()">导出 JSON</button><button class="danger" onclick="clipboard=[];render()">清空复制板</button><label class="danger">导入 JSON<input type="file" accept="application/json" hidden onchange="importData(this)"></label></div></div><div class="card drive-sync-card"><b>Google Drive 云同步</b><p id="driveStatus" style="margin:7px 0;color:#718096">正在检查 Google Drive…</p><div class="row"><button class="primary" id="driveConnectBtn" onclick="driveConnect()">连接 Google Drive</button><button class="danger" id="driveDisconnectBtn" onclick="driveDisconnect()">断开</button></div><div class="row" style="margin-top:8px"><button class="primary" id="driveUploadBtn" onclick="driveUpload()">☁️ 上传/同步</button><button class="danger" id="driveDownloadBtn" onclick="driveDownload()">⬇️ 从云端恢复</button></div><label style="display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13px"><input id="driveAutoSync" type="checkbox" onchange="driveSetAutoSync(this.checked)"> 数据修改后自动同步</label><div id="driveDetail" style="font-size:11px;color:#8a94a6;margin-top:8px;line-height:1.45"></div></div><div class="card"><b>本地数据</b><p>${tasks.length} 个事项。当前数据保存在浏览器本地。</p><button class="danger" style="margin-top:8px;width:100%;color:#c62828" onclick="clearAllData()">⚠️ 清除全部数据</button></div>`}
 function clearAllData(){
   if(!confirm('第一次确认：确定要清除全部 Todo、日历事项和本地数据吗？此操作不可撤销。'))return;
   if(!confirm('第二次确认：再次确认要永久删除全部数据吗？'))return;
@@ -1529,7 +1529,7 @@ function exportData(){
   };
   let a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([JSON.stringify(backup,null,2)],{type:'application/json'}));
-  a.download='todo-calendar-backup-v2.138.json';
+  a.download='todo-calendar-backup-v2.142.json';
   a.click();
   setTimeout(()=>URL.revokeObjectURL(a.href),1500)
 }
@@ -2851,7 +2851,7 @@ render=function(){
 
 <script>
 if('serviceWorker' in navigator){
-  window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=2.136',{updateViaCache:'none'}).catch(()=>{}));
+  window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=2.142',{updateViaCache:'none'}).catch(()=>{}));
 }
 </script>
 
@@ -3472,7 +3472,7 @@ body:has(.nav button[data-page="settings"].active) #main.content.focus-fixed-off
     return data.files?.sort((a,b)=>String(b.modifiedTime).localeCompare(String(a.modifiedTime)))[0]||null;
   }
   function buildBackup(){
-    return {format:'todo-calendar-drive-v1',appVersion:'2.136',tasks:cloneObj(tasks),goals:cloneObj(goals||{year:[],monthByKey:{}}),monthlyReviews:cloneObj(getReviews()),annualReviews:cloneObj(getAnnualReviews()),exportedAt:new Date().toISOString()};
+    return {format:'todo-calendar-drive-v1',appVersion:'2.142',tasks:cloneObj(tasks),goals:cloneObj(goals||{year:[],monthByKey:{}}),monthlyReviews:cloneObj(getReviews()),annualReviews:cloneObj(getAnnualReviews()),exportedAt:new Date().toISOString()};
   }
   function applyBackup(x){
     if(!x||!Array.isArray(x.tasks))throw new Error('云端文件格式不正确');
@@ -3661,86 +3661,55 @@ body:has(.nav button[data-page="settings"].active) #main.content.focus-fixed-off
 </script>
 
 
-<style id="v2-142-focus-first-paint-final">
-/* v2.142: prevent Focus from flashing at top-left on first PWA launch.
-   The fixed Focus root is invisible until its final top/height are measured.
-   This removes the one-frame jump caused by the v2.130 display:block override. */
-.app>.focus-fixed-root{
-  visibility:hidden!important;
-  opacity:0!important;
-}
-.app>.focus-fixed-root.focus-layout-ready{
-  visibility:visible!important;
-  opacity:1!important;
-}
-/* Reserve the final content offset before exposing the page. */
-body:not(.focus-initialized) #main.content.focus-fixed-offset{
-  visibility:hidden!important;
-}
-body.focus-initialized #main.content.focus-fixed-offset{
-  visibility:visible!important;
-}
+<style id="v2-142-first-paint-focus-fix">
+/* v2.142: Focus must never be painted at top:0 before its header anchor is resolved.
+   The previous layered Focus fixes deferred the final positioning to DOMContentLoaded/
+   requestAnimationFrame, which allowed one incorrect frame on cold PWA launch. */
+.app>.focus-fixed-root{visibility:hidden!important;}
+.app>.focus-fixed-root.v2142-positioned{visibility:visible!important;}
 </style>
-<script id="v2-142-focus-first-paint-final-js">
+<script id="v2-142-first-paint-focus-fix-js">
 (function(){
-  if(window.__v142FocusFirstPaint)return;
-  window.__v142FocusFirstPaint=true;
-
-  function markReady(){
-    const root=document.querySelector('.app>.focus-fixed-root');
-    if(root)root.classList.add('focus-layout-ready');
-    document.body.classList.add('focus-initialized');
-  }
-
-  function wrapSync(){
-    if(typeof window.syncFocus==='function' && !window.syncFocus.__v142){
-      const original=window.syncFocus;
-      const wrapped=function(){
-        const root=document.querySelector('.app>.focus-fixed-root');
-        if(root)root.classList.remove('focus-layout-ready');
-        document.body.classList.remove('focus-initialized');
-        const result=original.apply(this,arguments);
-        requestAnimationFrame(function(){
-          /* At this point top, Focus height and main padding have all been
-             resolved, so reveal them together in the same frame. */
-          markReady();
-        });
-        return result;
-      };
-      wrapped.__v142=true;
-      window.syncFocus=wrapped;
+  if(window.__v2142FocusFirstPaintFix)return;
+  window.__v2142FocusFirstPaintFix=true;
+  function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+  function sync(){
+    const app=document.querySelector('.app'),head=app?.querySelector(':scope>.head'),main=document.getElementById('main');
+    if(!app||!head||!main||typeof page==='undefined')return false;
+    const fixed=(page==='todo'||page==='calendar')&&!document.body.classList.contains('event-editor-open');
+    let root=app.querySelector(':scope>.focus-fixed-root');
+    if(!fixed){
+      if(root){root.classList.remove('v2142-positioned');root.style.display='none';}
+      main.classList.remove('focus-fixed-offset');
+      main.style.removeProperty('--focus-space');
+      main.style.removeProperty('padding-top');
+      return true;
     }
+    if(!root){root=document.createElement('div');root.className='focus-fixed-root';app.appendChild(root)}
+    const y=typeof firstOpen==='function'?firstOpen('year'):null;
+    const m=typeof firstOpen==='function'?firstOpen('month'):null;
+    const yearLabel=typeof goalYear==='function'?goalYear():new Date().getFullYear();
+    const safeEsc=typeof escGoal==='function'?escGoal:esc;
+    const bar=`<div class="goals-focus" aria-label="Focus"><div class="goal-focus-card"><div class="goal-focus-label">🎯 ${yearLabel} 年 Focus</div><div class="goal-focus-title ${y?'':'goal-focus-empty'}" title="${safeEsc(y?.title||'')}">${safeEsc(y?.title||'年度目标已全部完成')}</div></div><div class="goal-focus-card month"><div class="goal-focus-label">📅 本月 Focus</div><div class="goal-focus-title ${m?'':'goal-focus-empty'}" title="${safeEsc(m?.title||'')}">${safeEsc(m?.title||'本月目标已全部完成')}</div></div></div>`;
+    if(root.innerHTML!==bar)root.innerHTML=bar;
+    const headBottom=Math.round(head.getBoundingClientRect().bottom);
+    const focus=root.querySelector('.goals-focus');
+    const focusHeight=Math.ceil(focus?.getBoundingClientRect().height||34);
+    root.style.setProperty('top',headBottom+'px','important');
+    root.style.setProperty('--focus-top',headBottom+'px');
+    root.style.display='block';
+    main.classList.add('focus-fixed-offset');
+    main.style.setProperty('--focus-space',(focusHeight+6)+'px','important');
+    root.classList.add('v2142-positioned');
+    return true;
   }
-
-  /* The existing v2.130 code owns the real syncFocus implementation, but it
-     is scoped inside its IIFE. Therefore observe creation/update of the root
-     and reveal it only after its geometry is no longer at the default top:0. */
-  function revealWhenPositioned(){
-    const root=document.querySelector('.app>.focus-fixed-root');
-    if(!root)return;
-    const top=root.style.getPropertyValue('top');
-    const space=document.getElementById('main')?.style.getPropertyValue('--focus-space');
-    if(top && space){
-      requestAnimationFrame(markReady);
-    }
-  }
-
-  const observer=new MutationObserver(revealWhenPositioned);
-  observer.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['style','class']});
-
-  function init(){
-    wrapSync();
-    requestAnimationFrame(function(){
-      revealWhenPositioned();
-      /* If the initial render happens before this patch's observer sees it,
-         give the existing Focus layout one extra frame to settle. */
-      setTimeout(revealWhenPositioned,0);
-    });
-  }
-
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});
-  else init();
+  /* This script runs while the document is still being parsed, before the first
+     normal frame. Do the first positioning synchronously rather than waiting for
+     DOMContentLoaded/rAF. */
+  try{sync();}catch(e){console.warn('v2.142 focus init',e)}
+  window.addEventListener('load',sync,{passive:true});
+  window.addEventListener('resize',sync,{passive:true});
+  window.addEventListener('orientationchange',()=>setTimeout(sync,0),{passive:true});
 })();
 </script>
-
 </body></html>
