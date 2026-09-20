@@ -8,7 +8,7 @@
 <link rel="manifest" href="./manifest.json">
 <link rel="apple-touch-icon" href="./icon-180.png">
 <link rel="icon" href="./icon-192.png" type="image/png">
-<title>Todo · v2.135</title>
+<title>Todo · v2.136</title>
 <style>
 :root{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#171717;background:#f5f5f7;--line:#e7e7eb;--muted:#777;--accent:#111}*{box-sizing:border-box}body{margin:0;background:#f5f5f7;overscroll-behavior:none}.app{max-width:1100px;margin:auto;min-height:100vh;background:#fff;padding-bottom:68px}.head{position:sticky;top:0;background:rgba(255,255,255,.96);backdrop-filter:blur(12px);padding:12px 14px;border-bottom:1px solid var(--line);z-index:30}.headtop{display:flex;align-items:center;justify-content:space-between;gap:8px}.head h1{margin:0;font-size:21px}.tabs,.seg{display:flex;gap:6px;margin-top:10px;overflow:auto}.tabs button,.seg button,.chip{border:0;border-radius:10px;padding:8px 11px;background:#eee;white-space:nowrap}.active{background:#111!important;color:#fff}.content{padding:12px}.group{margin:18px 0}.group h3{font-size:14px;margin:0 0 6px}.task{display:flex;align-items:center;gap:10px;padding:13px 7px;border-bottom:1px solid #eee;touch-action:pan-y}.check{width:23px;height:23px;cursor:pointer;border:2px solid #aaa;border-radius:50%;flex:none}.done .check{background:#111}.done .title{text-decoration:line-through;opacity:.45}.taskmain{flex:1;min-width:0}.title{font-weight:600}.meta{font-size:12px;color:#777;margin-top:3px}.badge{font-size:12px}.fab{position:fixed;right:18px;bottom:88px;width:56px;height:56px;border-radius:50%;border:0;background:#111;color:#fff;font-size:30px;z-index:20;box-shadow:0 5px 20px #0002}.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(1100px,100%);height:70px;background:#fff;border-top:1px solid #ddd;display:flex;z-index:40;padding-bottom:env(safe-area-inset-bottom)}.nav button{flex:1;border:0;background:white;font-size:13px}.nav .active{color:#fff!important;background:var(--primary,#3478f6)!important}.card{background:#f5f5f7;border-radius:16px;padding:14px;margin-bottom:12px}.row{display:flex;gap:10px;align-items:center}.row>*{flex:1}.field{margin:12px 0}.field label{display:block;font-size:12px;color:#666;margin-bottom:5px}.field input,.field textarea,.field select{width:100%;padding:12px;border:1px solid #ddd;border-radius:12px;background:#fff}.primary,.danger{border:0;border-radius:12px;padding:12px 16px}.primary{background:#111;color:#fff}.danger{background:#eee}.hidden{display:none!important}.empty{text-align:center;color:#888;padding:35px 10px}
 /* Google Calendar-like week/day timeline */
@@ -1006,7 +1006,7 @@ html,body{height:100%!important;overflow:hidden!important}
 <script>
 const $=s=>document.querySelector(s), DB='todoCalendarV1';
 let tasks=JSON.parse(localStorage.getItem(DB)||'[]'), page='todo', todoTab='today', calMode='week', calDate=new Date(), selected=new Set(), selectMode=false, clipboard=[], weekZoom=Math.max(50,Math.min(170,Number(localStorage.getItem('todoCalendarWeekZoom')||100))), dayZoom=Math.max(50,Math.min(170,Number(localStorage.getItem('todoCalendarDayZoom')||100))), calScroll={left:0,top:0}, weekCenterRequested=false, calendarViewInitialized=false;
-const save=()=>localStorage.setItem(DB,JSON.stringify(tasks));
+const save=()=>{localStorage.setItem(DB,JSON.stringify(tasks));window.__driveScheduleSync?.()};
 const id=()=>crypto.randomUUID?.()||Date.now()+Math.random()+'';
 function workDate(d=new Date()){let x=new Date(d);if(x.getHours()<6||(x.getHours()===6&&x.getMinutes()<30))x.setDate(x.getDate()-1);return fmt(x)}
 const today=()=>workDate();
@@ -1402,8 +1402,8 @@ function copyOne(i){let t=tasks.find(x=>x.id===i);if(t){clipboard=[{...t,id:id()
 function removeTask(i){if(confirm('删除此事项？')){tasks=tasks.filter(t=>t.id!==i);save();render()}}
 function renderSettings(){
   /* v2.95: version information belongs in Settings, not beside the page title. */
-  const VERSION_INFO_HTML = '<div class="settings-card version-info-card"><div class="settings-title">版本信息</div><div class="settings-row"><span>Todo 日历</span><b>v2.135</b></div></div>';
-$('#subtabs').innerHTML='';$('#headActions').innerHTML='';$('#main').innerHTML=`<div class="card"><b>版本信息</b><p>Todo 日历 v2.135</p></div><div class="card"><b>每日开始时间</b><p>06:30（今天/逾期和每日刷新边界）</p></div><div class="card"><b>默认事件时长</b><p>60 分钟</p></div><div class="card"><div class="settings-data-actions"><button class="primary" onclick="exportData()">导出 JSON</button><button class="danger" onclick="clipboard=[];render()">清空复制板</button><label class="danger">导入 JSON<input type="file" accept="application/json" hidden onchange="importData(this)"></label></div></div><div class="card"><b>本地数据</b><p>${tasks.length} 个事项。当前数据保存在浏览器本地。</p><button class="danger" style="margin-top:8px;width:100%;color:#c62828" onclick="clearAllData()">⚠️ 清除全部数据</button></div>`}
+  const VERSION_INFO_HTML = '<div class="settings-card version-info-card"><div class="settings-title">版本信息</div><div class="settings-row"><span>Todo 日历</span><b>v2.136</b></div></div>';
+$('#subtabs').innerHTML='';$('#headActions').innerHTML='';$('#main').innerHTML=`<div class="card"><b>版本信息</b><p>Todo 日历 v2.136</p></div><div class="card"><b>每日开始时间</b><p>06:30（今天/逾期和每日刷新边界）</p></div><div class="card"><b>默认事件时长</b><p>60 分钟</p></div><div class="card"><div class="settings-data-actions"><button class="primary" onclick="exportData()">导出 JSON</button><button class="danger" onclick="clipboard=[];render()">清空复制板</button><label class="danger">导入 JSON<input type="file" accept="application/json" hidden onchange="importData(this)"></label></div></div><div class="card drive-sync-card"><b>Google Drive 云同步</b><p id="driveStatus" style="margin:7px 0;color:#718096">正在检查 Google Drive…</p><div class="row"><button class="primary" id="driveConnectBtn" onclick="driveConnect()">连接 Google Drive</button><button class="danger" id="driveDisconnectBtn" onclick="driveDisconnect()">断开</button></div><div class="row" style="margin-top:8px"><button class="primary" id="driveUploadBtn" onclick="driveUpload()">☁️ 上传/同步</button><button class="danger" id="driveDownloadBtn" onclick="driveDownload()">⬇️ 从云端恢复</button></div><label style="display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13px"><input id="driveAutoSync" type="checkbox" onchange="driveSetAutoSync(this.checked)"> 数据修改后自动同步</label><div id="driveDetail" style="font-size:11px;color:#8a94a6;margin-top:8px;line-height:1.45"></div></div><div class="card"><b>本地数据</b><p>${tasks.length} 个事项。当前数据保存在浏览器本地。</p><button class="danger" style="margin-top:8px;width:100%;color:#c62828" onclick="clearAllData()">⚠️ 清除全部数据</button></div>`}
 function clearAllData(){
   if(!confirm('第一次确认：确定要清除全部 Todo、日历事项和本地数据吗？此操作不可撤销。'))return;
   if(!confirm('第二次确认：再次确认要永久删除全部数据吗？'))return;
@@ -1422,7 +1422,7 @@ function exportData(){
   };
   let a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([JSON.stringify(backup,null,2)],{type:'application/json'}));
-  a.download='todo-calendar-backup-v2.135.json';
+  a.download='todo-calendar-backup-v2.136.json';
   a.click();
   setTimeout(()=>URL.revokeObjectURL(a.href),1500)
 }
@@ -2502,7 +2502,7 @@ const GOAL_DB='todoCalendarGoalsV1';
 function normalizeGoalArray(a){const arr=Array.isArray(a)?a:[];return arr.slice(0,3).map(g=>{if(typeof g==='string')return {title:g,done:false,krs:[]};const krs=Array.isArray(g?.krs)?g.krs.slice(0,3).map(k=>typeof k==='string'?{title:k,done:false}:{title:String(k?.title||''),done:!!k?.done}):[];return {title:String(g?.title||''),done:!!g?.done,krs};}).filter(g=>g.title)}
 function currentGoalMonth(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`}
 let goals=(()=>{try{const x=JSON.parse(localStorage.getItem(GOAL_DB)||'{}');const year=normalizeGoalArray(x.year);let monthByKey={};if(x.monthByKey&&typeof x.monthByKey==='object'&&!Array.isArray(x.monthByKey)){Object.entries(x.monthByKey).forEach(([k,v])=>{monthByKey[k]=normalizeGoalArray(v)})}else if(Array.isArray(x.month)){monthByKey[currentGoalMonth()]=normalizeGoalArray(x.month)}return {year,monthByKey}}catch{return {year:[],monthByKey:{}}}})();
-const saveGoals=()=>localStorage.setItem(GOAL_DB,JSON.stringify(goals));
+const saveGoals=()=>{localStorage.setItem(GOAL_DB,JSON.stringify(goals));window.__driveScheduleSync?.()};
 const goalYear=()=>String(new Date().getFullYear());
 const goalMonth=()=>currentGoalMonth();
 let goalViewMonth=goalMonth();
@@ -2563,7 +2563,7 @@ document.addEventListener('keydown',e=>{if(e.target.matches('input,textarea,sele
 
 const REVIEW_DB='todoCalendarMonthlyReviewsV1';
 function getReviews(){try{return JSON.parse(localStorage.getItem(REVIEW_DB)||'{}')}catch{return {}}}
-function saveReviews(x){localStorage.setItem(REVIEW_DB,JSON.stringify(x))}
+function saveReviews(x){localStorage.setItem(REVIEW_DB,JSON.stringify(x));window.__driveScheduleSync?.()}
 function monthKey(d=new Date()){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`}
 function monthTasks(mk){
   const [y,m]=mk.split('-').map(Number),from=`${y}-${String(m).padStart(2,'0')}-01`,last=new Date(y,m,0).getDate(),to=`${y}-${String(m).padStart(2,'0')}-${String(last).padStart(2,'0')}`;
@@ -2744,7 +2744,7 @@ render=function(){
 
 <script>
 if('serviceWorker' in navigator){
-  window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=2.133',{updateViaCache:'none'}).catch(()=>{}));
+  window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=2.136',{updateViaCache:'none'}).catch(()=>{}));
 }
 </script>
 
@@ -2895,7 +2895,7 @@ window.openGoalsCurrentMonth=openGoalsCurrentMonth;
 function annualKey(d=new Date()){return String(d.getFullYear())}
 const ANNUAL_REVIEW_DB='todoCalendarAnnualReviewsV1';
 function getAnnualReviews(){try{return JSON.parse(localStorage.getItem(ANNUAL_REVIEW_DB)||'{}')}catch{return {}}}
-function saveAnnualReviews(x){localStorage.setItem(ANNUAL_REVIEW_DB,JSON.stringify(x))}
+function saveAnnualReviews(x){localStorage.setItem(ANNUAL_REVIEW_DB,JSON.stringify(x));window.__driveScheduleSync?.()}
 function renderAnnualReview(yr=annualKey()){
   window.__annualReviewYear=yr; const r=getAnnualReviews()[yr]||{}; const ys=goals.year, yd=ys.filter(g=>g.done).length;
   const done=tasks.filter(t=>t.completed&&String(t.completedAt||'').slice(0,4)===yr);
@@ -3293,4 +3293,150 @@ body:has(.nav button[data-page="settings"].active) #main.content.focus-fixed-off
 })();
 </script>
 
+<script id="v2-136-google-drive-sync">
+/* v2.136 — Google Drive sync. Uses Google Identity Services + the narrow drive.file scope. */
+(function(){
+  const DRIVE_CLIENT_ID='801960562511-unbv53o8cqjbphvicehm7q3hhqr2f3pd.apps.googleusercontent.com';
+  const DRIVE_SCOPE='https://www.googleapis.com/auth/drive.file';
+  const DRIVE_FILE_NAME='Todo Calendar Sync.json';
+  const DRIVE_META_KEY='todoCalendarDriveFileId';
+  const DRIVE_AUTO_KEY='todoCalendarDriveAutoSync';
+  const DRIVE_STATE_KEY='todoCalendarDriveConnected';
+  const state={token:null,expiresAt:0,tokenClient:null,ready:false,loading:false,busy:false,fileId:localStorage.getItem(DRIVE_META_KEY)||null};
+  let autoTimer=null;
+
+  function loadGIS(){
+    if(window.google?.accounts?.oauth2){initGIS();return}
+    if(document.getElementById('google-gis-script'))return;
+    const s=document.createElement('script');s.id='google-gis-script';s.src='https://accounts.google.com/gsi/client';s.async=true;s.defer=true;s.onload=initGIS;s.onerror=()=>setDriveMessage('Google 登录组件加载失败，请检查网络。',true);document.head.appendChild(s);
+  }
+  function initGIS(){
+    if(state.ready||!window.google?.accounts?.oauth2)return;
+    state.tokenClient=google.accounts.oauth2.initTokenClient({client_id:DRIVE_CLIENT_ID,scope:DRIVE_SCOPE,callback:()=>{}});
+    state.ready=true;
+    updateDriveUI();
+  }
+  window.driveConnect=function(){
+    if(!state.ready){loadGIS();setDriveMessage('正在加载 Google 登录组件…');return}
+    if(state.loading)return;
+    state.loading=true;
+    state.tokenClient.callback=async resp=>{
+      state.loading=false;
+      if(resp?.error){console.error(resp);setDriveMessage('Google 授权失败：'+(resp.error_description||resp.error),true);updateDriveUI();return}
+      state.token=resp.access_token;state.expiresAt=Date.now()+Math.max(30,Number(resp.expires_in||3600)-60)*1000;
+      localStorage.setItem(DRIVE_STATE_KEY,'1');
+      updateDriveUI();
+      try{
+        const cloud=await findDriveFile();
+        if(cloud){state.fileId=cloud.id;localStorage.setItem(DRIVE_META_KEY,cloud.id);setDriveMessage('已连接。发现云端备份：'+formatDriveDate(cloud.modifiedTime));}
+        else setDriveMessage('已连接。云端还没有备份，点击“上传/同步”即可创建。');
+      }catch(e){setDriveMessage('已连接，但读取云端文件失败：'+e.message,true)}
+    };
+    state.tokenClient.requestAccessToken({prompt:localStorage.getItem(DRIVE_STATE_KEY)?'':'consent'});
+  };
+  window.driveDisconnect=function(){
+    if(state.token){try{google.accounts.oauth2.revoke(state.token,()=>{})}catch(e){}}
+    state.token=null;state.expiresAt=0;state.fileId=null;localStorage.removeItem(DRIVE_META_KEY);localStorage.removeItem(DRIVE_STATE_KEY);localStorage.removeItem(DRIVE_AUTO_KEY);if(autoTimer)clearTimeout(autoTimer);updateDriveUI();setDriveMessage('已断开 Google Drive。');
+  };
+  async function accessToken(){
+    if(state.token&&Date.now()<state.expiresAt)return state.token;
+    if(!state.ready)loadGIS();
+    return new Promise((resolve,reject)=>{
+      const wait=()=>{
+        if(!state.ready){setTimeout(wait,100);return}
+        state.tokenClient.callback=resp=>{if(resp?.error){reject(new Error(resp.error_description||resp.error));return}state.token=resp.access_token;state.expiresAt=Date.now()+Math.max(30,Number(resp.expires_in||3600)-60)*1000;localStorage.setItem(DRIVE_STATE_KEY,'1');updateDriveUI();resolve(state.token)};
+        state.tokenClient.requestAccessToken({prompt:''});
+      };wait();
+    });
+  }
+  async function driveFetch(url,opts={}){
+    const token=await accessToken();
+    const headers=new Headers(opts.headers||{});headers.set('Authorization','Bearer '+token);
+    const res=await fetch(url,{...opts,headers});
+    if(res.status===401){state.token=null;state.expiresAt=0;throw new Error('Google 授权已过期，请重新连接。')}
+    if(!res.ok){let msg='HTTP '+res.status;try{const x=await res.json();msg=x.error?.message||msg}catch(e){}throw new Error(msg)}
+    return res;
+  }
+  async function findDriveFile(){
+    const q=encodeURIComponent("name='"+DRIVE_FILE_NAME.replace(/'/g,"\\'")+"' and trashed=false");
+    const res=await driveFetch('https://www.googleapis.com/drive/v3/files?q='+q+'&pageSize=10&fields=files(id,name,mimeType,size,modifiedTime,createdTime)');
+    const data=await res.json();
+    return data.files?.sort((a,b)=>String(b.modifiedTime).localeCompare(String(a.modifiedTime)))[0]||null;
+  }
+  function buildBackup(){
+    return {format:'todo-calendar-drive-v1',appVersion:'2.136',tasks:cloneObj(tasks),goals:cloneObj(goals||{year:[],monthByKey:{}}),monthlyReviews:cloneObj(getReviews()),annualReviews:cloneObj(getAnnualReviews()),exportedAt:new Date().toISOString()};
+  }
+  function applyBackup(x){
+    if(!x||!Array.isArray(x.tasks))throw new Error('云端文件格式不正确');
+    tasks=x.tasks;
+    if(x.goals&&typeof x.goals==='object'){
+      const year=Array.isArray(x.goals.year)?x.goals.year.slice(0,3):[];
+      const monthByKey=x.goals.monthByKey&&typeof x.goals.monthByKey==='object'&&!Array.isArray(x.goals.monthByKey)?x.goals.monthByKey:{};
+      goals={year,monthByKey:cloneObj(monthByKey)};saveGoals();
+    }
+    if(x.monthlyReviews&&typeof x.monthlyReviews==='object')saveReviews(x.monthlyReviews);
+    if(x.annualReviews&&typeof x.annualReviews==='object')saveAnnualReviews(x.annualReviews);
+    save();
+  }
+  function multipartBody(metadata,json){
+    const boundary='todo_calendar_'+Date.now();
+    return {boundary,body:'--'+boundary+'\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n'+JSON.stringify(metadata)+'\r\n--'+boundary+'\r\nContent-Type: application/json\r\n\r\n'+JSON.stringify(json)+'\r\n--'+boundary+'--'};
+  }
+  async function createDriveFile(json){
+    const m=multipartBody({name:DRIVE_FILE_NAME,mimeType:'application/json'},json);
+    const res=await driveFetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,modifiedTime',{method:'POST',headers:{'Content-Type':'multipart/related; boundary='+m.boundary},body:m.body});
+    return res.json();
+  }
+  async function updateDriveFile(id,json){
+    const res=await driveFetch('https://www.googleapis.com/upload/drive/v3/files/'+encodeURIComponent(id)+'?uploadType=media&fields=id,name,modifiedTime',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(json)});
+    return res.json();
+  }
+  window.driveUpload=async function(silent=false){
+    if(state.busy)return;
+    state.busy=true;updateDriveUI();
+    try{
+      const json=buildBackup();let file=null;
+      if(state.fileId){try{file=await updateDriveFile(state.fileId,json)}catch(e){if(/404|not found/i.test(e.message))state.fileId=null;else throw e}}
+      if(!file){const existing=await findDriveFile();if(existing){state.fileId=existing.id;file=await updateDriveFile(existing.id,json)}else file=await createDriveFile(json)}
+      state.fileId=file.id;localStorage.setItem(DRIVE_META_KEY,file.id);localStorage.setItem(DRIVE_STATE_KEY,'1');
+      if(!silent)setDriveMessage('同步完成：'+formatDriveDate(file.modifiedTime));
+    }catch(e){console.error(e);if(!silent)setDriveMessage('上传失败：'+e.message,true)}finally{state.busy=false;updateDriveUI()}
+  };
+  window.driveDownload=async function(){
+    if(state.busy)return;
+    state.busy=true;updateDriveUI();
+    try{
+      const file=state.fileId?{id:state.fileId}:await findDriveFile();
+      if(!file)throw new Error('没有找到云端备份。');
+      state.fileId=file.id;localStorage.setItem(DRIVE_META_KEY,file.id);
+      const res=await driveFetch('https://www.googleapis.com/drive/v3/files/'+encodeURIComponent(file.id)+'?alt=media');
+      const json=await res.json();
+      if(!confirm('确定用云端数据覆盖本机数据吗？\n\n云端时间：'+formatDriveDate(file.modifiedTime||json.exportedAt)+'\n本机当前事项：'+tasks.length+' 个')){state.busy=false;updateDriveUI();return}
+      applyBackup(json);setDriveMessage('已从 Google Drive 恢复云端数据。');render();
+    }catch(e){console.error(e);setDriveMessage('恢复失败：'+e.message,true)}finally{state.busy=false;updateDriveUI()}
+  };
+  window.driveSetAutoSync=function(v){localStorage.setItem(DRIVE_AUTO_KEY,v?'1':'0');if(v&&state.token)driveUpload(true);updateDriveUI()};
+  window.__driveScheduleSync=function(){
+    if(localStorage.getItem(DRIVE_AUTO_KEY)!=='1')return;
+    if(autoTimer)clearTimeout(autoTimer);
+    autoTimer=setTimeout(()=>{if(state.token)driveUpload(true)},1800);
+  };
+  function formatDriveDate(s){if(!s)return'未知时间';try{return new Date(s).toLocaleString('zh-CN',{hour12:false})}catch(e){return s}}
+  function setDriveMessage(msg,error=false){
+    const el=document.getElementById('driveStatus');if(el){el.textContent=msg;el.style.color=error?'#d64545':'#718096'}
+  }
+  function updateDriveUI(){
+    const connected=!!state.token;
+    const b=document.getElementById('driveConnectBtn'),d=document.getElementById('driveDisconnectBtn'),u=document.getElementById('driveUploadBtn'),r=document.getElementById('driveDownloadBtn'),a=document.getElementById('driveAutoSync'),detail=document.getElementById('driveDetail');
+    if(b)b.disabled=connected||state.busy;
+    if(d)d.disabled=!connected||state.busy;
+    if(u)u.disabled=!connected||state.busy;
+    if(r)r.disabled=!connected||state.busy;
+    if(a){a.checked=localStorage.getItem(DRIVE_AUTO_KEY)==='1';a.disabled=!connected||state.busy}
+    if(detail)detail.textContent=connected?'当前账号已授权 drive.file；云端文件：'+(state.fileId?'已关联':'尚未关联')+'。自动同步为本机开关。':'需要先连接 Google Drive。';
+  }
+  window.addEventListener('load',()=>{loadGIS();setTimeout(()=>{if(localStorage.getItem(DRIVE_STATE_KEY)==='1')setDriveMessage('可以连接 Google Drive；点击“连接 Google Drive”重新授权。');updateDriveUI()},500)});
+})();
+</script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 </body></html>
