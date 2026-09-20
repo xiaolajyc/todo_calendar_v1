@@ -3660,4 +3660,87 @@ body:has(.nav button[data-page="settings"].active) #main.content.focus-fixed-off
 })();
 </script>
 
+
+<style id="v2-142-focus-first-paint-final">
+/* v2.142: prevent Focus from flashing at top-left on first PWA launch.
+   The fixed Focus root is invisible until its final top/height are measured.
+   This removes the one-frame jump caused by the v2.130 display:block override. */
+.app>.focus-fixed-root{
+  visibility:hidden!important;
+  opacity:0!important;
+}
+.app>.focus-fixed-root.focus-layout-ready{
+  visibility:visible!important;
+  opacity:1!important;
+}
+/* Reserve the final content offset before exposing the page. */
+body:not(.focus-initialized) #main.content.focus-fixed-offset{
+  visibility:hidden!important;
+}
+body.focus-initialized #main.content.focus-fixed-offset{
+  visibility:visible!important;
+}
+</style>
+<script id="v2-142-focus-first-paint-final-js">
+(function(){
+  if(window.__v142FocusFirstPaint)return;
+  window.__v142FocusFirstPaint=true;
+
+  function markReady(){
+    const root=document.querySelector('.app>.focus-fixed-root');
+    if(root)root.classList.add('focus-layout-ready');
+    document.body.classList.add('focus-initialized');
+  }
+
+  function wrapSync(){
+    if(typeof window.syncFocus==='function' && !window.syncFocus.__v142){
+      const original=window.syncFocus;
+      const wrapped=function(){
+        const root=document.querySelector('.app>.focus-fixed-root');
+        if(root)root.classList.remove('focus-layout-ready');
+        document.body.classList.remove('focus-initialized');
+        const result=original.apply(this,arguments);
+        requestAnimationFrame(function(){
+          /* At this point top, Focus height and main padding have all been
+             resolved, so reveal them together in the same frame. */
+          markReady();
+        });
+        return result;
+      };
+      wrapped.__v142=true;
+      window.syncFocus=wrapped;
+    }
+  }
+
+  /* The existing v2.130 code owns the real syncFocus implementation, but it
+     is scoped inside its IIFE. Therefore observe creation/update of the root
+     and reveal it only after its geometry is no longer at the default top:0. */
+  function revealWhenPositioned(){
+    const root=document.querySelector('.app>.focus-fixed-root');
+    if(!root)return;
+    const top=root.style.getPropertyValue('top');
+    const space=document.getElementById('main')?.style.getPropertyValue('--focus-space');
+    if(top && space){
+      requestAnimationFrame(markReady);
+    }
+  }
+
+  const observer=new MutationObserver(revealWhenPositioned);
+  observer.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['style','class']});
+
+  function init(){
+    wrapSync();
+    requestAnimationFrame(function(){
+      revealWhenPositioned();
+      /* If the initial render happens before this patch's observer sees it,
+         give the existing Focus layout one extra frame to settle. */
+      setTimeout(revealWhenPositioned,0);
+    });
+  }
+
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});
+  else init();
+})();
+</script>
+
 </body></html>
