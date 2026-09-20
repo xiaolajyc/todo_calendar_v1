@@ -1628,7 +1628,7 @@ function removeTask(i){if(confirm('删除此事项？')){tasks=tasks.filter(t=>t
 function renderSettings(){
   /* v2.95: version information belongs in Settings, not beside the page title. */
   const VERSION_INFO_HTML = '<div class="settings-card version-info-card"><div class="settings-title">版本信息</div><div class="settings-row"><span>Todo 日历</span><b>v2.148</b></div></div>';
-$('#subtabs').innerHTML='';$('#headActions').innerHTML='';$('#main').innerHTML=`<div class="card"><b>版本信息</b><p>Todo 日历 v2.148</p></div><div class="card"><b>每日开始时间</b><p>06:30（今天/逾期和每日刷新边界）</p></div><div class="card"><b>默认事件时长</b><p>60 分钟</p></div><div class="card"><div class="settings-data-actions"><button class="primary" onclick="exportData()">导出 JSON</button><button class="danger" onclick="clipboard=[];render()">清空复制板</button><label class="danger">导入 JSON<input type="file" accept="application/json" hidden onchange="importData(this)"></label></div></div><div class="card drive-sync-card"><b>Google Drive 云同步</b><p id="driveStatus" style="margin:7px 0;color:#718096">正在检查 Google Drive…</p><div class="row"><button class="primary" id="driveConnectBtn" onclick="driveConnect()">连接 Google Drive</button><button class="danger" id="driveDisconnectBtn" onclick="driveDisconnect()">断开</button></div><div class="row" style="margin-top:8px"><button class="primary" id="driveUploadBtn" onclick="driveUpload()">☁️ 上传/同步</button><button class="danger" id="driveDownloadBtn" onclick="driveDownload()">⬇️ 从云端恢复</button></div><label style="display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13px"><input id="driveAutoSync" type="checkbox" onchange="driveSetAutoSync(this.checked)"> 数据修改后自动同步</label><div id="driveDetail" style="font-size:11px;color:#8a94a6;margin-top:8px;line-height:1.45"></div></div><div class="card"><b>本地数据</b><p>${tasks.length} 个事项。当前数据保存在浏览器本地。</p><button class="danger" style="margin-top:8px;width:100%;color:#c62828" onclick="clearAllData()">⚠️ 清除全部数据</button></div>`}
+$('#subtabs').innerHTML='';$('#headActions').innerHTML='';$('#main').innerHTML=`<div class="card"><b>版本信息</b><p>Todo 日历 v2.149</p></div><div class="card"><b>每日开始时间</b><p>06:30（今天/逾期和每日刷新边界）</p></div><div class="card"><b>默认事件时长</b><p>60 分钟</p></div><div class="card"><div class="settings-data-actions"><button class="primary" onclick="exportData()">导出 JSON</button><button class="danger" onclick="clipboard=[];render()">清空复制板</button><label class="danger">导入 JSON<input type="file" accept="application/json" hidden onchange="importData(this)"></label></div></div><div class="card drive-sync-card"><b>Google Drive 云同步</b><p id="driveStatus" style="margin:7px 0;color:#718096">正在检查 Google Drive…</p><div class="row"><button class="primary" id="driveConnectBtn" onclick="driveConnect()">连接 Google Drive</button><button class="danger" id="driveDisconnectBtn" onclick="driveDisconnect()">断开</button></div><div class="row" style="margin-top:8px"><button class="primary" id="driveUploadBtn" onclick="driveUpload()">☁️ 上传/同步</button><button class="danger" id="driveDownloadBtn" onclick="driveDownload()">⬇️ 从云端恢复</button></div><label style="display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13px"><input id="driveAutoSync" type="checkbox" onchange="driveSetAutoSync(this.checked)"> 数据修改后自动同步</label><div id="driveDetail" style="font-size:11px;color:#8a94a6;margin-top:8px;line-height:1.45"></div></div><div class="card"><b>本地数据</b><p>${tasks.length} 个事项。当前数据保存在浏览器本地。</p><button class="danger" style="margin-top:8px;width:100%;color:#c62828" onclick="clearAllData()">⚠️ 清除全部数据</button></div>`}
 function clearAllData(){
   if(!confirm('第一次确认：确定要清除全部 Todo、日历事项和本地数据吗？此操作不可撤销。'))return;
   if(!confirm('第二次确认：再次确认要永久删除全部数据吗？'))return;
@@ -3350,315 +3350,110 @@ window.renderReviewHistory=function(){const ms=getReviews(),as=getAnnualReviews(
 </script>
 
 
-<style id="v2-148-canonical-focus">
-/* v2.148: ONE canonical Focus/scroll system.
-   Focus is generated in exactly one place and its vertical position is derived
-   only from the header's bottom edge. No content, scroll position, or lower
-   element is ever used as the Focus anchor. */
+
+<style id="v2-149-focus-system">
+/* v2.149: Focus has one owner and one lifecycle.
+   Header determines Focus top; Focus never uses lower content as an anchor. */
 .goals-focus{
-  display:grid!important;
-  grid-template-columns:1fr 1fr!important;
-  gap:0!important;
-  margin:0 0 7px!important;
-  padding:0!important;
-  border:1px solid #e3eaf3!important;
-  border-radius:12px!important;
-  background:#fff!important;
-  box-shadow:0 4px 14px rgba(45,60,90,.045)!important;
-  overflow:hidden!important;
-  height:38px!important;
-  min-height:38px!important;
-  box-sizing:border-box!important;
+  display:grid!important;grid-template-columns:1fr 1fr!important;gap:0!important;
+  margin:0!important;padding:0!important;border:1px solid #e3eaf3!important;
+  border-radius:12px!important;background:#fff!important;
+  box-shadow:0 4px 14px rgba(45,60,90,.045)!important;overflow:hidden!important;
+  height:38px!important;min-height:38px!important;box-sizing:border-box!important;
 }
-.goal-focus-card{
-  height:36px!important;
-  min-height:36px!important;
-  padding:4px 9px!important;
-  display:grid!important;
-  grid-template-columns:auto minmax(0,1fr)!important;
-  grid-template-rows:1fr!important;
-  column-gap:7px!important;
-  align-items:center!important;
-  border:0!important;
-  border-radius:0!important;
-  box-shadow:none!important;
-  overflow:hidden!important;
-  box-sizing:border-box!important;
-}
+.goal-focus-card{height:36px!important;min-height:36px!important;padding:4px 9px!important;
+  display:grid!important;grid-template-columns:auto minmax(0,1fr)!important;
+  align-items:center!important;column-gap:7px!important;border:0!important;border-radius:0!important;
+  box-shadow:none!important;overflow:hidden!important;box-sizing:border-box!important}
 .goal-focus-card.month{border-left:1px solid #e8edf4!important}
 .goal-focus-label{font-size:9px!important;line-height:12px!important;white-space:nowrap!important}
 .goal-focus-title{font-size:13px!important;line-height:17px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
-.app>.focus-fixed-root{
-  position:fixed!important;
-  left:0!important;
-  right:0!important;
-  top:0!important;
-  margin:0!important;
-  padding:0!important;
-  z-index:490!important;
-  pointer-events:none!important;
-  display:none!important;
-  transform:none!important;
-  transition:none!important;
-  animation:none!important;
-}
+.app>.focus-fixed-root{position:fixed!important;left:0!important;right:0!important;top:0!important;
+  margin:0!important;padding:0!important;z-index:490!important;pointer-events:none!important;
+  display:none!important;transform:none!important;transition:none!important;animation:none!important}
 .app>.focus-fixed-root .goals-focus{pointer-events:auto!important}
-#main.content.v148-focus-reserved{box-sizing:border-box!important}
-body.event-editor-open .app>.focus-fixed-root{display:none!important}
+@media(min-width:800px){.app>.focus-fixed-root{left:236px!important}}
 @media(max-width:799px){
-  .app>.focus-fixed-root{width:100%!important}
   .app>.head{z-index:480!important}
-  html.legacy-x6-scroll body.x6-todo148 .app>.head{
-    position:fixed!important;left:0!important;right:0!important;top:0!important;
-    width:100%!important;z-index:480!important;transform:none!important;
-  }
-  html.legacy-x6-scroll body.x6-todo148 .app>#main.content{
-    position:relative!important;width:100%!important;height:auto!important;
-    max-height:none!important;overflow:visible!important;touch-action:pan-y!important;
-  }
+  html.legacy-x6-scroll body.x6-todo149 .app>.head{position:fixed!important;left:0!important;right:0!important;top:0!important;width:100%!important;z-index:480!important;transform:none!important}
+  html.legacy-x6-scroll body.x6-todo149 .app>#main.content{position:relative!important;width:100%!important;height:auto!important;max-height:none!important;overflow:visible!important;touch-action:pan-y!important}
 }
 </style>
-<script id="v2-148-canonical-system">
+<script id="v2-149-focus-system-js">
 (function(){
   'use strict';
-  const VERSION='2.148';
-  const tabs=['all','today','overdue','inbox','done'];
-  const labels={all:'全部',today:'今天',overdue:'逾期',inbox:'无日期',done:'已完成'};
-
-  // ---------- Todo instance cache: one expansion per tab until data changes ----------
-  const rawTodoInstances=window.todoInstances;
-  const cache=new Map();
-  let cacheOwner=tasks;
-  let cacheDay=typeof today==='function'?today():'';
-  function clearCache(){cache.clear();cacheOwner=tasks;cacheDay=typeof today==='function'?today():'';}
-  function cachedTodoInstances(tab){
-    const d=typeof today==='function'?today():'';
-    if(cacheOwner!==tasks||cacheDay!==d){cache.clear();cacheOwner=tasks;cacheDay=d;}
-    if(!cache.has(tab))cache.set(tab,rawTodoInstances(tab));
-    return cache.get(tab);
+  let root=null, ro=null, mo=null, raf=0;
+  const app=()=>document.querySelector('.app');
+  const head=()=>app()?.querySelector(':scope>.head')||null;
+  const main=()=>document.getElementById('main');
+  const x6=()=>window.innerWidth<800 && document.documentElement.classList.contains('legacy-x6-scroll') && page==='todo';
+  const editor=()=>document.body.classList.contains('event-editor-open');
+  function removeFocus(){
+    if(root){root.remove();root=null;}
+    document.querySelectorAll('.app>.focus-fixed-root').forEach(el=>el.remove());
+    const m=main(); if(m){m.style.removeProperty('padding-top');m.style.removeProperty('--focus-space');m.classList.remove('v149-focus-reserved');}
   }
-  if(typeof rawTodoInstances==='function')window.todoInstances=cachedTodoInstances;
-  window.__clearTodoPerf147=clearCache;
-  window.__clearTodoPerf148=clearCache;
-
-  // ---------- One Todo renderer ----------
-  const renderTodoBase=window.renderTodo;
-  let todoRenderSeq=0;
-  function renderTodo148(){
-    if(typeof todoTab==='undefined')return renderTodoBase?.();
-    const renderSeq=++todoRenderSeq;
-    const list=todoInstances(todoTab);
-    document.body.classList.toggle('todo-today-original',todoTab==='today');
-    document.body.classList.toggle('todo-priority-today',todoTab==='today');
-    const counts=Object.create(null);
-    for(const t of tabs) counts[t]=cache.has(t)?cache.get(t).length:null;
-    const paintTabs=()=>{
-      $('#subtabs').innerHTML=tabs.map(a=>`<button class="${todoTab===a?'active':''}" onclick="todoTab='${a}';selectMode=false;selected.clear();window.__resetTodoScroll148();render()">${labels[a]}${counts[a]?` ${counts[a]}`:''}</button>`).join('');
-    };
-    paintTabs();
-    // Calculate other tab counts after the active list has painted. This keeps
-    // tab switching responsive on large recurring-task datasets.
-    let countIndex=0;
-    const fillCount=()=>{
-      if(countIndex>=tabs.length)return;
-      const t=tabs[countIndex++];
-      if(counts[t]==null) counts[t]=todoInstances(t).length;
-      if(renderSeq!==todoRenderSeq||page!=='todo')return;
-      paintTabs();
-      setTimeout(fillCount,0);
-    };
-    setTimeout(fillCount,0);
-    const allSelected=list.length>0&&list.every(t=>selected.has(instanceKey(t)));
-    $('#headActions').innerHTML=`<button class="tabsbtn" style="min-height:38px;padding:8px 12px;background:#edf2f8;border-radius:11px;border:0;color:#34435a;font-weight:700" onclick="toggleSelectAllTodo()">${allSelected?'取消全选':'全选'}</button>`;
-    let html='';
-    if(todoTab==='today'){
-      const groups=[{p:0,label:'🔥 重要且紧急'},{p:1,label:'⭐ 重要'},{p:2,label:'⚡ 紧急'},{p:3,label:'○ 其他'}];
-      for(const g of groups){
-        const items=list.filter(t=>priority(t)===g.p).sort((a,b)=>(a.start||'').localeCompare(b.start||'')||a.title.localeCompare(b.title));
-        if(items.length)html+=`<section class="today-priority-group p${g.p}"><h3 class="today-priority-title">${g.label}<span class="count">${items.length}</span></h3>${items.map(taskRow).join('')}</section>`;
-      }
-      html ||= '<div class="empty">今天没有待办事项</div>';
-    }else{
-      const dateLabel=ds=>{
-        if(ds==='__none__')return'无日期';
-        const d=parseDate(ds),base=today(),diff=Math.round((d-parseDate(base))/86400000),wd=['日','一','二','三','四','五','六'][d.getDay()];
-        if(ds===base)return`今天 · ${ds} · 周${wd}`;
-        if(diff===-1)return`昨天 · ${ds} · 周${wd}`;
-        if(diff===1)return`明天 · ${ds} · 周${wd}`;
-        return`${ds} · 周${wd}`;
-      };
-      const groups=new Map();
-      [...list].sort((a,b)=>(a.date||'9999').localeCompare(b.date||'9999')||priority(a)-priority(b)||(a.start||'').localeCompare(b.start||'')||a.title.localeCompare(b.title)).forEach(t=>{const k=t.date||'__none__';if(!groups.has(k))groups.set(k,[]);groups.get(k).push(t)});
-      for(const [ds,items] of groups)html+=`<section class="group"><h3>${esc(dateLabel(ds))}<span style="float:right;font-weight:600;color:#8290a2">${items.length}</span></h3>${items.map(taskRow).join('')}</section>`;
-      html ||= '<div class="empty">暂无事项</div>';
-    }
-    $('#main').innerHTML=html;
-    attachTaskGestures();renderBulk();
+  function clearOnlyFocusSpace(){
+    const m=main(); if(m){m.style.removeProperty('padding-top');m.style.removeProperty('--focus-space');m.classList.remove('v149-focus-reserved');}
   }
-  window.renderTodo=renderTodo148;
-
-  // ---------- Focus: one root, one anchor, one synchronization path ----------
-  let focusRoot=null;
-  let focusObserver=null;
-  let focusResizeObserver=null;
-  let syncQueued=false;
-  function appHead(){const app=document.querySelector('.app');return app?.querySelector('.head')||null}
-  function main(){return document.getElementById('main')}
-  function isX6Todo(){return window.innerWidth<800 && document.documentElement.classList.contains('legacy-x6-scroll') && page==='todo'}
-  function isEditor(){return document.body.classList.contains('event-editor-open')||!!document.getElementById('fNotes')}
-  function getRoot(){return document.querySelector('.app>.focus-fixed-root')}
-  function removeRoot(){
-    const root=getRoot();
-    if(root)root.remove();
-    focusRoot=null;
-  }
-  function headerHeight(head){return Math.ceil(head?.getBoundingClientRect().height||head?.offsetHeight||0)}
-  function buildFocus(){
+  function esc(s){return typeof escGoal==='function'?escGoal(s):String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+  function markup(){
     const y=typeof firstOpen==='function'?firstOpen('year'):null;
     const m=typeof firstOpen==='function'?firstOpen('month'):null;
-    const yearLabel=typeof goalYear==='function'?goalYear():new Date().getFullYear();
-    const e=typeof escGoal==='function'?escGoal:(s=>String(s??''));
-    return `<div class="goals-focus" aria-label="Focus"><div class="goal-focus-card"><div class="goal-focus-label">🎯 ${yearLabel} 年 Focus</div><div class="goal-focus-title ${y?'':'goal-focus-empty'}" title="${e(y?.title||'')}">${e(y?.title||'年度目标已全部完成')}</div></div><div class="goal-focus-card month"><div class="goal-focus-label">📅 本月 Focus</div><div class="goal-focus-title ${m?'':'goal-focus-empty'}" title="${e(m?.title||'')}">${e(m?.title||'本月目标已全部完成')}</div></div></div>`;
+    const yl=typeof goalYear==='function'?goalYear():new Date().getFullYear();
+    return `<div class="goals-focus" aria-label="Focus"><div class="goal-focus-card"><div class="goal-focus-label">🎯 ${yl} 年 Focus</div><div class="goal-focus-title ${y?'':'goal-focus-empty'}">${esc(y?.title||'年度目标已全部完成')}</div></div><div class="goal-focus-card month"><div class="goal-focus-label">📅 本月 Focus</div><div class="goal-focus-title ${m?'':'goal-focus-empty'}">${esc(m?.title||'本月目标已全部完成')}</div></div></div>`;
   }
-  function ensureRoot(){
-    const app=document.querySelector('.app');
-    if(!app)return null;
-    let root=getRoot();
-    if(!root){root=document.createElement('div');root.className='focus-fixed-root';app.appendChild(root)}
-    focusRoot=root;
-    return root;
-  }
-  function clearMainFocusSpace(){
-    const m=main();if(!m)return;
-    m.classList.remove('v148-focus-reserved');
-    m.style.removeProperty('padding-top');
-    m.style.removeProperty('--focus-space');
-    m.style.removeProperty('--x6-main-top');
-  }
-  function syncFocusNow(){
-    syncQueued=false;
-    const m=main(),head=appHead();
-    const x6Todo=isX6Todo();
-    document.body.classList.toggle('x6-todo148',x6Todo);
-    if(!m||!head||!(page==='todo'||page==='calendar')||isEditor()){
-      removeRoot();clearMainFocusSpace();
-      if(isEditor()&&x6Todo&&head&&m)m.style.setProperty('padding-top',headerHeight(head)+'px','important');
+  function syncNow(){
+    raf=0;
+    const h=head(),m=main();
+    if(!h||!m||!(page==='todo'||page==='calendar')||editor()){
+      removeFocus();
+      // Xiaomi 6 editor still needs only the fixed header's space; no Focus space.
+      if(editor()&&x6()&&h)m.style.setProperty('padding-top',Math.ceil(h.getBoundingClientRect().height)+'px','important');
       return;
     }
+    // Remove any legacy Focus accidentally inserted into content, then own one root.
     m.querySelectorAll('.goals-focus').forEach(el=>el.remove());
-    const root=ensureRoot();
-    if(!root)return;
-    root.innerHTML=buildFocus();
-    // Header is the ONLY vertical anchor. Never use content position/height.
-    const top=Math.max(0,Math.round(head.getBoundingClientRect().bottom));
-    root.style.setProperty('top',top+'px','important');
-    root.style.display='block';
-    const focusEl=root.querySelector('.goals-focus');
-    const focusH=Math.ceil(focusEl?.getBoundingClientRect().height||0);
-    m.classList.add('v148-focus-reserved');
-    if(x6Todo){
-      // Xiaomi 6 uses document scrolling; header is fixed, so reserve header + Focus.
-      const hh=headerHeight(head);
-      m.style.setProperty('padding-top',(hh+focusH+7)+'px','important');
-      root.style.setProperty('top',hh+'px','important');
+    if(!root||!root.isConnected){root=document.createElement('div');root.className='focus-fixed-root';app().appendChild(root);}
+    root.innerHTML=markup();
+    // ONLY header determines Focus position.
+    const hh=Math.ceil(h.getBoundingClientRect().height||h.offsetHeight||0);
+    root.style.top=hh+'px';root.style.display='block';
+    const fh=Math.ceil(root.querySelector('.goals-focus')?.getBoundingClientRect().height||38);
+    m.classList.add('v149-focus-reserved');
+    if(x6()){
+      m.style.setProperty('padding-top',(hh+fh+7)+'px','important');
     }else{
-      // Normal devices: header remains in flow/sticky; reserve Focus only.
-      m.style.setProperty('padding-top',(focusH+7)+'px','important');
+      m.style.setProperty('padding-top',(fh+7)+'px','important');
     }
   }
-  function syncFocus(){
-    if(syncQueued)return;
-    syncQueued=true;
-    requestAnimationFrame(syncFocusNow);
+  function sync(){if(!raf)raf=requestAnimationFrame(syncNow);}
+  function installObservers(){
+    const h=head();
+    if(!h)return;
+    mo?.disconnect(); ro?.disconnect();
+    mo=new MutationObserver(sync); mo.observe(h,{childList:true,subtree:true,attributes:true,attributeFilter:['class','style']});
+    if('ResizeObserver' in window){ro=new ResizeObserver(sync);ro.observe(h);}
   }
-  function installFocusObservers(){
-    const head=appHead();
-    if(!head)return;
-    if(focusObserver)focusObserver.disconnect();
-    focusObserver=new MutationObserver(syncFocus);
-    focusObserver.observe(head,{childList:true,subtree:true,attributes:true,attributeFilter:['class','style']});
-    if('ResizeObserver' in window){
-      if(focusResizeObserver)focusResizeObserver.disconnect();
-      focusResizeObserver=new ResizeObserver(syncFocus);
-      focusResizeObserver.observe(head);
-    }
-  }
-
-  // ---------- Editor: remove Focus and its space, do not merely hide it ----------
-  function openEditorClean(){
-    document.body.classList.add('event-editor-open');
-    removeRoot();
-    clearMainFocusSpace();
-    const h=appHead();
-    const m=main();
-    if(isX6Todo()&&h&&m)m.style.setProperty('padding-top',headerHeight(h)+'px','important');
-  }
-  const rawEditTask=window.editTask;
-  if(typeof rawEditTask==='function'){
-    window.editTask=function(){openEditorClean();return rawEditTask.apply(this,arguments)};
-  }
-  const rawNewTask=window.newTask;
-  if(typeof rawNewTask==='function'){
-    window.newTask=function(){openEditorClean();return rawNewTask.apply(this,arguments)};
-  }
-
-  // ---------- Todo scroll: every tab starts at exactly the same top as Today ----------
-  function resetTodoScroll(){
-    window.__todoResetPending148=true;
-    const m=main();
-    window.scrollTo(0,0);
-    if(document.scrollingElement)document.scrollingElement.scrollTop=0;
-    if(m)m.scrollTop=0;
-    requestAnimationFrame(()=>{
-      window.scrollTo(0,0);
-      if(document.scrollingElement)document.scrollingElement.scrollTop=0;
-      if(m)m.scrollTop=0;
-    });
-  }
-  window.__resetTodoScroll148=resetTodoScroll;
-
-  // ---------- One navigation/render path ----------
-  const rawRender=window.render;
+  function enterEditor(){document.body.classList.add('event-editor-open');removeFocus();const h=head(),m=main();if(x6()&&h&&m)m.style.setProperty('padding-top',Math.ceil(h.getBoundingClientRect().height)+'px','important');}
+  const oldEdit=window.editTask, oldNew=window.newTask;
+  if(typeof oldEdit==='function')window.editTask=function(){enterEditor();return oldEdit.apply(this,arguments)};
+  if(typeof oldNew==='function')window.newTask=function(){enterEditor();return oldNew.apply(this,arguments)};
+  const oldRender=window.render;
   window.render=function(){
     const wasEditor=document.body.classList.contains('event-editor-open');
     if(wasEditor)document.body.classList.remove('event-editor-open');
-    // Switching pages always destroys the old Focus root before the new page renders.
-    if(page!=='todo'&&page!=='calendar')removeRoot();
-    const result=rawRender?.apply(this,arguments);
-    if(page==='todo'||page==='calendar'){
-      installFocusObservers();
-      syncFocusNow();
-      if(wasEditor)resetTodoScroll();
-      if(page==='todo'&&window.__todoResetPending148){
-        window.__todoResetPending148=false;
-        resetTodoScroll();
-      }
-    }else{
-      clearMainFocusSpace();
-    }
-    if(window.__syncLegacyAndroidScroll)window.__syncLegacyAndroidScroll();
-    if(window.__syncPageScrollClass)window.__syncPageScrollClass();
+    const result=oldRender?.apply(this,arguments);
+    installObservers();
+    if(page==='todo'||page==='calendar')sync();else removeFocus();
     return result;
   };
-
-  // When the calendar renderer changes its header (day/week/month), ResizeObserver
-  // re-anchors Focus to the new header without using the calendar's scroll position.
-  window.addEventListener('resize',syncFocus,{passive:true});
-  window.addEventListener('orientationchange',()=>setTimeout(syncFocus,120),{passive:true});
-
-  // Clear editor state when an editor disappears through save/cancel.
-  const bodyObserver=new MutationObserver(()=>{
-    if(document.body.classList.contains('event-editor-open') && !document.getElementById('fNotes')){
-      document.body.classList.remove('event-editor-open');
-    }
-    syncFocus();
-  });
-  bodyObserver.observe(document.body,{attributes:true,attributeFilter:['class']});
-
-  // Initial setup after all previous application code has loaded.
-  installFocusObservers();
-  if(page==='todo'||page==='calendar')syncFocus();
-
+  window.addEventListener('resize',sync,{passive:true});
+  window.addEventListener('orientationchange',()=>setTimeout(sync,120),{passive:true});
+  const bodyMo=new MutationObserver(()=>{if(!editor()&&(page==='todo'||page==='calendar'))sync();});
+  bodyMo.observe(document.body,{attributes:true,attributeFilter:['class']});
+  installObservers();
+  if(page==='todo'||page==='calendar')sync();
 })();
 </script>
 
