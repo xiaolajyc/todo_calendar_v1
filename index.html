@@ -1493,7 +1493,7 @@ body.page-calendar #main{
 <script>
 const $=s=>document.querySelector(s), DB='todoCalendarV1';
 let tasks=JSON.parse(localStorage.getItem(DB)||'[]'), page='todo', todoTab='today', calMode='week', calDate=new Date(), selected=new Set(), selectMode=false, clipboard=[], weekZoom=Math.max(50,Math.min(170,Number(localStorage.getItem('todoCalendarWeekZoom')||100))), dayZoom=Math.max(50,Math.min(170,Number(localStorage.getItem('todoCalendarDayZoom')||100))), calScroll={left:0,top:0}, weekCenterRequested=false, calendarViewInitialized=false;
-const save=()=>{localStorage.setItem(DB,JSON.stringify(tasks));window.__driveScheduleSync?.()};
+const save=()=>{window.__clearTodoPerf147?.();localStorage.setItem(DB,JSON.stringify(tasks));window.__driveScheduleSync?.()};
 const id=()=>crypto.randomUUID?.()||Date.now()+Math.random()+'';
 function workDate(d=new Date()){let x=new Date(d);if(x.getHours()<6||(x.getHours()===6&&x.getMinutes()<30))x.setDate(x.getDate()-1);return fmt(x)}
 const today=()=>workDate();
@@ -1553,7 +1553,7 @@ function renderTodo(){
   };
   $('#subtabs').innerHTML=['all:全部','today:今天','overdue:逾期','inbox:无日期','done:已完成'].map(x=>{
     const [a,b]=x.split(':');
-    return `<button class="${todoTab===a?'active':''}" onclick="todoTab='${a}';selectMode=false;selected.clear();render()">${b}${counts[a]?` ${counts[a]}`:''}</button>`;
+    return `<button class="${todoTab===a?'active':''}" onclick="todoTab='${a}';selectMode=false;selected.clear();window.scrollTo(0,0);render()">${b}${counts[a]?` ${counts[a]}`:''}</button>`;
   }).join('');
   const allSelected=currentItems.length>0&&currentItems.every(t=>selected.has(instanceKey(t)));
   $('#headActions').innerHTML=`<button class="tabsbtn" style="min-height:38px;padding:8px 12px;background:#edf2f8;border-radius:11px;border:0;color:#34435a;font-weight:700" onclick="toggleSelectAllTodo()">${allSelected?'取消全选':'全选'}</button>`;
@@ -1944,9 +1944,9 @@ function importData(el){
   let r=new FileReader();
   r.onload=()=>{try{
     let x=JSON.parse(r.result);
-    if(Array.isArray(x)){tasks=x}
+    if(Array.isArray(x)){tasks=x;window.__todoViewCache147?.clear()}
     else if(x&&Array.isArray(x.tasks)){
-      tasks=x.tasks;
+      tasks=x.tasks;window.__todoViewCache147?.clear();
       if(x.goals&&typeof x.goals==='object'){
         const year=Array.isArray(x.goals.year)?x.goals.year.slice(0,3):[];
         const monthByKey=x.goals.monthByKey&&typeof x.goals.monthByKey==='object'&&!Array.isArray(x.goals.monthByKey)?x.goals.monthByKey:{};
@@ -2088,7 +2088,7 @@ function taskRow(t){return `<div class="task ${t.completed?'done':''} ${selected
 function renderTodo(){
   const list=todoInstances(todoTab);
   const counts={all:todoInstances('all').length,today:todoInstances('today').length,overdue:todoInstances('overdue').length,inbox:todoInstances('inbox').length,done:todoInstances('done').length};
-  $('#subtabs').innerHTML=['all:全部','today:今天','overdue:逾期','inbox:无日期','done:已完成'].map(x=>{const[a,b]=x.split(':');return `<button class="${todoTab===a?'active':''}" onclick="todoTab='${a}';selectMode=false;selected.clear();render()">${b}${counts[a]?` ${counts[a]}`:''}</button>`}).join('');
+  $('#subtabs').innerHTML=['all:全部','today:今天','overdue:逾期','inbox:无日期','done:已完成'].map(x=>{const[a,b]=x.split(':');return `<button class="${todoTab===a?'active':''}" onclick="todoTab='${a}';selectMode=false;selected.clear();window.scrollTo(0,0);render()">${b}${counts[a]?` ${counts[a]}`:''}</button>`}).join('');
   const allSelected=list.length>0&&list.every(t=>selected.has(instanceKey(t)));
   $('#headActions').innerHTML=`<button class="tabsbtn" style="min-height:38px;padding:8px 12px;background:#edf2f8;border-radius:11px;border:0;color:#34435a;font-weight:700" onclick="toggleSelectAllTodo()">${allSelected?'取消全选':'全选'}</button>`;
   const dateLabel=ds=>{if(ds==='__none__')return'无日期';const d=parseDate(ds),base=today(),diff=Math.round((d-parseDate(base))/86400000),wd=['日','一','二','三','四','五','六'][d.getDay()];if(ds===base)return`今天 · ${ds} · 周${wd}`;if(diff===-1)return`昨天 · ${ds} · 周${wd}`;if(diff===1)return`明天 · ${ds} · 周${wd}`;return`${ds} · 周${wd}`};
@@ -2450,7 +2450,7 @@ function attachTimelineGestures(dates,startHour,rowH){
   window.renderTodo=function(){
     const list=todoInstances(todoTab);
     const counts={all:todoInstances('all').length,today:todoInstances('today').length,overdue:todoInstances('overdue').length,inbox:todoInstances('inbox').length,done:todoInstances('done').length};
-    $('#subtabs').innerHTML=['all:全部','today:今天','overdue:逾期','inbox:无日期','done:已完成'].map(x=>{const[a,b]=x.split(':');return `<button class="${todoTab===a?'active':''}" onclick="todoTab='${a}';selectMode=false;selected.clear();render()">${b}${counts[a]?` ${counts[a]}`:''}</button>`}).join('');
+    $('#subtabs').innerHTML=['all:全部','today:今天','overdue:逾期','inbox:无日期','done:已完成'].map(x=>{const[a,b]=x.split(':');return `<button class="${todoTab===a?'active':''}" onclick="todoTab='${a}';selectMode=false;selected.clear();window.scrollTo(0,0);render()">${b}${counts[a]?` ${counts[a]}`:''}</button>`}).join('');
     const allSelected=list.length>0&&list.every(t=>selected.has(instanceKey(t)));
     $('#headActions').innerHTML=`<button class="tabsbtn" style="min-height:38px;padding:8px 12px;background:#edf2f8;border-radius:11px;border:0;color:#34435a;font-weight:700" onclick="toggleSelectAllTodo()">${allSelected?'取消全选':'全选'}</button>`;
     const groups=new Map();
@@ -2615,7 +2615,7 @@ function attachTimelineGestures(dates,startHour,rowH){
   window.renderTodo=function(){
     const list=todoInstances(todoTab);
     const counts={all:todoInstances('all').length,today:todoInstances('today').length,overdue:todoInstances('overdue').length,inbox:todoInstances('inbox').length,done:todoInstances('done').length};
-    $('#subtabs').innerHTML=['all:全部','today:今天','overdue:逾期','inbox:无日期','done:已完成'].map(x=>{const[a,b]=x.split(':');return `<button class="${todoTab===a?'active':''}" onclick="todoTab='${a}';selectMode=false;selected.clear();render()">${b}${counts[a]?` ${counts[a]}`:''}</button>`}).join('');
+    $('#subtabs').innerHTML=['all:全部','today:今天','overdue:逾期','inbox:无日期','done:已完成'].map(x=>{const[a,b]=x.split(':');return `<button class="${todoTab===a?'active':''}" onclick="todoTab='${a}';selectMode=false;selected.clear();window.scrollTo(0,0);render()">${b}${counts[a]?` ${counts[a]}`:''}</button>`}).join('');
     const allSelected=list.length>0&&list.every(t=>selected.has(instanceKey(t)));
     $('#headActions').innerHTML=`<button class="tabsbtn" style="min-height:38px;padding:8px 12px;background:#edf2f8;border-radius:11px;border:0;color:#34435a;font-weight:700" onclick="toggleSelectAllTodo()">${allSelected?'取消全选':'全选'}</button>`;
     const dateStatus=ds=>{if(ds==='__none__')return'none';const b=today(),d=parseDate(ds),diff=Math.round((d-parseDate(b))/86400000);if(ds===b)return'today';if(diff<0)return'overdue';if(diff===1)return'tomorrow';return'other'};
@@ -2783,7 +2783,7 @@ body.todo-priority-today .today-priority-group.p2 .check{border-color:#f0a07a}
     const counts={all:todoInstances('all').length,today:list.length,overdue:todoInstances('overdue').length,inbox:todoInstances('inbox').length,done:todoInstances('done').length};
     $('#subtabs').innerHTML=['all:全部','today:今天','overdue:逾期','inbox:无日期','done:已完成'].map(x=>{
       const [a,b]=x.split(':');
-      return `<button class="${todoTab===a?'active':''}" onclick="todoTab='${a}';selectMode=false;selected.clear();render()">${b}${counts[a]?` ${counts[a]}`:''}</button>`;
+      return `<button class="${todoTab===a?'active':''}" onclick="todoTab='${a}';selectMode=false;selected.clear();window.scrollTo(0,0);render()">${b}${counts[a]?` ${counts[a]}`:''}</button>`;
     }).join('');
     const allSelected=list.length>0&&list.every(t=>selected.has(instanceKey(t)));
     $('#headActions').innerHTML=`<button class="tabsbtn" style="min-height:38px;padding:8px 12px;background:#edf2f8;border-radius:11px;border:0;color:#34435a;font-weight:700" onclick="toggleSelectAllTodo()">${allSelected?'取消全选':'全选'}</button>`;
@@ -3883,7 +3883,7 @@ body:has(.nav button[data-page="settings"].active) #main.content.focus-fixed-off
   }
   function applyBackup(x){
     if(!x||!Array.isArray(x.tasks))throw new Error('云端文件格式不正确');
-    tasks=x.tasks;
+    tasks=x.tasks;window.__todoViewCache147?.clear();
     if(x.goals&&typeof x.goals==='object'){
       const year=Array.isArray(x.goals.year)?x.goals.year.slice(0,3):[];
       const monthByKey=x.goals.monthByKey&&typeof x.goals.monthByKey==='object'&&!Array.isArray(x.goals.monthByKey)?x.goals.monthByKey:{};
@@ -4093,6 +4093,154 @@ body:has(.nav button[data-page="settings"].active) #main.content.focus-fixed-off
     if(b)setTimeout(later,0);
   },true);
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',later,{once:true}); else later();
+})();
+</script>
+
+<style id="v2-147-performance-final">
+/* v2.147: Xiaomi 6 Todo performance. The document remains the scroll surface.
+   Focus is a fixed shell anchored only to the header. */
+@media(max-width:799px){
+  html.legacy-x6-scroll body.x6-todo-shell .app>.head{
+    position:fixed!important;top:0!important;left:0!important;right:0!important;
+    width:100%!important;z-index:480!important;transform:none!important;
+  }
+  html.legacy-x6-scroll body.x6-todo-shell .app>.focus-fixed-root{
+    position:fixed!important;left:0!important;right:0!important;
+    top:var(--x6-focus-top,0px)!important;width:100%!important;
+    z-index:490!important;transform:none!important;transition:none!important;
+  }
+  html.legacy-x6-scroll body.x6-todo-shell .app>#main.content{
+    position:relative!important;top:auto!important;left:auto!important;right:auto!important;bottom:auto!important;
+    height:auto!important;max-height:none!important;overflow:visible!important;
+    padding-top:var(--x6-main-top,0px)!important;touch-action:pan-y!important;
+  }
+}
+</style>
+<script id="v2-147-performance-final-js">
+(function(){
+  /* Cache expanded Todo instances. Switching tabs should not repeatedly expand
+     the same 731-day recurrence window. The cache is cleared by save() and when
+     synced data replaces the task array. */
+  const rawTodoInstances=window.todoInstances;
+  if(typeof rawTodoInstances==='function'){
+    const cache=new Map();
+    window.__todoViewCache147=cache;
+    let ownerTasks=tasks;
+    let ownerDay=today();
+    function cached(tab){
+      const d=today();
+      if(ownerTasks!==tasks || ownerDay!==d){cache.clear();ownerTasks=tasks;ownerDay=d;}
+      if(!cache.has(tab)) cache.set(tab,rawTodoInstances(tab));
+      return cache.get(tab);
+    }
+    window.todoInstances=cached;
+  }
+
+  function isX6Todo(){return window.innerWidth<800 && document.documentElement.classList.contains('legacy-x6-scroll') && typeof page!=='undefined' && page==='todo';}
+
+  /* A single authoritative Todo renderer. It avoids the older chain of
+     renderTodo wrappers that each rebuilt the same list and recalculated Focus. */
+  const previousTodo=window.renderTodo;
+  const tabs147=['all','today','overdue','inbox','done'];
+  const labels147={all:'全部',today:'今天',overdue:'逾期',inbox:'无日期',done:'已完成'};
+  const counts147=Object.create(null);
+  let countJob147=0;
+  window.__todoCounts147=counts147;
+  window.__clearTodoPerf147=function(){cache.clear();for(const k of tabs147)delete counts147[k];countJob147++;};
+  function scheduleCounts147(){
+    const job=++countJob147;
+    const run=(i)=>{
+      if(job!==countJob147||i>=tabs147.length)return;
+      const k=tabs147[i];
+      if(counts147[k]==null) counts147[k]=todoInstances(k).length;
+      const sub=document.getElementById('subtabs');
+      if(sub){sub.innerHTML=tabs147.map(a=>`<button class="${todoTab===a?'active':''}" onclick="todoTab='${a}';selectMode=false;selected.clear();window.scrollTo(0,0);render()">${labels147[a]}${counts147[a]?` ${counts147[a]}`:''}</button>`).join('');}
+      setTimeout(()=>run(i+1),0);
+    };
+    setTimeout(()=>run(0),250);
+  }
+  function renderTodoFast(){
+    if(typeof todoTab==='undefined') return previousTodo?.();
+    const list=todoInstances(todoTab);
+    document.body.classList.toggle('todo-priority-today',todoTab==='today');
+    $('#subtabs').innerHTML=tabs147.map(a=>`<button class="${todoTab===a?'active':''}" onclick="todoTab='${a}';selectMode=false;selected.clear();window.scrollTo(0,0);render()">${labels147[a]}${counts147[a]!=null&&counts147[a]?` ${counts147[a]}`:''}</button>`).join('');
+    const allSelected=list.length>0&&list.every(t=>selected.has(instanceKey(t)));
+    $('#headActions').innerHTML=`<button class="tabsbtn" style="min-height:38px;padding:8px 12px;background:#edf2f8;border-radius:11px;border:0;color:#34435a;font-weight:700" onclick="toggleSelectAllTodo()">${allSelected?'取消全选':'全选'}</button>`;
+    let html='';
+    if(todoTab==='today'){
+      const groups=[{p:0,label:'🔥 重要且紧急'},{p:1,label:'⭐ 重要'},{p:2,label:'⚡ 紧急'},{p:3,label:'○ 其他'}];
+      for(const g of groups){
+        const items=list.filter(t=>priority(t)===g.p).sort((a,b)=>(a.start||'').localeCompare(b.start||'')||a.title.localeCompare(b.title));
+        if(items.length)html+=`<section class="today-priority-group p${g.p}"><h3 class="today-priority-title">${g.label}<span class="count">${items.length}</span></h3>${items.map(taskRow).join('')}</section>`;
+      }
+      html ||= '<div class="empty">今天没有待办事项</div>';
+    }else{
+      const dateLabel=ds=>{if(ds==='__none__')return'无日期';const d=parseDate(ds),base=today(),diff=Math.round((d-parseDate(base))/86400000),wd=['日','一','二','三','四','五','六'][d.getDay()];if(ds===base)return`今天 · ${ds} · 周${wd}`;if(diff===-1)return`昨天 · ${ds} · 周${wd}`;if(diff===1)return`明天 · ${ds} · 周${wd}`;return`${ds} · 周${wd}`};
+      const groups=new Map();
+      [...list].sort((a,b)=>(a.date||'9999').localeCompare(b.date||'9999')||priority(a)-priority(b)||(a.start||'').localeCompare(b.start||'')||a.title.localeCompare(b.title)).forEach(t=>{const k=t.date||'__none__';if(!groups.has(k))groups.set(k,[]);groups.get(k).push(t)});
+      for(const [ds,items] of groups)html+=`<section class="group"><h3>${esc(dateLabel(ds))}<span style="float:right;font-weight:600;color:#8290a2">${items.length}</span></h3>${items.map(taskRow).join('')}</section>`;
+      html ||= '<div class="empty">暂无事项</div>';
+    }
+    $('#main').innerHTML=html;
+    attachTaskGestures();renderBulk();
+    scheduleCounts147();
+  }
+  window.renderTodo=renderTodoFast;
+
+  /* Direct render dispatcher: one render per tab click, while keeping calendar
+     and settings implementations intact. This removes redundant render wrappers
+     from the tab-switch path. */
+  window.render=function(){
+    if(typeof captureCalendarView==='function' && page==='calendar')captureCalendarView();
+    document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===page));
+    $('#fab')?.classList.toggle('hidden',page==='settings');
+    $('#heading').textContent=page==='todo'?'Todo':page==='calendar'?'日历':page==='goals'?'目标':'设置';
+    if(page==='todo')renderTodo();
+    else if(page==='calendar')renderCalendar();
+    else if(page==='goals' && typeof renderGoals==='function')renderGoals();
+    else renderSettings();
+    if(page!=='todo'){
+      document.body.classList.remove('x6-todo-shell','event-editor-open');
+      const root=document.querySelector('.app>.focus-fixed-root');
+      if(root){root.style.display='none';root.style.removeProperty('--x6-focus-top');}
+      const main=document.getElementById('main');
+      if(main)main.style.removeProperty('--x6-main-top');
+    }
+    if(window.__syncLegacyAndroidScroll)window.__syncLegacyAndroidScroll();
+    if(window.__syncPageScrollClass)window.__syncPageScrollClass();
+    if(window.__x6Focus147Sync)window.__x6Focus147Sync();
+  };
+
+  /* Focus/editor shell: header is the only anchor. New/Edit Event never shows Focus. */
+  function syncFocus(){
+    if(!isX6Todo())return;
+    const app=document.querySelector('.app'),head=app?.querySelector('.head'),root=app?.querySelector('.focus-fixed-root'),main=document.getElementById('main');
+    if(!head||!root||!main)return;
+    if(document.body.classList.contains('event-editor-open') || document.getElementById('fNotes') || document.querySelector('#eventEditor,.event-editor,.editor-page')){
+      root.style.display='none';
+      main.style.removeProperty('--x6-main-top');
+      return;
+    }
+    const headH=Math.ceil(head.getBoundingClientRect().height||head.offsetHeight||0);
+    const focus=root.querySelector('.goals-focus');
+    const focusH=Math.ceil(focus?.getBoundingClientRect().height||0);
+    root.style.setProperty('--x6-focus-top',headH+'px','important');
+    root.style.setProperty('top',headH+'px','important');
+    root.style.display='block';
+    main.style.setProperty('--x6-main-top',(headH+focusH+7)+'px','important');
+  }
+  window.__x6Focus147Sync=syncFocus;
+  document.addEventListener('click',function(e){
+    const b=e.target?.closest?.('.nav button[data-page]');
+    if(b)setTimeout(syncFocus,0);
+  },true);
+  window.addEventListener('resize',function(){requestAnimationFrame(syncFocus)},{passive:true});
+  window.addEventListener('orientationchange',function(){setTimeout(syncFocus,120)},{passive:true});
+  new MutationObserver(function(){
+    if(isX6Todo())requestAnimationFrame(syncFocus);
+  }).observe(document.body,{attributes:true,attributeFilter:['class']});
+  setTimeout(syncFocus,0);
+  setTimeout(syncFocus,120);
 })();
 </script>
 </body></html>
