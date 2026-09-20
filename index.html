@@ -8,7 +8,7 @@
 <link rel="manifest" href="./manifest.json">
 <link rel="apple-touch-icon" href="./icon-180.png">
 <link rel="icon" href="./icon-192.png" type="image/png">
-<title>Todo · v2.137</title>
+<title>Todo · v2.138</title>
 <style>
 :root{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#171717;background:#f5f5f7;--line:#e7e7eb;--muted:#777;--accent:#111}*{box-sizing:border-box}body{margin:0;background:#f5f5f7;overscroll-behavior:none}.app{max-width:1100px;margin:auto;min-height:100vh;background:#fff;padding-bottom:68px}.head{position:sticky;top:0;background:rgba(255,255,255,.96);backdrop-filter:blur(12px);padding:12px 14px;border-bottom:1px solid var(--line);z-index:30}.headtop{display:flex;align-items:center;justify-content:space-between;gap:8px}.head h1{margin:0;font-size:21px}.tabs,.seg{display:flex;gap:6px;margin-top:10px;overflow:auto}.tabs button,.seg button,.chip{border:0;border-radius:10px;padding:8px 11px;background:#eee;white-space:nowrap}.active{background:#111!important;color:#fff}.content{padding:12px}.group{margin:18px 0}.group h3{font-size:14px;margin:0 0 6px}.task{display:flex;align-items:center;gap:10px;padding:13px 7px;border-bottom:1px solid #eee;touch-action:pan-y}.check{width:23px;height:23px;cursor:pointer;border:2px solid #aaa;border-radius:50%;flex:none}.done .check{background:#111}.done .title{text-decoration:line-through;opacity:.45}.taskmain{flex:1;min-width:0}.title{font-weight:600}.meta{font-size:12px;color:#777;margin-top:3px}.badge{font-size:12px}.fab{position:fixed;right:18px;bottom:88px;width:56px;height:56px;border-radius:50%;border:0;background:#111;color:#fff;font-size:30px;z-index:20;box-shadow:0 5px 20px #0002}.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(1100px,100%);height:70px;background:#fff;border-top:1px solid #ddd;display:flex;z-index:40;padding-bottom:env(safe-area-inset-bottom)}.nav button{flex:1;border:0;background:white;font-size:13px}.nav .active{color:#fff!important;background:var(--primary,#3478f6)!important}.card{background:#f5f5f7;border-radius:16px;padding:14px;margin-bottom:12px}.row{display:flex;gap:10px;align-items:center}.row>*{flex:1}.field{margin:12px 0}.field label{display:block;font-size:12px;color:#666;margin-bottom:5px}.field input,.field textarea,.field select{width:100%;padding:12px;border:1px solid #ddd;border-radius:12px;background:#fff}.primary,.danger{border:0;border-radius:12px;padding:12px 16px}.primary{background:#111;color:#fff}.danger{background:#eee}.hidden{display:none!important}.empty{text-align:center;color:#888;padding:35px 10px}
 /* Google Calendar-like week/day timeline */
@@ -1402,8 +1402,8 @@ function copyOne(i){let t=tasks.find(x=>x.id===i);if(t){clipboard=[{...t,id:id()
 function removeTask(i){if(confirm('删除此事项？')){tasks=tasks.filter(t=>t.id!==i);save();render()}}
 function renderSettings(){
   /* v2.95: version information belongs in Settings, not beside the page title. */
-  const VERSION_INFO_HTML = '<div class="settings-card version-info-card"><div class="settings-title">版本信息</div><div class="settings-row"><span>Todo 日历</span><b>v2.137</b></div></div>';
-$('#subtabs').innerHTML='';$('#headActions').innerHTML='';$('#main').innerHTML=`<div class="card"><b>版本信息</b><p>Todo 日历 v2.137</p></div><div class="card"><b>每日开始时间</b><p>06:30（今天/逾期和每日刷新边界）</p></div><div class="card"><b>默认事件时长</b><p>60 分钟</p></div><div class="card"><div class="settings-data-actions"><button class="primary" onclick="exportData()">导出 JSON</button><button class="danger" onclick="clipboard=[];render()">清空复制板</button><label class="danger">导入 JSON<input type="file" accept="application/json" hidden onchange="importData(this)"></label></div></div><div class="card drive-sync-card"><b>Google Drive 云同步</b><p id="driveStatus" style="margin:7px 0;color:#718096">正在检查 Google Drive…</p><div class="row"><button class="primary" id="driveConnectBtn" onclick="driveConnect()">连接 Google Drive</button><button class="danger" id="driveDisconnectBtn" onclick="driveDisconnect()">断开</button></div><div class="row" style="margin-top:8px"><button class="primary" id="driveUploadBtn" onclick="driveUpload()">☁️ 上传/同步</button><button class="danger" id="driveDownloadBtn" onclick="driveDownload()">⬇️ 从云端恢复</button></div><label style="display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13px"><input id="driveAutoSync" type="checkbox" onchange="driveSetAutoSync(this.checked)"> 数据修改后自动同步</label><div id="driveDetail" style="font-size:11px;color:#8a94a6;margin-top:8px;line-height:1.45"></div></div><div class="card"><b>本地数据</b><p>${tasks.length} 个事项。当前数据保存在浏览器本地。</p><button class="danger" style="margin-top:8px;width:100%;color:#c62828" onclick="clearAllData()">⚠️ 清除全部数据</button></div>`}
+  const VERSION_INFO_HTML = '<div class="settings-card version-info-card"><div class="settings-title">版本信息</div><div class="settings-row"><span>Todo 日历</span><b>v2.138</b></div></div>';
+$('#subtabs').innerHTML='';$('#headActions').innerHTML='';$('#main').innerHTML=`<div class="card"><b>版本信息</b><p>Todo 日历 v2.138</p></div><div class="card"><b>每日开始时间</b><p>06:30（今天/逾期和每日刷新边界）</p></div><div class="card"><b>默认事件时长</b><p>60 分钟</p></div><div class="card"><div class="settings-data-actions"><button class="primary" onclick="exportData()">导出 JSON</button><button class="danger" onclick="clipboard=[];render()">清空复制板</button><label class="danger">导入 JSON<input type="file" accept="application/json" hidden onchange="importData(this)"></label></div></div><div class="card drive-sync-card"><b>Google Drive 云同步</b><p id="driveStatus" style="margin:7px 0;color:#718096">正在检查 Google Drive…</p><div class="row"><button class="primary" id="driveConnectBtn" onclick="driveConnect()">连接 Google Drive</button><button class="danger" id="driveDisconnectBtn" onclick="driveDisconnect()">断开</button></div><div class="row" style="margin-top:8px"><button class="primary" id="driveUploadBtn" onclick="driveUpload()">☁️ 上传/同步</button><button class="danger" id="driveDownloadBtn" onclick="driveDownload()">⬇️ 从云端恢复</button></div><label style="display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13px"><input id="driveAutoSync" type="checkbox" onchange="driveSetAutoSync(this.checked)"> 数据修改后自动同步</label><div id="driveDetail" style="font-size:11px;color:#8a94a6;margin-top:8px;line-height:1.45"></div></div><div class="card"><b>本地数据</b><p>${tasks.length} 个事项。当前数据保存在浏览器本地。</p><button class="danger" style="margin-top:8px;width:100%;color:#c62828" onclick="clearAllData()">⚠️ 清除全部数据</button></div>`}
 function clearAllData(){
   if(!confirm('第一次确认：确定要清除全部 Todo、日历事项和本地数据吗？此操作不可撤销。'))return;
   if(!confirm('第二次确认：再次确认要永久删除全部数据吗？'))return;
@@ -1422,7 +1422,7 @@ function exportData(){
   };
   let a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([JSON.stringify(backup,null,2)],{type:'application/json'}));
-  a.download='todo-calendar-backup-v2.137.json';
+  a.download='todo-calendar-backup-v2.138.json';
   a.click();
   setTimeout(()=>URL.revokeObjectURL(a.href),1500)
 }
@@ -1958,7 +1958,7 @@ function attachTimelineGestures(dates,startHour,rowH){
     const b=$('#bulk');
     if(!selectMode){b.classList.add('hidden');b.classList.remove('bulk-fixed');return;}
     b.classList.remove('hidden');b.classList.add('bulk-fixed');
-    b.innerHTML=`<span class="bulk-count">已选 ${selected.size}</span><button onclick="bulk('done')">✓完成</button><button onclick="bulk('today')">今天</button><button onclick="bulk('tomorrow')">明天</button><button onclick="bulkDate()">📅日期</button><button onclick="bulkShiftTime()">🕐时间</button><button onclick="bulk('important')">⭐重要</button><button onclick="bulk('urgent')">⚡紧急</button><button onclick="bulk('copy')">📋复制</button><button onclick="bulk('paste')" ${clipboard.length?'':'disabled'}>📌粘贴</button><button onclick="bulk('delete')">🗑删除</button><button onclick="selectMode=false;selected.clear();render()">取消</button>`;
+    b.innerHTML=`<span class="bulk-count">已选 ${selected.size}</span><button onclick="bulk('done')">✓完成</button><button onclick="bulk('undone')">↩未完成</button><button onclick="bulk('today')">今天</button><button onclick="bulk('tomorrow')">明天</button><button onclick="bulkDate()">📅日期</button><button onclick="bulkShiftTime()">🕐时间</button><button onclick="bulk('important')">⭐重要</button><button onclick="bulk('urgent')">⚡紧急</button><button onclick="bulk('copy')">📋复制</button><button onclick="bulk('paste')" ${clipboard.length?'':'disabled'}>📌粘贴</button><button onclick="bulk('delete')">🗑删除</button><button onclick="selectMode=false;selected.clear();render()">取消</button>`;
   };
 
   /* Todo selection: first long-press enters mode; afterwards every tap toggles an item. */
@@ -3294,7 +3294,8 @@ body:has(.nav button[data-page="settings"].active) #main.content.focus-fixed-off
 </script>
 
 <script id="v2-136-google-drive-sync">
-/* v2.137 — Multi-select: mark selected Todo/calendar occurrences as incomplete. */
+/* v2.139 — Google Drive: silently restore OAuth authorization after reload/expiry. */
+/* v2.138 — Multi-select: add the incomplete action to the bulk toolbar. */
 /* v2.136 — Google Drive sync. Uses Google Identity Services + the narrow drive.file scope. */
 (function(){
   const DRIVE_CLIENT_ID='801960562511-unbv53o8cqjbphvicehm7q3hhqr2f3pd.apps.googleusercontent.com';
@@ -3303,7 +3304,7 @@ body:has(.nav button[data-page="settings"].active) #main.content.focus-fixed-off
   const DRIVE_META_KEY='todoCalendarDriveFileId';
   const DRIVE_AUTO_KEY='todoCalendarDriveAutoSync';
   const DRIVE_STATE_KEY='todoCalendarDriveConnected';
-  const state={token:null,expiresAt:0,tokenClient:null,ready:false,loading:false,busy:false,fileId:localStorage.getItem(DRIVE_META_KEY)||null};
+  const state={token:null,expiresAt:0,tokenClient:null,ready:false,loading:false,busy:false,silentRestoring:false,fileId:localStorage.getItem(DRIVE_META_KEY)||null};
   let autoTimer=null;
 
   function loadGIS(){
@@ -3316,6 +3317,43 @@ body:has(.nav button[data-page="settings"].active) #main.content.focus-fixed-off
     state.tokenClient=google.accounts.oauth2.initTokenClient({client_id:DRIVE_CLIENT_ID,scope:DRIVE_SCOPE,callback:()=>{}});
     state.ready=true;
     updateDriveUI();
+    // GIS access tokens are intentionally not persisted by the browser.
+    // If this device has already granted drive.file, silently obtain a fresh
+    // short-lived token after every page/PWA restart instead of asking the
+    // user to log in again. No consent popup is requested here.
+    if(localStorage.getItem(DRIVE_STATE_KEY)==='1') silentRestore();
+  }
+  async function silentRestore(){
+    if(state.token||state.loading||state.silentRestoring||!state.ready)return;
+    state.silentRestoring=true;
+    setDriveMessage('正在恢复 Google Drive 授权…');
+    try{
+      await new Promise((resolve,reject)=>{
+        state.tokenClient.callback=resp=>{
+          if(resp?.error){reject(new Error(resp.error_description||resp.error));return}
+          state.token=resp.access_token;
+          state.expiresAt=Date.now()+Math.max(30,Number(resp.expires_in||3600)-60)*1000;
+          localStorage.setItem(DRIVE_STATE_KEY,'1');
+          resolve(state.token);
+        };
+        state.tokenClient.requestAccessToken({prompt:''});
+      });
+      updateDriveUI();
+      // Recover the Drive file id if this browser profile does not have it.
+      if(!state.fileId){
+        try{const cloud=await findDriveFile();if(cloud){state.fileId=cloud.id;localStorage.setItem(DRIVE_META_KEY,cloud.id)}}catch(e){console.warn('Silent Drive restore file lookup failed',e)}
+      }
+      setDriveMessage('Google Drive 已自动恢复连接。');
+    }catch(e){
+      console.warn('Silent Google Drive restore unavailable:',e);
+      // Keep the connected preference, but do not open an interactive login
+      // popup automatically. The user can explicitly reconnect if needed.
+      setDriveMessage('Google Drive 授权需要重新确认时，请点击“连接 Google Drive”。');
+    }finally{
+      state.silentRestoring=false;
+      updateDriveUI();
+      if(state.token&&localStorage.getItem(DRIVE_AUTO_KEY)==='1') window.__driveScheduleSync?.();
+    }
   }
   window.driveConnect=function(){
     if(!state.ready){loadGIS();setDriveMessage('正在加载 Google 登录组件…');return}
@@ -3345,16 +3383,35 @@ body:has(.nav button[data-page="settings"].active) #main.content.focus-fixed-off
     return new Promise((resolve,reject)=>{
       const wait=()=>{
         if(!state.ready){setTimeout(wait,100);return}
-        state.tokenClient.callback=resp=>{if(resp?.error){reject(new Error(resp.error_description||resp.error));return}state.token=resp.access_token;state.expiresAt=Date.now()+Math.max(30,Number(resp.expires_in||3600)-60)*1000;localStorage.setItem(DRIVE_STATE_KEY,'1');updateDriveUI();resolve(state.token)};
+        state.tokenClient.callback=resp=>{
+          if(resp?.error){reject(new Error(resp.error_description||resp.error));return}
+          state.token=resp.access_token;
+          state.expiresAt=Date.now()+Math.max(30,Number(resp.expires_in||3600)-60)*1000;
+          localStorage.setItem(DRIVE_STATE_KEY,'1');
+          updateDriveUI();
+          resolve(state.token);
+        };
+        // Empty prompt = silent reauthorization when consent already exists.
+        // This is the important part that prevents a fresh login prompt after
+        // every PWA/browser restart.
         state.tokenClient.requestAccessToken({prompt:''});
       };wait();
     });
   }
   async function driveFetch(url,opts={}){
-    const token=await accessToken();
-    const headers=new Headers(opts.headers||{});headers.set('Authorization','Bearer '+token);
-    const res=await fetch(url,{...opts,headers});
-    if(res.status===401){state.token=null;state.expiresAt=0;throw new Error('Google 授权已过期，请重新连接。')}
+    let token=await accessToken();
+    const makeRequest=async t=>{
+      const headers=new Headers(opts.headers||{});headers.set('Authorization','Bearer '+t);
+      return fetch(url,{...opts,headers});
+    };
+    let res=await makeRequest(token);
+    if(res.status===401){
+      // Token may have expired between accessToken() and fetch(). Refresh once
+      // silently before surfacing an authentication error to the user.
+      state.token=null;state.expiresAt=0;
+      token=await accessToken();
+      res=await makeRequest(token);
+    }
     if(!res.ok){let msg='HTTP '+res.status;try{const x=await res.json();msg=x.error?.message||msg}catch(e){}throw new Error(msg)}
     return res;
   }
@@ -3365,7 +3422,7 @@ body:has(.nav button[data-page="settings"].active) #main.content.focus-fixed-off
     return data.files?.sort((a,b)=>String(b.modifiedTime).localeCompare(String(a.modifiedTime)))[0]||null;
   }
   function buildBackup(){
-    return {format:'todo-calendar-drive-v1',appVersion:'2.136',tasks:cloneObj(tasks),goals:cloneObj(goals||{year:[],monthByKey:{}}),monthlyReviews:cloneObj(getReviews()),annualReviews:cloneObj(getAnnualReviews()),exportedAt:new Date().toISOString()};
+    return {format:'todo-calendar-drive-v1',appVersion:'2.139',tasks:cloneObj(tasks),goals:cloneObj(goals||{year:[],monthByKey:{}}),monthlyReviews:cloneObj(getReviews()),annualReviews:cloneObj(getAnnualReviews()),exportedAt:new Date().toISOString()};
   }
   function applyBackup(x){
     if(!x||!Array.isArray(x.tasks))throw new Error('云端文件格式不正确');
@@ -3428,15 +3485,22 @@ body:has(.nav button[data-page="settings"].active) #main.content.focus-fixed-off
   }
   function updateDriveUI(){
     const connected=!!state.token;
+    const restoring=state.silentRestoring;
     const b=document.getElementById('driveConnectBtn'),d=document.getElementById('driveDisconnectBtn'),u=document.getElementById('driveUploadBtn'),r=document.getElementById('driveDownloadBtn'),a=document.getElementById('driveAutoSync'),detail=document.getElementById('driveDetail');
-    if(b)b.disabled=connected||state.busy;
-    if(d)d.disabled=!connected||state.busy;
-    if(u)u.disabled=!connected||state.busy;
-    if(r)r.disabled=!connected||state.busy;
-    if(a){a.checked=localStorage.getItem(DRIVE_AUTO_KEY)==='1';a.disabled=!connected||state.busy}
-    if(detail)detail.textContent=connected?'当前账号已授权 drive.file；云端文件：'+(state.fileId?'已关联':'尚未关联')+'。自动同步为本机开关。':'需要先连接 Google Drive。';
+    if(b)b.disabled=connected||state.busy||restoring;
+    if(d)d.disabled=!connected||state.busy||restoring;
+    if(u)u.disabled=!connected||state.busy||restoring;
+    if(r)r.disabled=!connected||state.busy||restoring;
+    if(a){a.checked=localStorage.getItem(DRIVE_AUTO_KEY)==='1';a.disabled=!connected||state.busy||restoring}
+    if(detail)detail.textContent=connected?'当前账号已授权 drive.file；云端文件：'+(state.fileId?'已关联':'尚未关联')+'。自动同步为本机开关。':(localStorage.getItem(DRIVE_STATE_KEY)==='1'?'已保存 Google Drive 授权，正在尝试自动恢复。':'需要先连接 Google Drive。');
   }
-  window.addEventListener('load',()=>{loadGIS();setTimeout(()=>{if(localStorage.getItem(DRIVE_STATE_KEY)==='1')setDriveMessage('可以连接 Google Drive；点击“连接 Google Drive”重新授权。');updateDriveUI()},500)});
+  window.addEventListener('load',()=>{
+    loadGIS();
+    setTimeout(()=>{
+      if(localStorage.getItem(DRIVE_STATE_KEY)==='1'&&!state.token&&!state.ready)setDriveMessage('正在恢复 Google Drive 授权…');
+      updateDriveUI();
+    },500);
+  });
 })();
 </script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
