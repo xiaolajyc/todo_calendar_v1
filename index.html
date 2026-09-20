@@ -8,7 +8,7 @@
 <link rel="manifest" href="./manifest.json">
 <link rel="apple-touch-icon" href="./icon-180.png">
 <link rel="icon" href="./icon-192.png" type="image/png">
-<title>v2.142 · Todo</title>
+<title>v2.142 · Todo Calendar</title>
 <style>
 :root{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#171717;background:#f5f5f7;--line:#e7e7eb;--muted:#777;--accent:#111}*{box-sizing:border-box}body{margin:0;background:#f5f5f7;overscroll-behavior:none}.app{max-width:1100px;margin:auto;min-height:100vh;background:#fff;padding-bottom:68px}.head{position:sticky;top:0;background:rgba(255,255,255,.96);backdrop-filter:blur(12px);padding:12px 14px;border-bottom:1px solid var(--line);z-index:30}.headtop{display:flex;align-items:center;justify-content:space-between;gap:8px}.head h1{margin:0;font-size:21px}.tabs,.seg{display:flex;gap:6px;margin-top:10px;overflow:auto}.tabs button,.seg button,.chip{border:0;border-radius:10px;padding:8px 11px;background:#eee;white-space:nowrap}.active{background:#111!important;color:#fff}.content{padding:12px}.group{margin:18px 0}.group h3{font-size:14px;margin:0 0 6px}.task{display:flex;align-items:center;gap:10px;padding:13px 7px;border-bottom:1px solid #eee;touch-action:pan-y}.check{width:23px;height:23px;cursor:pointer;border:2px solid #aaa;border-radius:50%;flex:none}.done .check{background:#111}.done .title{text-decoration:line-through;opacity:.45}.taskmain{flex:1;min-width:0}.title{font-weight:600}.meta{font-size:12px;color:#777;margin-top:3px}.badge{font-size:12px}.fab{position:fixed;right:18px;bottom:88px;width:56px;height:56px;border-radius:50%;border:0;background:#111;color:#fff;font-size:30px;z-index:20;box-shadow:0 5px 20px #0002}.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(1100px,100%);height:70px;background:#fff;border-top:1px solid #ddd;display:flex;z-index:40;padding-bottom:env(safe-area-inset-bottom)}.nav button{flex:1;border:0;background:white;font-size:13px}.nav .active{color:#fff!important;background:var(--primary,#3478f6)!important}.card{background:#f5f5f7;border-radius:16px;padding:14px;margin-bottom:12px}.row{display:flex;gap:10px;align-items:center}.row>*{flex:1}.field{margin:12px 0}.field label{display:block;font-size:12px;color:#666;margin-bottom:5px}.field input,.field textarea,.field select{width:100%;padding:12px;border:1px solid #ddd;border-radius:12px;background:#fff}.primary,.danger{border:0;border-radius:12px;padding:12px 16px}.primary{background:#111;color:#fff}.danger{background:#eee}.hidden{display:none!important}.empty{text-align:center;color:#888;padding:35px 10px}
 /* Google Calendar-like week/day timeline */
@@ -1076,6 +1076,20 @@ body.page-calendar #main{
   setTimeout(syncPageScrollClass,100);
   setTimeout(syncPageScrollClass,500);
 })();
+</script>
+<style id="v2-142-focus-boot-hide">
+/* v2.142: hide Focus during the initial layout pass. The fixed Focus bar is
+   revealed only after its final top/height and main offset have been measured.
+   This prevents the one-frame jump seen when the PWA first opens. */
+html.focus-boot-pending .goals-focus,
+html.focus-boot-pending .app>.focus-fixed-root{
+  visibility:hidden!important;
+  opacity:0!important;
+}
+</style>
+<script id="v2-142-focus-boot-flag">
+/* Set before body paint so the initial Focus bar can never flash at y=0. */
+document.documentElement.classList.add('focus-boot-pending');
 </script>
 </head><body><div class="app"><header class="head"><div class="headtop"><h1 id="heading"><span id="headingText">Todo</span></h1><div id="headActions"></div></div><div id="subtabs" class="tabs"></div></header><main id="main" class="content"></main><button id="fab" class="fab">+</button><div id="bulk" class="bulk hidden"></div><nav class="nav">
 <button data-page="todo" class="active"><span class="navicon todoicon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 8l1.5 1.5L12 7"/><path d="M13.5 8H17"/><path d="M8 13l1.5 1.5L12 12"/><path d="M13.5 13H17"/></svg></span><span>Todo</span></button>
@@ -3472,7 +3486,7 @@ body:has(.nav button[data-page="settings"].active) #main.content.focus-fixed-off
     return data.files?.sort((a,b)=>String(b.modifiedTime).localeCompare(String(a.modifiedTime)))[0]||null;
   }
   function buildBackup(){
-    return {format:'todo-calendar-drive-v1',appVersion:'2.142',tasks:cloneObj(tasks),goals:cloneObj(goals||{year:[],monthByKey:{}}),monthlyReviews:cloneObj(getReviews()),annualReviews:cloneObj(getAnnualReviews()),exportedAt:new Date().toISOString()};
+    return {format:'todo-calendar-drive-v1',appVersion:'2.136',tasks:cloneObj(tasks),goals:cloneObj(goals||{year:[],monthByKey:{}}),monthlyReviews:cloneObj(getReviews()),annualReviews:cloneObj(getAnnualReviews()),exportedAt:new Date().toISOString()};
   }
   function applyBackup(x){
     if(!x||!Array.isArray(x.tasks))throw new Error('云端文件格式不正确');
@@ -3660,56 +3674,90 @@ body:has(.nav button[data-page="settings"].active) #main.content.focus-fixed-off
 })();
 </script>
 
-
-<style id="v2-142-first-paint-focus-fix">
-/* v2.142: Focus must never be painted at top:0 before its header anchor is resolved.
-   The previous layered Focus fixes deferred the final positioning to DOMContentLoaded/
-   requestAnimationFrame, which allowed one incorrect frame on cold PWA launch. */
-.app>.focus-fixed-root{visibility:hidden!important;}
-.app>.focus-fixed-root.v2142-positioned{visibility:visible!important;}
+<style id="v2-142-focus-final-reveal">
+/* Keep the final fixed Focus invisible until the geometry is settled. */
+html.focus-boot-pending .app>.focus-fixed-root{
+  visibility:hidden!important;
+  opacity:0!important;
+}
 </style>
-<script id="v2-142-first-paint-focus-fix-js">
+<script id="v2-142-focus-final-reveal-js">
 (function(){
-  if(window.__v2142FocusFirstPaintFix)return;
-  window.__v2142FocusFirstPaintFix=true;
-  function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-  function sync(){
-    const app=document.querySelector('.app'),head=app?.querySelector(':scope>.head'),main=document.getElementById('main');
-    if(!app||!head||!main||typeof page==='undefined')return false;
-    const fixed=(page==='todo'||page==='calendar')&&!document.body.classList.contains('event-editor-open');
-    let root=app.querySelector(':scope>.focus-fixed-root');
-    if(!fixed){
-      if(root){root.classList.remove('v2142-positioned');root.style.display='none';}
-      main.classList.remove('focus-fixed-offset');
-      main.style.removeProperty('--focus-space');
-      main.style.removeProperty('padding-top');
+  if(window.__v2142FocusBootFix)return;
+  window.__v2142FocusBootFix=true;
+
+  function isFocusPage(){
+    return typeof page!=='undefined' && (page==='todo'||page==='calendar') && !document.body.classList.contains('event-editor-open');
+  }
+
+  function settle(){
+    const app=document.querySelector('.app');
+    const head=app?.querySelector(':scope>.head');
+    const main=document.getElementById('main');
+    if(!app||!head||!main)return false;
+
+    /* The existing final Focus layout code creates this root during
+       DOMContentLoaded. If it is not ready yet, wait for the next frame. */
+    const root=app.querySelector(':scope>.focus-fixed-root');
+    if(!isFocusPage()){
+      document.documentElement.classList.remove('focus-boot-pending');
       return true;
     }
-    if(!root){root=document.createElement('div');root.className='focus-fixed-root';app.appendChild(root)}
-    const y=typeof firstOpen==='function'?firstOpen('year'):null;
-    const m=typeof firstOpen==='function'?firstOpen('month'):null;
-    const yearLabel=typeof goalYear==='function'?goalYear():new Date().getFullYear();
-    const safeEsc=typeof escGoal==='function'?escGoal:esc;
-    const bar=`<div class="goals-focus" aria-label="Focus"><div class="goal-focus-card"><div class="goal-focus-label">🎯 ${yearLabel} 年 Focus</div><div class="goal-focus-title ${y?'':'goal-focus-empty'}" title="${safeEsc(y?.title||'')}">${safeEsc(y?.title||'年度目标已全部完成')}</div></div><div class="goal-focus-card month"><div class="goal-focus-label">📅 本月 Focus</div><div class="goal-focus-title ${m?'':'goal-focus-empty'}" title="${safeEsc(m?.title||'')}">${safeEsc(m?.title||'本月目标已全部完成')}</div></div></div>`;
-    if(root.innerHTML!==bar)root.innerHTML=bar;
-    const headBottom=Math.round(head.getBoundingClientRect().bottom);
-    const focus=root.querySelector('.goals-focus');
-    const focusHeight=Math.ceil(focus?.getBoundingClientRect().height||34);
-    root.style.setProperty('top',headBottom+'px','important');
-    root.style.setProperty('--focus-top',headBottom+'px');
+    if(!root)return false;
+
+    root.style.visibility='hidden';
+    root.style.opacity='0';
     root.style.display='block';
+
+    /* Recalculate from the actual rendered header, not a guessed height. */
+    const top=Math.round(head.getBoundingClientRect().bottom);
+    root.style.setProperty('--focus-top',top+'px');
+    root.style.setProperty('top',top+'px','important');
+
+    const focus=root.querySelector('.goals-focus');
+    if(!focus)return false;
+
+    /* Force layout before reading the final height. */
+    void root.offsetHeight;
+    const height=Math.ceil(focus.getBoundingClientRect().height);
     main.classList.add('focus-fixed-offset');
-    main.style.setProperty('--focus-space',(focusHeight+6)+'px','important');
-    root.classList.add('v2142-positioned');
+    main.style.setProperty('--focus-space',(height+6)+'px','important');
+
+    /* A second frame catches Safari/old Android layout settling after the
+       header, safe-area and Focus card have all been measured. */
+    requestAnimationFrame(function(){
+      const top2=Math.round(head.getBoundingClientRect().bottom);
+      const focus2=root.querySelector('.goals-focus');
+      const height2=Math.ceil(focus2?.getBoundingClientRect().height||height);
+      root.style.setProperty('--focus-top',top2+'px');
+      root.style.setProperty('top',top2+'px','important');
+      main.classList.add('focus-fixed-offset');
+      main.style.setProperty('--focus-space',(height2+6)+'px','important');
+      void root.offsetHeight;
+      requestAnimationFrame(function(){
+        /* Only now is the Focus bar allowed to become visible. */
+        root.style.visibility='visible';
+        root.style.opacity='1';
+        document.documentElement.classList.remove('focus-boot-pending');
+      });
+    });
     return true;
   }
-  /* This script runs while the document is still being parsed, before the first
-     normal frame. Do the first positioning synchronously rather than waiting for
-     DOMContentLoaded/rAF. */
-  try{sync();}catch(e){console.warn('v2.142 focus init',e)}
-  window.addEventListener('load',sync,{passive:true});
-  window.addEventListener('resize',sync,{passive:true});
-  window.addEventListener('orientationchange',()=>setTimeout(sync,0),{passive:true});
+
+  function start(){
+    let tries=0;
+    function tick(){
+      if(settle())return;
+      if(++tries<30)requestAnimationFrame(tick);
+      else document.documentElement.classList.remove('focus-boot-pending');
+    }
+    /* Let the existing v2.130 Focus installer run first. */
+    requestAnimationFrame(function(){requestAnimationFrame(tick)});
+  }
+
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});
+  else start();
 })();
 </script>
+
 </body></html>
