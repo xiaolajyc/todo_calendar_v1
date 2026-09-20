@@ -1077,6 +1077,137 @@ body.page-calendar #main{
   setTimeout(syncPageScrollClass,500);
 })();
 </script>
+
+<style id="v2-142-legacy-android-scroll-final">
+/* v2.142: Xiaomi 6 / legacy Chromium — final scroll architecture.
+   Do not rely on flex overflow, :has(), or 100dvh for the primary page scroll.
+   The app shell is fixed to the viewport and #main is an explicit scrollport. */
+@media(max-width:799px){
+  html,body{height:100%!important;overflow:hidden!important;}
+  body{position:relative!important;}
+  .app{
+    position:relative!important;
+    display:block!important;
+    width:100%!important;
+    height:100vh!important;
+    min-height:0!important;
+    max-height:none!important;
+    overflow:hidden!important;
+    padding-bottom:0!important;
+  }
+  .app>.head{
+    position:relative!important;
+    top:auto!important;
+    left:auto!important;
+    height:auto!important;
+    min-height:0!important;
+    max-height:none!important;
+    flex:none!important;
+    overflow:visible!important;
+    z-index:200!important;
+  }
+  .app>#main.content{
+    position:absolute!important;
+    left:0!important;
+    right:0!important;
+    top:var(--legacy-head-height,82px)!important;
+    bottom:82px!important;
+    width:auto!important;
+    height:auto!important;
+    min-height:0!important;
+    max-height:none!important;
+    margin:0!important;
+    box-sizing:border-box!important;
+    overflow-y:auto!important;
+    overflow-x:hidden!important;
+    -webkit-overflow-scrolling:touch!important;
+    overscroll-behavior-y:auto!important;
+    touch-action:pan-y!important;
+  }
+  /* The calendar has its own internal scroll container. */
+  body.page-calendar .app>#main.content{
+    overflow:hidden!important;
+    touch-action:none!important;
+  }
+  body.page-calendar .timeline-wrap{
+    touch-action:pan-x pan-y!important;
+  }
+  /* Do not let the old short-Todo rule disable the new scrollport. */
+  #main.content.short-todo-content{
+    overflow-y:auto!important;
+    touch-action:pan-y!important;
+  }
+  .app>.nav{
+    position:fixed!important;
+    left:0!important;
+    right:0!important;
+    bottom:0!important;
+    top:auto!important;
+    width:100%!important;
+    height:82px!important;
+    min-height:82px!important;
+    max-height:82px!important;
+    transform:none!important;
+    z-index:500!important;
+    overflow:hidden!important;
+  }
+  .app>.bulk{z-index:450!important;}
+}
+</style>
+<script id="v2-142-legacy-android-scroll-final-js">
+(function(){
+  function syncLegacyScroll(){
+    var app=document.querySelector('.app');
+    var head=app&&app.querySelector(':scope>.head');
+    var main=document.getElementById('main');
+    if(!app||!head||!main||window.innerWidth>=800)return;
+    var h=Math.ceil(head.getBoundingClientRect().height||82);
+    if(h<1)h=82;
+    document.documentElement.style.setProperty('--legacy-head-height',h+'px');
+    var nav=app.querySelector(':scope>.nav');
+    if(nav){
+      nav.style.height='82px';
+      nav.style.minHeight='82px';
+    }
+    if(typeof page!=='undefined'){
+      document.body.classList.remove('page-todo','page-calendar','page-goals','page-settings');
+      document.body.classList.add('page-'+page);
+      if(page==='calendar'){
+        main.style.overflowY='hidden';
+        main.style.touchAction='none';
+      }else{
+        main.style.overflowY='auto';
+        main.style.overflowX='hidden';
+        main.style.touchAction='pan-y';
+      }
+    }
+  }
+  window.__syncLegacyAndroidScroll=syncLegacyScroll;
+  function install(){
+    syncLegacyScroll();
+    var oldRender=window.render;
+    if(oldRender&&!oldRender.__v142){
+      var wrapped=function(){
+        var r=oldRender.apply(this,arguments);
+        setTimeout(syncLegacyScroll,0);
+        setTimeout(syncLegacyScroll,80);
+        return r;
+      };
+      wrapped.__v142=true;
+      window.render=wrapped;
+    }
+    document.addEventListener('click',function(e){
+      var b=e.target.closest&&e.target.closest('.nav button[data-page]');
+      if(b){setTimeout(syncLegacyScroll,0);setTimeout(syncLegacyScroll,80);}
+    },true);
+    window.addEventListener('resize',function(){setTimeout(syncLegacyScroll,0)},{passive:true});
+    window.addEventListener('orientationchange',function(){setTimeout(syncLegacyScroll,150)},{passive:true});
+    setTimeout(syncLegacyScroll,300);
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install,{once:true});
+  else install();
+})();
+</script>
 </head><body><div class="app"><header class="head"><div class="headtop"><h1 id="heading"><span id="headingText">Todo</span></h1><div id="headActions"></div></div><div id="subtabs" class="tabs"></div></header><main id="main" class="content"></main><button id="fab" class="fab">+</button><div id="bulk" class="bulk hidden"></div><nav class="nav">
 <button data-page="todo" class="active"><span class="navicon todoicon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 8l1.5 1.5L12 7"/><path d="M13.5 8H17"/><path d="M8 13l1.5 1.5L12 12"/><path d="M13.5 13H17"/></svg></span><span>Todo</span></button>
 <button data-page="calendar"><span class="navicon calendaricon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="16" rx="2.5"/><path d="M7 3v4M17 3v4M3.5 9.5h17"/><path d="M7.5 13h.01M12 13h.01M16.5 13h.01M7.5 17h.01M12 17h.01M16.5 17h.01"/></svg></span><span>日历</span></button>
