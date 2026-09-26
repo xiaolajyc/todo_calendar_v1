@@ -1,4 +1,4 @@
-const CACHE='todo-calendar-v2.149';
+const CACHE='todo-calendar-v2.150';
 const ASSETS=['./','./index.html','./manifest.json','./icon-180.png','./icon-192.png','./icon-512.png'];
 self.addEventListener('install',event=>event.waitUntil(
   caches.open(CACHE).then(cache=>cache.addAll(ASSETS)).then(()=>self.skipWaiting())
