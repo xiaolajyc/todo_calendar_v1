@@ -8,7 +8,7 @@
 <link rel="manifest" href="./manifest.json">
 <link rel="apple-touch-icon" href="./icon-180.png">
 <link rel="icon" href="./icon-192.png" type="image/png">
-<title>v2.157 · Todo Calendar</title>
+<title>v2.148 · Todo Calendar</title>
 <style>
 :root{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#171717;background:#f5f5f7;--line:#e7e7eb;--muted:#777;--accent:#111}*{box-sizing:border-box}body{margin:0;background:#f5f5f7;overscroll-behavior:none}.app{max-width:1100px;margin:auto;min-height:100vh;background:#fff;padding-bottom:68px}.head{position:sticky;top:0;background:rgba(255,255,255,.96);backdrop-filter:blur(12px);padding:12px 14px;border-bottom:1px solid var(--line);z-index:30}.headtop{display:flex;align-items:center;justify-content:space-between;gap:8px}.head h1{margin:0;font-size:21px}.tabs,.seg{display:flex;gap:6px;margin-top:10px;overflow:auto}.tabs button,.seg button,.chip{border:0;border-radius:10px;padding:8px 11px;background:#eee;white-space:nowrap}.active{background:#111!important;color:#fff}.content{padding:12px}.group{margin:18px 0}.group h3{font-size:14px;margin:0 0 6px}.task{display:flex;align-items:center;gap:10px;padding:13px 7px;border-bottom:1px solid #eee;touch-action:pan-y}.check{width:23px;height:23px;cursor:pointer;border:2px solid #aaa;border-radius:50%;flex:none}.done .check{background:#111}.done .title{text-decoration:line-through;opacity:.45}.taskmain{flex:1;min-width:0}.title{font-weight:600}.meta{font-size:12px;color:#777;margin-top:3px}.badge{font-size:12px}.fab{position:fixed;right:18px;bottom:88px;width:56px;height:56px;border-radius:50%;border:0;background:#111;color:#fff;font-size:30px;z-index:20;box-shadow:0 5px 20px #0002}.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(1100px,100%);height:70px;background:#fff;border-top:1px solid #ddd;display:flex;z-index:40;padding-bottom:env(safe-area-inset-bottom)}.nav button{flex:1;border:0;background:white;font-size:13px}.nav .active{color:#fff!important;background:var(--primary,#3478f6)!important}.card{background:#f5f5f7;border-radius:16px;padding:14px;margin-bottom:12px}.row{display:flex;gap:10px;align-items:center}.row>*{flex:1}.field{margin:12px 0}.field label{display:block;font-size:12px;color:#666;margin-bottom:5px}.field input,.field textarea,.field select{width:100%;padding:12px;border:1px solid #ddd;border-radius:12px;background:#fff}.primary,.danger{border:0;border-radius:12px;padding:12px 16px}.primary{background:#111;color:#fff}.danger{background:#eee}.hidden{display:none!important}.empty{text-align:center;color:#888;padding:35px 10px}
 /* Google Calendar-like week/day timeline */
@@ -1092,7 +1092,7 @@ html.focus-boot-pending .app>.focus-fixed-root{
 document.documentElement.classList.add('focus-boot-pending');
 </script>
 <style id="v2-145-todo-header-lock">
-/* v2.154: keep the Todo title/header bar completely outside the scrolling surface.
+/* v2.148: keep the Todo title/header bar completely outside the scrolling surface.
    The content area owns vertical scrolling; the header must never participate in it. */
 html,body{height:100%!important;overflow:hidden!important;overscroll-behavior:none!important;}
 .app{height:100dvh!important;min-height:100dvh!important;overflow:hidden!important;}
@@ -1129,17 +1129,6 @@ html,body{height:100%!important;overflow:hidden!important;overscroll-behavior:no
   window.addEventListener('resize',lockTodoHeader,{passive:true});
 })();
 </script>
-<style id="v2-149-ongoing-fix">
-/* Ongoing: same clear symbol in Todo and every calendar view. */
-.ongoing-mark{display:inline-flex!important;align-items:center;justify-content:center;width:22px;height:22px;margin-right:6px;border:0;background:transparent;color:#2f80ed;font-size:18px;font-weight:800;line-height:1;vertical-align:middle;cursor:pointer;flex:0 0 22px}
-.task .ongoing-mark{margin-left:2px}
-.event .ongoing-mark{position:absolute;top:4px;right:5px;margin:0;z-index:3;pointer-events:auto;width:20px;height:20px;font-size:17px}
-.event.ongoing-event{border-left-color:#2f80ed!important}.calendar-ongoing-toggle:not(.is-ongoing){opacity:.35}.calendar-ongoing-toggle.is-ongoing{opacity:1;color:#2f80ed}
-</style>
-
-<style id="v2-154-todo-ongoing-button">
-.todo-ongoing-btn{display:inline-flex;align-items:center;justify-content:center;width:25px;height:25px;margin-right:6px;padding:0;border:1px solid #cbd5e1;border-radius:50%;background:#fff;color:#94a3b8;font-size:15px;font-weight:800;line-height:1;vertical-align:-3px;cursor:pointer;flex:0 0 25px}.todo-ongoing-btn.is-ongoing{border-color:#2f80ed;background:#2f80ed;color:#fff}.todo-ongoing-btn:active{transform:scale(.92)}.task.ongoing .todo-ongoing-btn{box-shadow:0 0 0 2px rgba(47,128,237,.12)}
-</style>
 </head><body><div class="app"><header class="head"><div class="headtop"><h1 id="heading"><span id="headingText">Todo</span></h1><div id="headActions"></div></div><div id="subtabs" class="tabs"></div></header><main id="main" class="content"></main><button id="fab" class="fab">+</button><div id="bulk" class="bulk hidden"></div><nav class="nav">
 <button data-page="todo" class="active"><span class="navicon todoicon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 8l1.5 1.5L12 7"/><path d="M13.5 8H17"/><path d="M8 13l1.5 1.5L12 12"/><path d="M13.5 13H17"/></svg></span><span>Todo</span></button>
 <button data-page="calendar"><span class="navicon calendaricon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="16" rx="2.5"/><path d="M7 3v4M17 3v4M3.5 9.5h17"/><path d="M7.5 13h.01M12 13h.01M16.5 13h.01M7.5 17h.01M12 17h.01M16.5 17h.01"/></svg></span><span>日历</span></button>
@@ -1244,8 +1233,7 @@ function toggleSelectAllTodo(){
   if(allSelected)keys.forEach(k=>selected.delete(k));else keys.forEach(k=>selected.add(k));
   selectMode=selected.size>0;render();
 }
-function toggleTodoOngoing(key){const f=findInstance(key);if(!f)return;setOngoingInstance(f.master,f.instance)}
-function taskRow(t){const k=instanceKey(t);const om=t.ongoing&&!t.completed;return `<div class="task ${t.completed?'done':''} ${om?'ongoing':''} ${selected.has(k)?'selected':''}" data-id="${esc(k)}" onclick="taskClick(event,'${esc(k)}')" oncontextmenu="event.preventDefault();toggleSelect('${esc(k)}')"><span class="${selected.size?'selectbox':'check'}"></span><div class="taskmain"><div class="title"><button type="button" class="todo-ongoing-btn ${om?'is-ongoing':''}" aria-label="${om?'取消 Ongoing':'标记为 Ongoing'}" title="${om?'取消 Ongoing':'标记为 Ongoing'}" onclick="event.preventDefault();event.stopPropagation();toggleTodoOngoing('${esc(k)}')">◐</button>${esc(t.title)}${recurrenceLabel(t)}</div><div class="meta">${t.date||'无日期'} ${t.start||''}${t.end?'–'+t.end:''}</div></div><span class="badge">${t.important?'⭐':''}${t.urgent?'⚡':''}</span></div>`}
+function taskRow(t){return `<div class="task ${t.completed?'done':''} ${selected.has(t.id)?'selected':''}" data-id="${t.id}" onclick="taskClick(event,'${t.id}')" oncontextmenu="event.preventDefault();toggleSelect('${t.id}')"><span class="${selected.size?'selectbox':'check'}"></span><div class="taskmain"><div class="title">${esc(t.title)}</div><div class="meta">${t.date||'无日期'} ${t.start||''}${t.end?'–'+t.end:''}</div></div><span class="badge">${t.important?'⭐':''}${t.urgent?'⚡':''}</span></div>`}
 let taskGesture={timer:null,id:null,x:0,y:0,moved:false,long:false,suppressClick:false};
 function attachTaskGestures(){
   document.querySelectorAll('.task').forEach(row=>{
@@ -1269,23 +1257,9 @@ function taskClick(e,i){
   if(selectMode){toggleSelect(i);return}
   const f=findInstance(i);
   if(!f)return;
-  if(e.target.classList.contains('ongoing-mark')){setOngoingInstance(f.master,f.instance);return;}
   if(e.target.classList.contains('check')){completeInstance(f.master,f.instance);return;}
   if(e.target.closest('.check')){completeInstance(f.master,f.instance);return;}
   editTask(f.master.id);
-}
-function setOngoingInstance(master,instance){
-  if(!master||!instance)return;
-  const next=!instance.ongoing;
-  if(recurring(master)){
-    const ex=ensureRec(master),ds=instance._occurrenceDate;
-    ex.overrides[ds]={...(ex.overrides[ds]||{}),ongoing:next,completed:false};
-    const idx=ex.completed.indexOf(ds); if(next&&idx>=0)ex.completed.splice(idx,1);
-  }else{
-    master.ongoing=next;
-    if(next){master.completed=false;master.completedAt=null;}
-  }
-  save();render();
 }
 function completeInstance(master,instance){
   if(recurring(master)){
@@ -1587,8 +1561,8 @@ function copyOne(i){let t=tasks.find(x=>x.id===i);if(t){clipboard=[{...t,id:id()
 function removeTask(i){if(confirm('删除此事项？')){tasks=tasks.filter(t=>t.id!==i);save();render()}}
 function renderSettings(){
   /* v2.95: version information belongs in Settings, not beside the page title. */
-  const VERSION_INFO_HTML = '<div class="settings-card version-info-card"><div class="settings-title">版本信息</div><div class="settings-row"><span>Todo 日历</span><b>v2.157</b></div></div>';
-$('#subtabs').innerHTML='';$('#headActions').innerHTML='';$('#main').innerHTML=`<div class="card"><b>版本信息</b><p>Todo 日历 v2.157</p></div><div class="card"><b>每日开始时间</b><p>06:30（今天/逾期和每日刷新边界）</p></div><div class="card"><b>默认事件时长</b><p>60 分钟</p></div><div class="card"><div class="settings-data-actions"><button class="primary" onclick="exportData()">导出 JSON</button><button class="danger" onclick="clipboard=[];render()">清空复制板</button><label class="danger">导入 JSON<input type="file" accept="application/json" hidden onchange="importData(this)"></label></div></div><div class="card drive-sync-card"><b>Google Drive 云同步</b><p id="driveStatus" style="margin:7px 0;color:#718096">正在检查 Google Drive…</p><div class="row"><button class="primary" id="driveConnectBtn" onclick="driveConnect()">连接 Google Drive</button><button class="danger" id="driveDisconnectBtn" onclick="driveDisconnect()">断开</button></div><div class="row" style="margin-top:8px"><button class="primary" id="driveUploadBtn" onclick="driveUpload()">☁️ 上传/同步</button><button class="danger" id="driveDownloadBtn" onclick="driveDownload()">⬇️ 从云端恢复</button></div><label style="display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13px"><input id="driveAutoSync" type="checkbox" onchange="driveSetAutoSync(this.checked)"> 数据修改后自动同步</label><div id="driveDetail" style="font-size:11px;color:#8a94a6;margin-top:8px;line-height:1.45"></div></div><div class="card"><b>本地数据</b><p>${tasks.length} 个事项。当前数据保存在浏览器本地。</p><button class="danger" style="margin-top:8px;width:100%;color:#c62828" onclick="clearAllData()">⚠️ 清除全部数据</button></div>`}
+  const VERSION_INFO_HTML = '<div class="settings-card version-info-card"><div class="settings-title">版本信息</div><div class="settings-row"><span>Todo 日历</span><b>v2.148</b></div></div>';
+$('#subtabs').innerHTML='';$('#headActions').innerHTML='';$('#main').innerHTML=`<div class="card"><b>版本信息</b><p>Todo 日历 v2.148</p></div><div class="card"><b>每日开始时间</b><p>06:30（今天/逾期和每日刷新边界）</p></div><div class="card"><b>默认事件时长</b><p>60 分钟</p></div><div class="card"><div class="settings-data-actions"><button class="primary" onclick="exportData()">导出 JSON</button><button class="danger" onclick="clipboard=[];render()">清空复制板</button><label class="danger">导入 JSON<input type="file" accept="application/json" hidden onchange="importData(this)"></label></div></div><div class="card drive-sync-card"><b>Google Drive 云同步</b><p id="driveStatus" style="margin:7px 0;color:#718096">正在检查 Google Drive…</p><div class="row"><button class="primary" id="driveConnectBtn" onclick="driveConnect()">连接 Google Drive</button><button class="danger" id="driveDisconnectBtn" onclick="driveDisconnect()">断开</button></div><div class="row" style="margin-top:8px"><button class="primary" id="driveUploadBtn" onclick="driveUpload()">☁️ 上传/同步</button><button class="danger" id="driveDownloadBtn" onclick="driveDownload()">⬇️ 从云端恢复</button></div><label style="display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13px"><input id="driveAutoSync" type="checkbox" onchange="driveSetAutoSync(this.checked)"> 数据修改后自动同步</label><div id="driveDetail" style="font-size:11px;color:#8a94a6;margin-top:8px;line-height:1.45"></div></div><div class="card"><b>本地数据</b><p>${tasks.length} 个事项。当前数据保存在浏览器本地。</p><button class="danger" style="margin-top:8px;width:100%;color:#c62828" onclick="clearAllData()">⚠️ 清除全部数据</button></div>`}
 function clearAllData(){
   if(!confirm('第一次确认：确定要清除全部 Todo、日历事项和本地数据吗？此操作不可撤销。'))return;
   if(!confirm('第二次确认：再次确认要永久删除全部数据吗？'))return;
@@ -1607,7 +1581,7 @@ function exportData(){
   };
   let a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([JSON.stringify(backup,null,2)],{type:'application/json'}));
-  a.download='todo-calendar-backup-v2.157.json';
+  a.download='todo-calendar-backup-v2.148.json';
   a.click();
   setTimeout(()=>URL.revokeObjectURL(a.href),1500)
 }
@@ -1755,7 +1729,7 @@ function todoInstances(tab){
 }
 function recurrenceLabel(t){return recurring(t)?' · 🔁':'';}
 function instanceKey(t){return t._key||t.id;}
-function taskRow(t){const k=instanceKey(t);const om=t.ongoing&&!t.completed;return `<div class="task ${t.completed?'done':''} ${om?'ongoing':''} ${selected.has(k)?'selected':''}" data-id="${esc(k)}" onclick="taskClick(event,'${esc(k)}')" oncontextmenu="event.preventDefault();toggleSelect('${esc(k)}')"><span class="${selected.size?'selectbox':'check'}"></span><div class="taskmain"><div class="title"><button type="button" class="todo-ongoing-btn ${om?'is-ongoing':''}" aria-label="${om?'取消 Ongoing':'标记为 Ongoing'}" title="${om?'取消 Ongoing':'标记为 Ongoing'}" onclick="event.preventDefault();event.stopPropagation();toggleTodoOngoing('${esc(k)}')">◐</button>${esc(t.title)}${recurrenceLabel(t)}</div><div class="meta">${t.date||'无日期'} ${t.start||''}${t.end?'–'+t.end:''}</div></div><span class="badge">${t.important?'⭐':''}${t.urgent?'⚡':''}</span></div>`}
+function taskRow(t){return `<div class="task ${t.completed?'done':''} ${selected.has(instanceKey(t))?'selected':''}" data-id="${esc(instanceKey(t))}" onclick="taskClick(event,'${esc(instanceKey(t))}')" oncontextmenu="event.preventDefault();toggleSelect('${esc(instanceKey(t))}')"><span class="${selected.size?'selectbox':'check'}"></span><div class="taskmain"><div class="title">${esc(t.title)}${recurrenceLabel(t)}</div><div class="meta">${t.date||'无日期'} ${t.start||''}${t.end?'–'+t.end:''}</div></div><span class="badge">${t.important?'⭐':''}${t.urgent?'⚡':''}</span></div>`}
 function renderTodo(){
   const list=todoInstances(todoTab);
   const counts={all:todoInstances('all').length,today:todoInstances('today').length,overdue:todoInstances('overdue').length,inbox:todoInstances('inbox').length,done:todoInstances('done').length};
@@ -1782,7 +1756,6 @@ function toggleInstanceComplete(master,instance){
   if(!master||!instance)return;
   if(!recurring(master)){
     master.completed=!master.completed;
-    if(master.completed)master.ongoing=false;
     master.completedAt=master.completed?new Date().toISOString():null;
   }else{
     const ds=instance._occurrenceDate||instance.date;
@@ -1792,7 +1765,7 @@ function toggleInstanceComplete(master,instance){
   }
   save();render();
 }
-function renderBulk(){let b=$('#bulk');if(!selectMode){b.classList.add('hidden');return}b.classList.remove('hidden');b.innerHTML=`<span style="padding:8px;font-weight:700;position:sticky;left:0;background:#111">已选 ${selected.size}</span><button onclick="bulk('done')">✓完成</button><button onclick="bulk('ongoing')">◐进行中</button><button onclick="bulk('today')">今天</button><button onclick="bulk('tomorrow')">明天</button><button onclick="bulkDate()">📅日期</button><button onclick="bulkShiftTime()">🕐时间</button><button onclick="bulk('important')">⭐重要</button><button onclick="bulk('urgent')">⚡紧急</button><button onclick="bulk('copy')">📋复制</button><button onclick="bulk('delete')">🗑删除</button><button onclick="selectMode=false;selected.clear();render()">取消</button>`}
+function renderBulk(){let b=$('#bulk');if(!selectMode){b.classList.add('hidden');return}b.classList.remove('hidden');b.innerHTML=`<span style="padding:8px;font-weight:700;position:sticky;left:0;background:#111">已选 ${selected.size}</span><button onclick="bulk('done')">✓完成</button><button onclick="bulk('today')">今天</button><button onclick="bulk('tomorrow')">明天</button><button onclick="bulkDate()">📅日期</button><button onclick="bulkShiftTime()">🕐时间</button><button onclick="bulk('important')">⭐重要</button><button onclick="bulk('urgent')">⚡紧急</button><button onclick="bulk('copy')">📋复制</button><button onclick="bulk('delete')">🗑删除</button><button onclick="selectMode=false;selected.clear();render()">取消</button>`}
 function mutateInstance(key,fn){const f=findInstance(key);if(f)fn(f.master,f.instance);}
 function bulkShiftTime(){let s=prompt('整体移动多少分钟？例如 30 或 -30','30');if(s===null)return;let delta=Number(s);if(!Number.isFinite(delta))return alert('请输入数字，例如 30 或 -30');selected.forEach(k=>mutateInstance(k,(m,x)=>{if(!x.start)return;let os=timeMin(x.start),oe=x.end?timeMin(x.end):os+60,d=Math.max(15,oe-os),ns=Math.max(0,Math.min(1439-d,os+delta));if(recurring(m)){const ex=ensureRec(m);ex.overrides[x._occurrenceDate]={...(ex.overrides[x._occurrenceDate]||{}),start:timeStr(ns),end:timeStr(ns+d)};}else{m.start=timeStr(ns);m.end=timeStr(ns+d)}}));selectMode=false;selected.clear();save();render();}
 function bulkDate(){let d=prompt('请输入日期（YYYY-MM-DD）',today());if(!/^\d{4}-\d{2}-\d{2}$/.test(d||''))return;selected.forEach(k=>mutateInstance(k,(m,x)=>{if(recurring(m)){const ex=ensureRec(m);ex.overrides[x._occurrenceDate]={...(ex.overrides[x._occurrenceDate]||{}),date:d};}else m.date=d}));selectMode=false;selected.clear();save();render();}
@@ -1826,7 +1799,7 @@ function occurrencesBefore(t,ds){let n=0,d=t.date,guard=0;while(d<ds&&guard++<10
 function truncateSeries(master,fromDate){const before=addDays(fromDate,-1),r=typeof master.repeat==='object'?cloneObj(master.repeat):{type:master.repeat};if(r.type==='none')return;if(r.endType==='date')r.endValue=before;else if(r.endType==='count')r.endValue=Math.max(0,occurrencesBefore(master,fromDate));else{r.endType='date';r.endValue=before;}master.repeat=r;ensureRec(master).deleted=ensureRec(master).deleted.filter(d=>d<fromDate);}
 let editingOccurrence=null;
 function editTask(i,p={}){rememberCalendarScroll();let master=i?tasks.find(x=>x.id===i):null;let t=master?cloneObj(master):{id:id(),title:'',date:p.date??today(),start:p.start||'',end:p.end||'',important:false,urgent:false,completed:false,notes:'',repeat:'none'};const eo=editingOccurrence;if(eo&&master&&eo.masterId===master.id){const inst=occurrenceData(master,eo.date);if(inst)t={...t,...cloneObj(inst),date:inst.date,start:inst.start,end:inst.end,important:inst.important,urgent:inst.urgent,notes:inst.notes||''};}$('#subtabs').innerHTML='';$('#headActions').innerHTML='';$('#heading').textContent=i?'编辑事项':'新事项';$('#main').innerHTML=`<div class="field"><label>事项</label><input id="fTitle" value="${esc(t.title)}" autofocus></div><div class="field"><label>日期</label><input id="fDate" type="date" value="${t.date||''}"></div><div class="row"><div class="field"><label>开始</label><input id="fStart" type="time" value="${t.start||''}"></div><div class="field"><label>结束</label><input id="fEnd" type="time" value="${t.end||''}"></div></div><div class="row"><button id="imp" class="chip ${t.important?'active':''}" onclick="this.classList.toggle('active')">⭐ 重要</button><button id="urg" class="chip ${t.urgent?'active':''}" onclick="this.classList.toggle('active')">⚡ 紧急</button></div><div class="field"><label>重复</label><select id="fRepeat" onchange="toggleCustomRepeat()"><option value="none">不重复</option><option value="daily">每天</option><option value="weekdays">工作日</option><option value="weekly">每周</option><option value="monthly">每月</option><option value="yearly">每年</option><option value="custom">自定义</option></select></div><div id="customRepeat" class="card hidden" style="padding:12px;margin-top:-4px"><div class="row"><div class="field"><label>每隔</label><input id="rInterval" type="number" min="1" max="99" value="1"></div><div class="field"><label>单位</label><select id="rUnit"><option value="day">天</option><option value="week">周</option><option value="month">月</option><option value="year">年</option></select></div></div><div class="field"><label>每周重复日</label><div id="rWeekdays" class="tabs" style="margin-top:0">${['一','二','三','四','五','六','日'].map((d,i)=>`<button type="button" class="chip" data-wd="${i}" onclick="this.classList.toggle('active')">周${d}</button>`).join('')}</div></div><div class="field"><label>结束方式</label><select id="rEndType" onchange="updateRepeatEndField()"><option value="forever">一直重复</option><option value="count">重复次数</option><option value="date">结束日期</option></select></div><div class="field" id="rEndValueWrap"></div></div><div class="field"><label>备注</label><textarea id="fNotes">${esc(t.notes||'')}</textarea></div><div class="row"><button class="primary" onclick="commit('${i||''}','${t.id}')">保存</button>${i?`<button class="danger" onclick="copyOne('${i}')">📋复制</button><button class="danger" onclick="removeTask('${i}')">删除</button>`:''}<button class="danger" onclick="cancelEventEditor()">取消</button></div>`;$('#fRepeat').value=(typeof t.repeat==='string'?t.repeat:(t.repeat?.type||'none'));if(typeof t.repeat==='object'&&t.repeat?.type==='custom'){$('#rInterval').value=t.repeat.interval||1;$('#rUnit').value=t.repeat.unit||'day';$('#rEndType').value=t.repeat.endType||'forever';toggleCustomRepeat();updateRepeatEndField();if(t.repeat.weekdays)t.repeat.weekdays.forEach(i=>document.querySelector(`#rWeekdays [data-wd="${i}"]`)?.classList.add('active'));}else toggleCustomRepeat();}
-function commit(old,newid){const x={id:newid,title:$('#fTitle').value.trim(),date:$('#fDate').value||null,start:$('#fStart').value,end:$('#fEnd').value,important:$('#imp').classList.contains('active'),urgent:$('#urg').classList.contains('active'),completed:false,notes:$('#fNotes').value,repeat:getRepeatValue()};if(!x.title)return alert('请输入事项名称');const eo=editingOccurrence;if(old&&eo&&eo.masterId===old){const m=tasks.find(t=>t.id===old);if(eo.mode===1){const ex=ensureRec(m);const patch={title:x.title,start:x.start,end:x.end,important:x.important,urgent:x.urgent,notes:x.notes,date:x.date};if(repeatType(m)!=='none'&&x.repeat!=='none')patch.repeat=x.repeat;ex.overrides[eo.date]=patch;}else if(eo.mode===2){truncateSeries(m,eo.date);x.id=id();x.date=eo.date;x.completed=false;x.exceptions={deleted:[],completed:[],overrides:{}};tasks.push(x);}else{Object.assign(m,x,{id:m.id,completed:m.completed,ongoing:m.ongoing,completedAt:m.completedAt,exceptions:m.exceptions});}editingOccurrence=null;save();render();return;}if(old){let o=tasks.find(t=>t.id===old);Object.assign(o,x,{id:o.id,completed:o.completed,ongoing:o.ongoing,completedAt:o.completedAt,exceptions:o.exceptions});}else tasks.push(x);editingOccurrence=null;save();render();}
+function commit(old,newid){const x={id:newid,title:$('#fTitle').value.trim(),date:$('#fDate').value||null,start:$('#fStart').value,end:$('#fEnd').value,important:$('#imp').classList.contains('active'),urgent:$('#urg').classList.contains('active'),completed:false,notes:$('#fNotes').value,repeat:getRepeatValue()};if(!x.title)return alert('请输入事项名称');const eo=editingOccurrence;if(old&&eo&&eo.masterId===old){const m=tasks.find(t=>t.id===old);if(eo.mode===1){const ex=ensureRec(m);const patch={title:x.title,start:x.start,end:x.end,important:x.important,urgent:x.urgent,notes:x.notes,date:x.date};if(repeatType(m)!=='none'&&x.repeat!=='none')patch.repeat=x.repeat;ex.overrides[eo.date]=patch;}else if(eo.mode===2){truncateSeries(m,eo.date);x.id=id();x.date=eo.date;x.completed=false;x.exceptions={deleted:[],completed:[],overrides:{}};tasks.push(x);}else{Object.assign(m,x,{id:m.id,completed:m.completed,completedAt:m.completedAt,ongoing:m.ongoing,exceptions:m.exceptions});}editingOccurrence=null;save();render();return;}if(old){let o=tasks.find(t=>t.id===old);Object.assign(o,x,{id:o.id,completed:o.completed,completedAt:o.completedAt,ongoing:o.ongoing,exceptions:o.exceptions});}else tasks.push(x);editingOccurrence=null;save();render();}
 function copyOne(i){let f=findInstance(i),t=f?.instance;if(t){clipboard=[{...cloneObj(t),id:id(),_key:undefined,_masterId:undefined,_occurrenceDate:undefined,_series:undefined}];alert('已复制，可粘贴。');render()}}
 function removeTask(i){const f=findInstance(i);if(f)openOccurrenceDelete(f.master,f.instance._occurrenceDate);}
 
@@ -1857,7 +1830,7 @@ function moveOccurrence(master,occDate,newDate,newStart,newEnd){
   save();
 }
 function toggleCalendarSelect(i){selectMode=true;selected.has(i)?selected.delete(i):selected.add(i);renderCalendar()}
-function renderMonth(){let y=calDate.getFullYear(),m=calDate.getMonth(),first=new Date(y,m,1),start=(first.getDay()+6)%7,days=new Date(y,m+1,0).getDate(),html=`<div class="calbar"><button class="navbtn" onclick="copyMonth()">📋 复制本月</button><div class="caltitle">${y}年${m+1}月</div><button class="navbtn" onclick="pasteCalendar()" ${clipboard.length?'':'disabled'}>📌 粘贴${clipboard.length?` ${clipboard.length}`:''}</button></div><div class="hint">点击日期进入日视图；重复事项可单独编辑、删除或拖动</div><div class="month-scroll"><div class="month">`;for(let i=0;i<start;i++)html+='<div></div>';for(let n=1;n<=days;n++){let ds=fmt(new Date(y,m,n)),a=sortTasksByImportance(calendarEventsForDate(ds).filter(t=>!t.completed),'date');html+=`<div class="day" onclick="calDate=parseDate('${ds}');calMode='day';selectMode=false;selected.clear();render()"><b>${n}</b>${a.slice(0,4).map(t=>`<div class="mini ${selected.has(instanceKey(t))?'selected':''}" onclick="if(selected.size){event.stopPropagation();toggleCalendarSelect('${esc(instanceKey(t))}')};else{event.stopPropagation();openOccurrenceEditor(tasks.find(x=>x.id==='${esc(t._masterId||t.id)}'),'${esc(t._occurrenceDate||t.date)}')}" oncontextmenu="event.preventDefault();toggleCalendarSelect('${esc(instanceKey(t))}')">${esc(t.title)}</div>`).join('')}</div>`}$('#main').innerHTML=html+'</div></div>';renderBulk()}
+function renderMonth(){let y=calDate.getFullYear(),m=calDate.getMonth(),first=new Date(y,m,1),start=(first.getDay()+6)%7,days=new Date(y,m+1,0).getDate(),html=`<div class="calbar"><button class="navbtn" onclick="copyMonth()">📋 复制本月</button><div class="caltitle">${y}年${m+1}月</div><button class="navbtn" onclick="pasteCalendar()" ${clipboard.length?'':'disabled'}>📌 粘贴${clipboard.length?` ${clipboard.length}`:''}</button></div><div class="hint">点击日期进入日视图；重复事项可单独编辑、删除或拖动</div><div class="month-scroll"><div class="month">`;for(let i=0;i<start;i++)html+='<div></div>';for(let n=1;n<=days;n++){let ds=fmt(new Date(y,m,n)),a=sortTasksByImportance(calendarEventsForDate(ds).filter(t=>!t.completed),'date');html+=`<div class="day" onclick="calDate=parseDate('${ds}');calMode='day';selectMode=false;selected.clear();render()"><b>${n}</b>${a.slice(0,4).map(t=>`<div class="mini ${t.ongoing&&!t.completed?'ongoing ':''}${selected.has(instanceKey(t))?'selected':''}" onclick="if(selected.size){event.stopPropagation();toggleCalendarSelect('${esc(instanceKey(t))}')};else{event.stopPropagation();openOccurrenceEditor(tasks.find(x=>x.id==='${esc(t._masterId||t.id)}'),'${esc(t._occurrenceDate||t.date)}')}" oncontextmenu="event.preventDefault();toggleCalendarSelect('${esc(instanceKey(t))}')">${esc(t.title)}</div>`).join('')}</div>`}$('#main').innerHTML=html+'</div></div>';renderBulk()}
 </script>
 
 
@@ -1887,7 +1860,7 @@ function dayColumn(d,total,startHour,rowH){let ds=fmt(d),events=calendarEventsFo
 
 function bulkShiftTime(){let s=prompt('整体移动多少分钟？例如 30 或 -30','30');if(s===null)return;let delta=Number(s);if(!Number.isFinite(delta))return;selected.forEach(k=>mutateInstance(k,(m,x)=>{if(!x.start)return;let os=timeMin(x.start),oe=x.end?timeMin(x.end):os+60,d=Math.max(15,oe-os),ns=Math.max(0,Math.min(1439-d,os+delta));if(recurring(m)){let ex=ensureRec(m);ex.overrides[x._occurrenceDate]={...(ex.overrides[x._occurrenceDate]||{}),start:timeStr(ns),end:timeStr(ns+d)};}else{m.start=timeStr(ns);m.end=timeStr(ns+d)}}));selectMode=false;selected.clear();save();render()}
 function bulkDate(){let d=prompt('请输入日期（YYYY-MM-DD）',today());if(!/^\d{4}-\d{2}-\d{2}$/.test(d||''))return;selected.forEach(k=>mutateInstance(k,(m,x)=>{if(recurring(m)){let ex=ensureRec(m);ex.overrides[x._occurrenceDate]={...(ex.overrides[x._occurrenceDate]||{}),date:d};}else m.date=d}));selectMode=false;selected.clear();save();render()}
-function bulk(a){let keys=[...selected];if(!keys.length)return;if(a==='delete'&&!confirm(`删除 ${keys.length} 个事项？`))return;if(a==='copy'){clipboard=keys.map(k=>findInstance(k)?.instance).filter(Boolean).map(x=>{let n=cloneObj(x);delete n._key;delete n._masterId;delete n._occurrenceDate;delete n._series;n.id=id();return n});selectMode=false;selected.clear();save();render();return}keys.forEach(k=>mutateInstance(k,(m,x)=>{if(a==='done'){if(recurring(m)){let ex=ensureRec(m);if(!ex.completed.includes(x._occurrenceDate))ex.completed.push(x._occurrenceDate)}else{m.completed=true;m.completedAt=new Date().toISOString()}}else if(a==='undone'){if(recurring(m)){let ex=ensureRec(m),idx=ex.completed.indexOf(x._occurrenceDate);if(idx>=0)ex.completed.splice(idx,1);const ov=ex.overrides[x._occurrenceDate];if(ov&&Object.prototype.hasOwnProperty.call(ov,'completed'))delete ov.completed;}else{m.completed=false;m.completedAt=null}}else if(a==='ongoing'){if(recurring(m)){let ex=ensureRec(m);ex.overrides[x._occurrenceDate]={...(ex.overrides[x._occurrenceDate]||{}),ongoing:true,completed:false};let ix=ex.completed.indexOf(x._occurrenceDate);if(ix>=0)ex.completed.splice(ix,1);}else{m.ongoing=true;m.completed=false;m.completedAt=null}}else if(a==='today'||a==='tomorrow'){let d=a==='today'?today():addDays(today(),1);if(recurring(m)){let ex=ensureRec(m);ex.overrides[x._occurrenceDate]={...(ex.overrides[x._occurrenceDate]||{}),date:d};}else m.date=d}else if(a==='important'){if(recurring(m)){let ex=ensureRec(m);ex.overrides[x._occurrenceDate]={...(ex.overrides[x._occurrenceDate]||{}),important:!x.important};}else m.important=!m.important}else if(a==='urgent'){if(recurring(m)){let ex=ensureRec(m);ex.overrides[x._occurrenceDate]={...(ex.overrides[x._occurrenceDate]||{}),urgent:!x.urgent};}else m.urgent=!m.urgent}else if(a==='delete'){if(recurring(m)){let ex=ensureRec(m);if(!ex.deleted.includes(x._occurrenceDate))ex.deleted.push(x._occurrenceDate)}else tasks=tasks.filter(z=>z.id!==m.id)}}));selectMode=false;selected.clear();save();render()}
+function bulk(a){let keys=[...selected];if(!keys.length)return;if(a==='delete'&&!confirm(`删除 ${keys.length} 个事项？`))return;if(a==='copy'){clipboard=keys.map(k=>findInstance(k)?.instance).filter(Boolean).map(x=>{let n=cloneObj(x);delete n._key;delete n._masterId;delete n._occurrenceDate;delete n._series;n.id=id();return n});selectMode=false;selected.clear();save();render();return}keys.forEach(k=>mutateInstance(k,(m,x)=>{if(a==='done'){if(recurring(m)){let ex=ensureRec(m);if(!ex.completed.includes(x._occurrenceDate))ex.completed.push(x._occurrenceDate)}else{m.completed=true;m.completedAt=new Date().toISOString()}}else if(a==='undone'){if(recurring(m)){let ex=ensureRec(m),idx=ex.completed.indexOf(x._occurrenceDate);if(idx>=0)ex.completed.splice(idx,1);const ov=ex.overrides[x._occurrenceDate];if(ov&&Object.prototype.hasOwnProperty.call(ov,'completed'))delete ov.completed;}else{m.completed=false;m.completedAt=null}}else if(a==='today'||a==='tomorrow'){let d=a==='today'?today():addDays(today(),1);if(recurring(m)){let ex=ensureRec(m);ex.overrides[x._occurrenceDate]={...(ex.overrides[x._occurrenceDate]||{}),date:d};}else m.date=d}else if(a==='important'){if(recurring(m)){let ex=ensureRec(m);ex.overrides[x._occurrenceDate]={...(ex.overrides[x._occurrenceDate]||{}),important:!x.important};}else m.important=!m.important}else if(a==='urgent'){if(recurring(m)){let ex=ensureRec(m);ex.overrides[x._occurrenceDate]={...(ex.overrides[x._occurrenceDate]||{}),urgent:!x.urgent};}else m.urgent=!m.urgent}else if(a==='delete'){if(recurring(m)){let ex=ensureRec(m);if(!ex.deleted.includes(x._occurrenceDate))ex.deleted.push(x._occurrenceDate)}else tasks=tasks.filter(z=>z.id!==m.id)}}));selectMode=false;selected.clear();save();render()}
 function toggleCalendarSelect(i){selectMode=true;selected.has(i)?selected.delete(i):selected.add(i);renderCalendar()}
 </script>
 
@@ -1910,10 +1883,10 @@ function commit(old,newid){
  if(old&&eo&&eo.masterId===old){const m=tasks.find(t=>t.id===old);if(!m){editingOccurrence=null;return;}
   if(eo.mode===1){const ex=ensureRec(m);ex.overrides[eo.date]={...(ex.overrides[eo.date]||{}),title:x.title,start:x.start,end:x.end,important:x.important,urgent:x.urgent,notes:x.notes,date:x.date};}
   else if(eo.mode===2){truncateSeries(m,eo.date);x.id=id();x.date=eo.date;x.exceptions={deleted:[],completed:[],overrides:{}};tasks.push(x);}
-  else Object.assign(m,x,{id:m.id,completed:m.completed,ongoing:m.ongoing,completedAt:m.completedAt,exceptions:m.exceptions});
+  else Object.assign(m,x,{id:m.id,completed:m.completed,completedAt:m.completedAt,ongoing:m.ongoing,exceptions:m.exceptions});
   editingOccurrence=null;save();render();return;
  }
- if(old){const o=tasks.find(t=>t.id===old);if(o)Object.assign(o,x,{id:o.id,completed:o.completed,ongoing:o.ongoing,completedAt:o.completedAt,exceptions:o.exceptions});}
+ if(old){const o=tasks.find(t=>t.id===old);if(o)Object.assign(o,x,{id:o.id,completed:o.completed,completedAt:o.completedAt,ongoing:o.ongoing,exceptions:o.exceptions});}
  else tasks.push(x);
  editingOccurrence=null;save();render();
 }
@@ -2144,7 +2117,7 @@ function attachTimelineGestures(dates,startHour,rowH){
     const b=$('#bulk');
     if(!selectMode){b.classList.add('hidden');b.classList.remove('bulk-fixed');return;}
     b.classList.remove('hidden');b.classList.add('bulk-fixed');
-    b.innerHTML=`<span class="bulk-count">已选 ${selected.size}</span><button onclick="bulk('done')">✓完成</button><button onclick="bulk('undone')">↩未完成</button><button onclick="bulk('ongoing')">◐进行中</button><button onclick="bulk('today')">今天</button><button onclick="bulk('tomorrow')">明天</button><button onclick="bulkDate()">📅日期</button><button onclick="bulkShiftTime()">🕐时间</button><button onclick="bulk('important')">⭐重要</button><button onclick="bulk('urgent')">⚡紧急</button><button onclick="bulk('copy')">📋复制</button><button onclick="bulk('paste')" ${clipboard.length?'':'disabled'}>📌粘贴</button><button onclick="bulk('delete')">🗑删除</button><button onclick="selectMode=false;selected.clear();render()">取消</button>`;
+    b.innerHTML=`<span class="bulk-count">已选 ${selected.size}</span><button onclick="bulk('done')">✓完成</button><button onclick="bulk('undone')">↩未完成</button><button onclick="bulk('today')">今天</button><button onclick="bulk('tomorrow')">明天</button><button onclick="bulkDate()">📅日期</button><button onclick="bulkShiftTime()">🕐时间</button><button onclick="bulk('important')">⭐重要</button><button onclick="bulk('urgent')">⚡紧急</button><button onclick="bulk('copy')">📋复制</button><button onclick="bulk('paste')" ${clipboard.length?'':'disabled'}>📌粘贴</button><button onclick="bulk('delete')">🗑删除</button><button onclick="selectMode=false;selected.clear();render()">取消</button>`;
   };
 
   /* Todo selection: first long-press enters mode; afterwards every tap toggles an item. */
@@ -2544,22 +2517,13 @@ body.todo-priority-today .today-priority-group.p2 .check{border-color:#f0a07a}
 })();
 
 /* v2.74: robust calendar overlap layout + note display. */
-function toggleCalendarOngoing(key){
-  const f=findInstance(key); if(!f)return;
-  setOngoingInstance(f.master,f.instance);
-}
-
 function eventHtml(t,startHour,rowH,col=0,cols=1){
   const s=timeMin(t.start), e=timeMin(t.end)||Math.min(s+60,1439);
   const top=(s-startHour*60)/60*rowH, height=Math.max(28,(e-s)/60*rowH);
   const gap=3, width=100/cols, left=col*width;
   const note=t.notes?`<div class="enote">${esc(t.notes)}</div>`:'';
-  const ongoing=!t.completed&&!!t.ongoing;
-  const key=esc(t._key||instanceKey(t));
-  const ongoingMark=!t.completed?`<button type="button" class="ongoing-mark calendar-ongoing-toggle ${ongoing?'is-ongoing':''}" aria-label="${ongoing?'取消 Ongoing':'标记为 Ongoing'}" title="${ongoing?'取消 Ongoing':'标记为 Ongoing'}" data-ongoing-key="${key}" onclick="event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();toggleCalendarOngoing('${key}')">◐</button>`:'';
-  return `<div class="event bulkable priority-${priority(t)} ${t.completed?'done':''} ${ongoing?'ongoing-event':''} ${selected.has(t._key||t.id)?'selected':''}" data-id="${esc(t._masterId||t.id)}" data-occ="${esc(t._occurrenceDate||t.date||'')}" data-key="${key}" style="top:${top}px;height:${height}px;left:calc(${left}% + 3px);width:calc(${width}% - 6px);right:auto"><b>${ongoingMark}${esc(t.title)}</b><div class="etime">${t.start}${t.end?'–'+t.end:''}</div>${note}</div>`;
+  return `<div class="event bulkable priority-${priority(t)} ${t.completed?'done':''} ${selected.has(t._key||t.id)?'selected':''}" data-id="${esc(t._masterId||t.id)}" data-occ="${esc(t._occurrenceDate||t.date||'')}" data-key="${esc(t._key||instanceKey(t))}" style="top:${top}px;height:${height}px;left:calc(${left}% + 3px);width:calc(${width}% - 6px);right:auto"><b>${esc(t.title)}${recurring(t)?' 🔁':''}</b><div class="etime">${t.start}${t.end?'–'+t.end:''}</div>${note}</div>`;
 }
-
 function dayColumn(d,total,startHour,rowH){
   const ds=fmt(d), events=calendarEventsForDate(ds).filter(t=>t.start);
   events.sort((a,b)=>timeMin(a.start)-timeMin(b.start)||(timeMin(a.end||'23:59')-timeMin(b.end||'23:59')));
@@ -2725,7 +2689,7 @@ function renderGoals(resetMonth=false){
   $('#heading').textContent='目标'; $('#subtabs').innerHTML=''; $('#headActions').innerHTML=''; $('#fab').classList.add('hidden');
   const y=goals.year,m=monthGoals(viewMonth());
   const section=(type,label,icon,arr)=>{return `<section class="goal-section"><div class="goal-section-head"><h3>${icon} ${label}</h3><span class="goal-limit">${pct3(arr)}</span></div><div class="goal-list">${arr.map((g,i)=>renderGoalRow(type,g,i,arr)).join('')}</div>${arr.length<3?`<button class="goal-add" type="button" onclick="addGoal('${type}')">＋ 添加${label}</button>`:''}</section>`};
-  $('#main').innerHTML=`<div class="goals-page"><div class="goals-hero"><h2>🎯 少一点计划，多一点行动</h2><p>年度最多 3 个目标；月度 OKR 按月份独立保存。</p></div>${section('year','年度目标','🎯',y)}<section class="goal-section"><div class="goal-section-head"><h3>📅 月度目标</h3><span class="goal-limit">${pct3(m)}</span></div><div class="goal-month-toolbar"><button type="button" onclick="changeGoalMonth(-1)">‹</button><input id="goalMonthPicker" type="month" value="${viewMonth()}" onchange="setGoalViewMonth(this.value)"><button type="button" onclick="changeGoalMonth(1)">›</button></div><div class="goal-list">${m.map((g,i)=>renderGoalRow('month',g,i,m)).join('')}</div>${m.length<3?`<button class="goal-add" type="button" onclick="addGoal('month')">＋ 添加 ${viewMonth()} 月度目标</button>`:''}</section><div class="goal-review-entry"><button class="goal-add" type="button" onclick="renderMonthlyReview(previousMonthKey())">📝 月度回顾</button><button class="goal-add" type="button" onclick="renderAnnualReview()">📊 年度回顾</button><button class="goal-add" type="button" onclick="renderReviewHistory()">📚 历史回顾</button></div></div>`;
+  $('#main').innerHTML=`<div class="goals-page"><div class="goals-hero"><h2>🎯 少一点计划，多一点行动</h2><p>年度最多 3 个目标；月度 OKR 按月份独立保存。</p></div>${section('year','年度目标','🎯',y)}<section class="goal-section"><div class="goal-section-head"><h3>📅 月度目标</h3><span class="goal-limit">${pct3(m)}</span></div><div class="goal-month-toolbar"><button type="button" onclick="changeGoalMonth(-1)">‹</button><input id="goalMonthPicker" type="month" value="${viewMonth()}" onchange="setGoalViewMonth(this.value)"><button type="button" onclick="changeGoalMonth(1)">›</button></div><div class="goal-list">${m.map((g,i)=>renderGoalRow('month',g,i,m)).join('')}</div>${m.length<3?`<button class="goal-add" type="button" onclick="addGoal('month')">＋ 添加 ${viewMonth()} 月度目标</button>`:''}</section><div class="goal-review-entry"><button class="goal-add" type="button" onclick="renderMonthlyReview(monthKey())">📝 月度回顾</button><button class="goal-add" type="button" onclick="renderAnnualReview()">📊 年度回顾</button><button class="goal-add" type="button" onclick="renderReviewHistory()">📚 历史回顾</button></div></div>`;
 }
 function setGoalViewMonth(v){if(!/^\d{4}-\d{2}$/.test(v)||Number(v.slice(5))<1||Number(v.slice(5))>12)return alert('请选择有效月份');goalViewMonth=v;renderGoals()}
 function changeGoalMonth(d){const [y,m]=viewMonth().split('-').map(Number);const x=new Date(y,m-1+d,1);goalViewMonth=`${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,'0')}`;renderGoals()}
@@ -2760,7 +2724,6 @@ const REVIEW_DB='todoCalendarMonthlyReviewsV1';
 function getReviews(){try{return JSON.parse(localStorage.getItem(REVIEW_DB)||'{}')}catch{return {}}}
 function saveReviews(x){localStorage.setItem(REVIEW_DB,JSON.stringify(x));window.__driveScheduleSync?.()}
 function monthKey(d=new Date()){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`}
-function previousMonthKey(d=new Date()){const x=new Date(d);x.setMonth(x.getMonth()-1);return `${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,'0')}`}
 function monthTasks(mk){
   const [y,m]=mk.split('-').map(Number),from=`${y}-${String(m).padStart(2,'0')}-01`,last=new Date(y,m,0).getDate(),to=`${y}-${String(m).padStart(2,'0')}-${String(last).padStart(2,'0')}`;
   const end=mk===monthKey()?today():to;
@@ -3132,10 +3095,18 @@ function openReviewMonth(mk){window.__reviewMonth=mk;renderMonthlyReview(mk)}
 .goal-kr-box{flex:0 0 18px!important;width:18px!important;height:18px!important}
 </style>
 <script id="v2-143-review-priority-stats">
-/* v2.154: review completion rates split by importance. */
-function reviewPriorityStats(done,pending,ongoing=[]){
-  const defs=[{key:'both',label:'重要且紧急',test:t=>!!t.important&&!!t.urgent},{key:'urgent',label:'仅紧急',test:t=>!t.important&&!!t.urgent},{key:'important',label:'仅重要',test:t=>!!t.important&&!t.urgent},{key:'normal',label:'普通',test:t=>!t.important&&!t.urgent}];
-  return defs.map(d=>{const dc=done.filter(d.test).length,pc=pending.filter(d.test).length,oc=ongoing.filter(d.test).length,total=dc+pc+oc;return {key:d.key,label:d.label,done:dc,pending:pc,ongoing:oc,total,rate:total?Math.round(dc/total*100):0};});
+/* v2.148: review completion rates split by importance. */
+function reviewPriorityStats(done,pending){
+  const defs=[
+    {key:'both',label:'重要且紧急',test:t=>!!t.important&&!!t.urgent},
+    {key:'urgent',label:'仅紧急',test:t=>!t.important&&!!t.urgent},
+    {key:'important',label:'仅重要',test:t=>!!t.important&&!t.urgent},
+    {key:'normal',label:'普通',test:t=>!t.important&&!t.urgent}
+  ];
+  return defs.map(d=>{
+    const dc=done.filter(d.test).length, pc=pending.filter(d.test).length, total=dc+pc;
+    return {key:d.key,label:d.label,done:dc,pending:pc,total,rate:total?Math.round(dc/total*100):0};
+  });
 }
 function reviewPriorityHtml(stats){
   if(!Array.isArray(stats)||!stats.length) return '<div class="empty">暂无重要性完成率记录</div>';
@@ -3149,22 +3120,21 @@ window.toggleKR=function(type,i,j){const arr=type==='month'?monthGoals(viewMonth
 window.renderAnnualReview=function(yr=annualKey(),readonly=false){
  window.__annualReviewYear=yr;const r=getAnnualReviews()[yr]||{},s=readonly&&r.snapshot?r.snapshot:null,ys=goals.year;
  const done=s?s.done:sortTasksByImportance(tasks.filter(t=>t&&t.id&&t.title&&t.completed&&!recurring(t)&&String(t.completedAt||'').slice(0,4)===yr),'completed');
- const ongoing=s?(s.ongoing||[]):sortTasksByImportance(tasks.filter(t=>t&&t.id&&t.title&&!t.completed&&t.ongoing&&!recurring(t)&&String(t.date||'').slice(0,4)===yr),'date');
- const pending=s?s.pending:sortTasksByImportance(tasks.filter(t=>t&&t.id&&t.title&&t.date&&!t.completed&&!t.ongoing&&!recurring(t)&&String(t.date).slice(0,4)===yr),'date');
- const goalPct=s?s.goalPct:pct3(ys),rate=s?s.completionRate:((done.length+ongoing.length+pending.length)>0?Math.round(done.length/(done.length+ongoing.length+pending.length)*100):0),priorityRates=s?(s.priorityRates||reviewPriorityStats(s.done||[],s.pending||[],s.ongoing||[])):reviewPriorityStats(done,pending,ongoing);
+ const pending=s?s.pending:sortTasksByImportance(tasks.filter(t=>t&&t.id&&t.title&&t.date&&String(t.date).slice(0,4)===yr&&!t.completed&&!recurring(t)),'date');
+ const goalPct=s?s.goalPct:pct3(ys),rate=s?s.completionRate:((done.length+pending.length)>0?Math.round(done.length/(done.length+pending.length)*100):0),priorityRates=s?(s.priorityRates||reviewPriorityStats(s.done||[],s.pending||[])):reviewPriorityStats(done,pending);
  $('#heading').textContent='年度回顾';$('#subtabs').innerHTML='';$('#headActions').innerHTML='';$('#fab').classList.add('hidden');
  const actions=readonly?`<div class="review-actions"><button type="button" class="btn" onclick="renderReviewHistory()">← 返回历史回顾</button></div>`:`<div class="review-actions"><button type="button" class="btn" onclick="openGoalsCurrentMonth()">← 返回目标</button><button type="button" class="btn primary" onclick="completeAnnualReview()">✓ 完成回顾</button></div>`;
- $('#main').innerHTML=`<div class="goals-page"><div class="goals-hero"><h2>📊 ${yr} 年度回顾 <small class="review-status ${r.completed?'review-done':'review-pending'}">${r.completed?'✓ 已完成':'○ 尚未完成'}</small></h2><p>${readonly?'此回顾保存时的信息不会随着后续任务或目标变化而改变。':'年度目标、任务完成情况和年度总结。'}</p></div><div class="goal-review-card"><h3>🎯 年度目标</h3><div class="review-stat"><span>年度目标</span><b>${goalPct}</b></div></div><div class="goal-review-card"><h3>✓ 任务完成情况</h3><div class="review-completion-rate"><span>任务完成率</span><b>${rate}%</b></div><div class="review-priority-block"><div class="review-priority-title">按重要性完成率</div>${reviewPriorityHtml(priorityRates)}</div><div class="review-stat"><span>✓ 已完成</span><b>${done.length}</b></div>${done.slice(0,20).map(t=>`<div class="review-stat"><span>✓ ${esc(t.title)}</span><span>${esc(String(t.completedAt||'').slice(0,10))}</span></div>`).join('')||'<div class="empty">本年度还没有完成记录</div>'}</div><div class="goal-review-card"><h3>◐ Ongoing</h3><div class="review-stat"><span>正在进行</span><b>${ongoing.length}</b></div>${ongoing.slice(0,20).map(t=>`<div class="review-stat"><span>◐ ${esc(t.title)}</span></div>`).join('')||'<div class="empty">暂无 Ongoing 任务</div>'}</div><div class="goal-review-card"><h3>○ 未完成</h3><div class="review-stat"><span>年度计划但未完成</span><b>${pending.length}</b></div>${pending.slice(0,20).map(t=>`<div class="review-stat"><span>${esc(t.title)}</span></div>`).join('')||'<div class="empty">全部完成 🎉</div>'}</div><div class="goal-review-card"><h3>📝 给这一年留一句话</h3><textarea id="annualReviewNote" class="review-note" placeholder="这一年最值得记录的事情是……" ${readonly?'readonly':''}>${esc(r.note||'')}</textarea>${actions}</div></div>`;
+ $('#main').innerHTML=`<div class="goals-page"><div class="goals-hero"><h2>📊 ${yr} 年度回顾 <small class="review-status ${r.completed?'review-done':'review-pending'}">${r.completed?'✓ 已完成':'○ 尚未完成'}</small></h2><p>${readonly?'此回顾保存时的信息不会随着后续任务或目标变化而改变。':'年度目标、任务完成情况和年度总结。'}</p></div><div class="goal-review-card"><h3>🎯 年度目标</h3><div class="review-stat"><span>年度目标</span><b>${goalPct}</b></div></div><div class="goal-review-card"><h3>✓ 年度完成</h3><div class="review-completion-rate"><span>任务完成率</span><b>${rate}%</b></div><div class="review-priority-block"><div class="review-priority-title">按重要性完成率</div>${reviewPriorityHtml(priorityRates)}</div><div class="review-stat"><span>完成 Todo</span><b>${done.length}</b></div>${done.slice(0,20).map(t=>`<div class="review-stat"><span>✓ ${esc(t.title)}</span><span>${esc(String(t.completedAt||'').slice(0,10))}</span></div>`).join('')||'<div class="empty">本年度还没有完成记录</div>'}</div><div class="goal-review-card"><h3>○ 尚未完成</h3><div class="review-stat"><span>年度计划但未完成</span><b>${pending.length}</b></div>${pending.slice(0,20).map(t=>`<div class="review-stat"><span>${esc(t.title)}</span></div>`).join('')||'<div class="empty">全部完成 🎉</div>'}</div><div class="goal-review-card"><h3>📝 给这一年留一句话</h3><textarea id="annualReviewNote" class="review-note" placeholder="这一年最值得记录的事情是……" ${readonly?'readonly':''}>${esc(r.note||'')}</textarea>${actions}</div></div>`;
 };
-window.completeAnnualReview=function(){const yr=window.__annualReviewYear||annualKey(),r=getAnnualReviews(),done=sortTasksByImportance(tasks.filter(t=>t&&t.id&&t.title&&t.completed&&!recurring(t)&&String(t.completedAt||'').slice(0,4)===yr),'completed'),ongoing=sortTasksByImportance(tasks.filter(t=>t&&t.id&&t.title&&!t.completed&&t.ongoing&&!recurring(t)&&String(t.date||'').slice(0,4)===yr),'date'),pending=sortTasksByImportance(tasks.filter(t=>t&&t.id&&t.title&&t.date&&!t.completed&&!t.ongoing&&!recurring(t)&&String(t.date).slice(0,4)===yr),'date'),ys=goals.year;r[yr]={...(r[yr]||{}),note:$('#annualReviewNote')?.value||'',completed:true,completedAt:new Date().toISOString(),snapshot:{done:cloneObj(done.slice(0,20)),ongoing:cloneObj(ongoing.slice(0,20)),pending:cloneObj(pending.slice(0,20)),goalPct:pct3(ys),completionRate:(done.length+ongoing.length+pending.length)>0?Math.round(done.length/(done.length+ongoing.length+pending.length)*100):0,priorityRates:reviewPriorityStats(done,pending,ongoing),savedAt:new Date().toISOString()}};saveAnnualReviews(r);openGoalsCurrentMonth();};
-window.renderMonthlyReview=function(mk=previousMonthKey(),readonly=false){
- window.__reviewMonth=mk;const r=getReviews()[mk]||{},s=readonly&&r.snapshot?r.snapshot:null,done=s?s.done:sortTasksByImportance(completedInMonth(mk).filter(t=>t&&t.id&&t.title&&!recurring(t)),'completed'),ongoing=s?(s.ongoing||[]):sortTasksByImportance(monthTasks(mk).filter(t=>t&&t.id&&t.title&&!t.completed&&t.ongoing&&!recurring(t)),'date'),pending=s?s.pending:sortTasksByImportance(monthTasks(mk).filter(t=>t&&t.id&&t.title&&!t.completed&&!t.ongoing&&!recurring(t)),'date'),delayed=s?s.delayed:pending.filter(t=>Number(t.deferCount||0)>0).sort((a,b)=>(b.deferCount||0)-(a.deferCount||0)).slice(0,5),ya=goals.year,ma=monthGoals(mk),yp=s?s.yearGoalPct:pct3(ya),mp=s?s.monthGoalPct:pct3(ma),rate=s?s.completionRate:((done.length+ongoing.length+pending.length)>0?Math.round(done.length/(done.length+ongoing.length+pending.length)*100):0),priorityRates=s?(s.priorityRates||reviewPriorityStats(s.done||[],s.pending||[],s.ongoing||[])):reviewPriorityStats(done,pending,ongoing),fy=s?s.focusYear:(goals.year.find(g=>!g.done)?.title||'全部完成 🎉'),fm=s?s.focusMonth:(ma.find(g=>!g.done)?.title||'全部完成 🎉');
+window.completeAnnualReview=function(){const yr=window.__annualReviewYear||annualKey(),r=getAnnualReviews(),done=sortTasksByImportance(tasks.filter(t=>t&&t.id&&t.title&&t.completed&&!recurring(t)&&String(t.completedAt||'').slice(0,4)===yr),'completed'),pending=sortTasksByImportance(tasks.filter(t=>t&&t.id&&t.title&&t.date&&String(t.date).slice(0,4)===yr&&!t.completed&&!recurring(t)),'date'),ys=goals.year;r[yr]={...(r[yr]||{}),note:$('#annualReviewNote')?.value||'',completed:true,completedAt:new Date().toISOString(),snapshot:{done:cloneObj(done.slice(0,20)),pending:cloneObj(pending.slice(0,20)),goalPct:pct3(ys),completionRate:(done.length+pending.length)>0?Math.round(done.length/(done.length+pending.length)*100):0,priorityRates:reviewPriorityStats(done,pending),savedAt:new Date().toISOString()}};saveAnnualReviews(r);openGoalsCurrentMonth();};
+window.renderMonthlyReview=function(mk=monthKey(),readonly=false){
+ window.__reviewMonth=mk;const r=getReviews()[mk]||{},s=readonly&&r.snapshot?r.snapshot:null,pending=s?s.pending:sortTasksByImportance(monthTasks(mk).filter(t=>t&&t.id&&!recurring(t)&&!t.completed),'date'),done=s?s.done:sortTasksByImportance(completedInMonth(mk).filter(t=>t&&t.id&&t.title&&!recurring(t)),'completed'),delayed=s?s.delayed:pending.filter(t=>Number(t.deferCount||0)>0).sort((a,b)=>(b.deferCount||0)-(a.deferCount||0)).slice(0,5),ya=goals.year,ma=monthGoals(mk),yp=s?s.yearGoalPct:pct3(ya),mp=s?s.monthGoalPct:pct3(ma),rate=s?s.completionRate:((done.length+pending.length)>0?Math.round(done.length/(done.length+pending.length)*100):0),priorityRates=s?(s.priorityRates||reviewPriorityStats(s.done||[],s.pending||[])):reviewPriorityStats(done,pending),fy=s?s.focusYear:(goals.year.find(g=>!g.done)?.title||'全部完成 🎉'),fm=s?s.focusMonth:(ma.find(g=>!g.done)?.title||'全部完成 🎉');
  $('#heading').textContent='月度回顾';$('#subtabs').innerHTML='';$('#headActions').innerHTML='';$('#fab').classList.add('hidden');
  const actions=readonly?`<div class="review-actions"><button type="button" class="btn" onclick="renderReviewHistory()">← 返回历史回顾</button></div>`:`<div class="review-actions"><button type="button" class="btn" onclick="openGoalsCurrentMonth()">← 返回目标</button><button type="button" class="btn primary" onclick="completeMonthlyReview()">✓ 完成回顾</button></div>`;
  const pendingHtml=pending.slice(0,10).map(t=>readonly?`<div class="review-stat"><span>${esc(t.title)}</span></div>`:`<div class="review-stat"><span>${esc(t.title)}</span><button class="btn small" onclick="shiftTaskToNextMonth('${t.id}')">移到下月</button></div>`).join('');
- $('#main').innerHTML=`<div class="goals-page"><div class="goals-hero"><h2>📝 ${mk} 月度回顾 <small class="review-status ${r.completed?'review-done':'review-pending'}">${r.completed?'✓ 已完成':'○ 尚未完成'}</small></h2><p>${readonly?'此回顾保存时的信息不会随着后续任务或目标变化而改变。':'大部分内容自动生成，你只需要看看这个月发生了什么，并决定未完成事项下一步怎么处理。'}</p></div><div class="goal-review-card"><h3>🎯 目标</h3><div class="review-stat"><span>年度目标</span><b>${yp}</b></div><div class="review-stat"><span>月度目标</span><b>${mp}</b></div></div><div class="goal-review-card"><h3>✓ 任务完成情况</h3><div class="review-completion-rate"><span>任务完成率</span><b>${rate}%</b></div><div class="review-priority-block"><div class="review-priority-title">按重要性完成率</div>${reviewPriorityHtml(priorityRates)}</div><div class="review-stat"><span>✓ 已完成</span><b>${done.length}</b></div>${done.slice(0,10).map(t=>`<div class="review-stat"><span>✓ ${esc(t.title)}</span><span>${esc(String(t.completedAt||'').slice(0,10))}</span></div>`).join('')||'<div class="empty">本月还没有完成记录</div>'}</div><div class="goal-review-card"><h3>◐ Ongoing</h3><div class="review-stat"><span>正在进行</span><b>${ongoing.length}</b></div>${ongoing.slice(0,10).map(t=>`<div class="review-stat"><span>◐ ${esc(t.title)}</span></div>`).join('')||'<div class="empty">暂无 Ongoing 任务</div>'}</div><div class="goal-review-card"><h3>○ 未完成</h3><div class="review-stat"><span>本月计划但未完成</span><b>${pending.length}</b></div>${pendingHtml||'<div class="empty">全部完成 🎉</div>'}</div><div class="goal-review-card"><h3>🔄 反复延期</h3>${delayed.map(t=>`<div class="review-stat"><span>${esc(t.title)}</span><b>${t.deferCount} 次</b></div>`).join('')||'<div class="empty">暂无反复延期</div>'}</div><div class="goal-review-card"><h3>🔥 本月 Focus</h3><div class="review-stat"><span>年度</span><b>${esc(fy)}</b></div><div class="review-stat"><span>本月</span><b>${esc(fm)}</b></div></div><div class="goal-review-card"><h3>📝 给这个月留一句话</h3><textarea id="monthlyReviewNote" class="review-note" placeholder="这个月最值得肯定自己的事情是……" ${readonly?'readonly':''}>${esc(r.note||'')}</textarea>${actions}</div></div>`;
+ $('#main').innerHTML=`<div class="goals-page"><div class="goals-hero"><h2>📝 ${mk} 月度回顾 <small class="review-status ${r.completed?'review-done':'review-pending'}">${r.completed?'✓ 已完成':'○ 尚未完成'}</small></h2><p>${readonly?'此回顾保存时的信息不会随着后续任务或目标变化而改变。':'大部分内容自动生成，你只需要看看这个月发生了什么，并决定未完成事项下一步怎么处理。'}</p></div><div class="goal-review-card"><h3>🎯 目标</h3><div class="review-stat"><span>年度目标</span><b>${yp}</b></div><div class="review-stat"><span>月度目标</span><b>${mp}</b></div></div><div class="goal-review-card"><h3>✓ 本月完成</h3><div class="review-completion-rate"><span>任务完成率</span><b>${rate}%</b></div><div class="review-priority-block"><div class="review-priority-title">按重要性完成率</div>${reviewPriorityHtml(priorityRates)}</div><div class="review-stat"><span>完成 Todo</span><b>${done.length}</b></div>${done.slice(0,10).map(t=>`<div class="review-stat"><span>✓ ${esc(t.title)}</span><span>${esc(String(t.completedAt||'').slice(0,10))}</span></div>`).join('')||'<div class="empty">本月还没有完成记录</div>'}</div><div class="goal-review-card"><h3>○ 尚未完成</h3><div class="review-stat"><span>本月计划但未完成</span><b>${pending.length}</b></div>${pendingHtml||'<div class="empty">全部完成 🎉</div>'}</div><div class="goal-review-card"><h3>🔄 反复延期</h3>${delayed.map(t=>`<div class="review-stat"><span>${esc(t.title)}</span><b>${t.deferCount} 次</b></div>`).join('')||'<div class="empty">暂无反复延期</div>'}</div><div class="goal-review-card"><h3>🔥 本月 Focus</h3><div class="review-stat"><span>年度</span><b>${esc(fy)}</b></div><div class="review-stat"><span>本月</span><b>${esc(fm)}</b></div></div><div class="goal-review-card"><h3>📝 给这个月留一句话</h3><textarea id="monthlyReviewNote" class="review-note" placeholder="这个月最值得肯定自己的事情是……" ${readonly?'readonly':''}>${esc(r.note||'')}</textarea>${actions}</div></div>`;
 };
-window.completeMonthlyReview=function(){const mk=window.__reviewMonth||previousMonthKey(),r=getReviews(),pending=sortTasksByImportance(monthTasks(mk).filter(t=>t&&t.id&&t.title&&!t.completed&&!t.ongoing&&!recurring(t)),'date'),ongoing=sortTasksByImportance(monthTasks(mk).filter(t=>t&&t.id&&t.title&&!t.completed&&t.ongoing&&!recurring(t)),'date'),done=sortTasksByImportance(completedInMonth(mk).filter(t=>t&&t.id&&t.title&&!recurring(t)),'completed'),delayed=pending.filter(t=>Number(t.deferCount||0)>0).sort((a,b)=>(b.deferCount||0)-(a.deferCount||0)).slice(0,5),ya=goals.year,ma=monthGoals(mk);r[mk]={...(r[mk]||{}),note:$('#monthlyReviewNote')?.value||'',completed:true,completedAt:new Date().toISOString(),snapshot:{pending:cloneObj(pending.slice(0,10)),ongoing:cloneObj(ongoing.slice(0,10)),done:cloneObj(done.slice(0,10)),delayed:cloneObj(delayed),yearGoalPct:pct3(ya),monthGoalPct:pct3(ma),completionRate:(done.length+ongoing.length+pending.length)>0?Math.round(done.length/(done.length+ongoing.length+pending.length)*100):0,priorityRates:reviewPriorityStats(done,pending,ongoing),focusYear:goals.year.find(g=>!g.done)?.title||'全部完成 🎉',focusMonth:ma.find(g=>!g.done)?.title||'全部完成 🎉',savedAt:new Date().toISOString()}};saveReviews(r);openGoalsCurrentMonth();};
+window.completeMonthlyReview=function(){const mk=window.__reviewMonth||monthKey(),r=getReviews(),pending=sortTasksByImportance(monthTasks(mk).filter(t=>t&&t.id&&!recurring(t)&&!t.completed),'date'),done=sortTasksByImportance(completedInMonth(mk).filter(t=>t&&t.id&&t.title&&!recurring(t)),'completed'),delayed=pending.filter(t=>Number(t.deferCount||0)>0).sort((a,b)=>(b.deferCount||0)-(a.deferCount||0)).slice(0,5),ya=goals.year,ma=monthGoals(mk);r[mk]={...(r[mk]||{}),note:$('#monthlyReviewNote')?.value||'',completed:true,completedAt:new Date().toISOString(),snapshot:{pending:cloneObj(pending.slice(0,10)),done:cloneObj(done.slice(0,10)),delayed:cloneObj(delayed),yearGoalPct:pct3(ya),monthGoalPct:pct3(ma),completionRate:(done.length+pending.length)>0?Math.round(done.length/(done.length+pending.length)*100):0,priorityRates:reviewPriorityStats(done,pending),focusYear:goals.year.find(g=>!g.done)?.title||'全部完成 🎉',focusMonth:ma.find(g=>!g.done)?.title||'全部完成 🎉',savedAt:new Date().toISOString()}};saveReviews(r);openGoalsCurrentMonth();};
 window.renderReviewHistory=function(){const ms=getReviews(),as=getAnnualReviews(),mk=Object.keys(ms).sort().reverse(),ak=Object.keys(as).sort().reverse();$('#heading').textContent='历史回顾';$('#subtabs').innerHTML='';$('#headActions').innerHTML='';$('#fab').classList.add('hidden');const mhtml=mk.map(k=>{const r=ms[k]||{};return `<div class="review-stat"><button class="btn small" type="button" onclick="renderMonthlyReview('${k}',true)">${k} 月度回顾</button><span>${r.completed?'✓ 已完成':'○ 尚未完成'}</span><button class="btn small danger" type="button" onclick="deleteMonthlyReview('${k}')">删除</button></div>`}).join('')||'<div class="empty">还没有保存的月度回顾</div>';const ahtml=ak.map(k=>{const r=as[k]||{};return `<div class="review-stat"><button class="btn small" type="button" onclick="renderAnnualReview('${k}',true)">${k} 年度回顾</button><span>${r.completed?'✓ 已完成':'○ 尚未完成'}</span><button class="btn small danger" type="button" onclick="deleteAnnualReview('${k}')">删除</button></div>`}).join('')||'<div class="empty">还没有保存的年度回顾</div>';$('#main').innerHTML=`<div class="goals-page"><div class="goals-hero"><h2>📚 历史回顾</h2><p>历史回顾只能查看或删除，不能修改。</p></div><div class="goal-review-card"><h3>📅 月度回顾</h3>${mhtml}</div><div class="goal-review-card"><h3>📊 年度回顾</h3>${ahtml}</div><button class="goal-add" type="button" onclick="openGoalsCurrentMonth()">← 返回目标</button></div>`;};
 })();
 </script>
@@ -3574,7 +3544,7 @@ body:has(.nav button[data-page="settings"].active) #main.content.focus-fixed-off
     return data.files?.sort((a,b)=>String(b.modifiedTime).localeCompare(String(a.modifiedTime)))[0]||null;
   }
   function buildBackup(){
-    return {format:'todo-calendar-drive-v1',appVersion:'2.151',tasks:cloneObj(tasks),goals:cloneObj(goals||{year:[],monthByKey:{}}),monthlyReviews:cloneObj(getReviews()),annualReviews:cloneObj(getAnnualReviews()),exportedAt:new Date().toISOString()};
+    return {format:'todo-calendar-drive-v1',appVersion:'2.148',tasks:cloneObj(tasks),goals:cloneObj(goals||{year:[],monthByKey:{}}),monthlyReviews:cloneObj(getReviews()),annualReviews:cloneObj(getAnnualReviews()),exportedAt:new Date().toISOString()};
   }
   function applyBackup(x){
     if(!x||!Array.isArray(x.tasks))throw new Error('云端文件格式不正确');
@@ -3849,112 +3819,109 @@ html.focus-boot-pending .app>.focus-fixed-root{
 </script>
 
 
-<style id="v2-156-ongoing-and-completed-final">
-/* v2.157: Ongoing UI final layout */
-.title{display:flex;align-items:center;min-width:0;gap:6px}
-.todo-ongoing-indicator{display:none;align-items:center;justify-content:center;width:22px;height:22px;flex:0 0 22px;color:#2f80ed;font-size:18px;font-weight:900;line-height:1}
-.todo-ongoing-indicator.show{display:inline-flex}
-.todo-ongoing-text{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.todo-ongoing-btn{margin-left:4px;margin-right:0;flex:0 0 25px}
+<style id="v2-147-ongoing">
+.task.ongoing-row{background:rgba(52,120,246,.045)}
+.task .ongoing-btn{flex:0 0 auto;width:28px;height:28px;border:1px solid #c9d2df;border-radius:50%;background:#fff;color:#6b7788;font-size:15px;line-height:1;padding:0}
+.task .ongoing-btn.active{background:#3478f6;color:#fff;border-color:#3478f6}
+.task.ongoing-row .title{color:#245fae}
+.event.ongoing{box-shadow:inset 3px 0 0 #3478f6}
+/* v2.148: calendar Ongoing uses the same clear circular marker as Todo. */
+.event.ongoing{padding-left:34px;box-shadow:inset 3px 0 0 #3478f6}
+.event.ongoing::before{content:"◐";position:absolute;left:7px;top:6px;width:20px;height:20px;border-radius:50%;background:#3478f6;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;line-height:20px;z-index:2}
+.mini.ongoing{font-weight:700;padding-left:22px;position:relative}
+.mini.ongoing::before{content:"◐";position:absolute;left:4px;top:2px;width:15px;height:15px;border-radius:50%;background:#3478f6;color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;line-height:15px}
+
+.review-status-counts{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:8px 0}
+.review-status-count{padding:8px 6px;border-radius:9px;background:#f7f9fc;text-align:center;font-size:11px;color:#687386}
+.review-status-count b{display:block;font-size:16px;color:#202733;margin-bottom:2px}
 </style>
-<script id="v2-156-ongoing-and-completed-final-js">
+<script id="v2-147-review-ongoing">
 (function(){
-  /* Final Todo row: state mark on the left, toggle button on the right. */
-  window.taskRow=function(t){
-    const k=instanceKey(t), om=!!t.ongoing&&!t.completed;
-    return `<div class="task ${t.completed?'done':''} ${om?'ongoing':''} ${selected.has(k)?'selected':''}" data-id="${esc(k)}" onclick="taskClick(event,'${esc(k)}')" oncontextmenu="event.preventDefault();toggleSelect('${esc(k)}')"><span class="${selected.size?'selectbox':'check'}"></span><div class="taskmain"><div class="title"><span class="todo-ongoing-indicator ${om?'show':''}" aria-hidden="true">◐</span><span class="todo-ongoing-text">${esc(t.title)}${recurrenceLabel(t)}</span><button type="button" class="todo-ongoing-btn ${om?'is-ongoing':''}" aria-label="${om?'取消 Ongoing':'标记为 Ongoing'}" title="${om?'取消 Ongoing':'标记为 Ongoing'}" onclick="event.preventDefault();event.stopPropagation();toggleTodoOngoing('${esc(k)}')">◐</button></div><div class="meta">${t.date||'无日期'} ${t.start||''}${t.end?'–'+t.end:''}</div></div><span class="badge">${t.important?'⭐':''}${t.urgent?'⚡':''}</span></div>`;
-  };
+  if(window.__v2147Applied)return; window.__v2147Applied=true;
 
-  /* Final bulk toolbar: retain the existing actions and add Ongoing. */
-  window.renderBulk=function(){
-    const b=$('#bulk');
-    if(!selectMode){b.classList.add('hidden');return}
-    b.classList.remove('hidden');
-    b.innerHTML=`<span style="padding:8px;font-weight:700;position:sticky;left:0;background:#111">已选 ${selected.size}</span><button onclick="bulk('done')">✓完成</button><button onclick="bulk('undone')">↩未完成</button><button onclick="bulk('ongoing')">◐ Ongoing</button><button onclick="bulk('today')">今天</button><button onclick="bulk('tomorrow')">明天</button><button onclick="bulkDate()">📅日期</button><button onclick="bulkShiftTime()">🕐时间</button><button onclick="bulk('important')">⭐重要</button><button onclick="bulk('urgent')">⚡紧急</button><button onclick="bulk('copy')">📋复制</button><button onclick="bulk('paste')" ${clipboard.length?'':'disabled'}>📌粘贴</button><button onclick="bulk('delete')">🗑删除</button><button onclick="selectMode=false;selected.clear();render()">取消</button>`;
-  };
-
-  /* Final bulk implementation: Ongoing is mutually exclusive with Completed,
-     and recurring selections modify only the selected occurrence. */
-  window.bulk=function(a){
-    const keys=[...selected];
-    if(!keys.length)return;
-    if(a==='delete'&&!confirm(`删除 ${keys.length} 个事项？`))return;
-    if(a==='copy'){
-      clipboard=keys.map(k=>findInstance(k)?.instance).filter(Boolean).map(x=>{
-        const n=cloneObj(x);delete n._key;delete n._masterId;delete n._occurrenceDate;delete n._series;n.id=id();n.completed=false;n.completedAt=null;n.ongoing=false;return n;
-      });
-      selectMode=false;selected.clear();save();render();return;
-    }
-    keys.forEach(k=>mutateInstance(k,(m,x)=>{
-      if(a==='done'){
-        if(recurring(m)){
-          const ex=ensureRec(m);if(!ex.completed.includes(x._occurrenceDate))ex.completed.push(x._occurrenceDate);
-          ex.overrides[x._occurrenceDate]={...(ex.overrides[x._occurrenceDate]||{}),ongoing:false,completed:false};
-        }else{m.completed=true;m.completedAt=new Date().toISOString();m.ongoing=false;}
-      }else if(a==='undone'){
-        if(recurring(m)){
-          const ex=ensureRec(m),idx=ex.completed.indexOf(x._occurrenceDate);if(idx>=0)ex.completed.splice(idx,1);
-          const ov=ex.overrides[x._occurrenceDate];if(ov&&Object.prototype.hasOwnProperty.call(ov,'completed'))delete ov.completed;
-        }else{m.completed=false;m.completedAt=null;}
-      }else if(a==='ongoing'){
-        if(recurring(m)){
-          const ex=ensureRec(m),ds=x._occurrenceDate;
-          ex.overrides[ds]={...(ex.overrides[ds]||{}),ongoing:true,completed:false};
-          const idx=ex.completed.indexOf(ds);if(idx>=0)ex.completed.splice(idx,1);
-        }else{m.ongoing=true;m.completed=false;m.completedAt=null;}
-      }else if(a==='today'||a==='tomorrow'){
-        const d=a==='today'?today():addDays(today(),1);
-        if(recurring(m)){const ex=ensureRec(m);ex.overrides[x._occurrenceDate]={...(ex.overrides[x._occurrenceDate]||{}),date:d};}else m.date=d;
-      }else if(a==='important'){
-        if(recurring(m)){const ex=ensureRec(m);ex.overrides[x._occurrenceDate]={...(ex.overrides[x._occurrenceDate]||{}),important:!x.important};}else m.important=!m.important;
-      }else if(a==='urgent'){
-        if(recurring(m)){const ex=ensureRec(m);ex.overrides[x._occurrenceDate]={...(ex.overrides[x._occurrenceDate]||{}),urgent:!x.urgent};}else m.urgent=!m.urgent;
-      }else if(a==='delete'){
-        if(recurring(m)){const ex=ensureRec(m);if(!ex.deleted.includes(x._occurrenceDate))ex.deleted.push(x._occurrenceDate);}else tasks=tasks.filter(z=>z.id!==m.id);
-      }
-    }));
-    selectMode=false;selected.clear();save();render();
-  };
-
-  /* Calendar: only an actually Ongoing event gets the Ongoing symbol. */
-  window.eventHtml=function(t,startHour,rowH,col=0,cols=1){
-    const s=timeMin(t.start), e=timeMin(t.end)||Math.min(s+60,1439);
-    const top=(s-startHour*60)/60*rowH, height=Math.max(28,(e-s)/60*rowH);
-    const gap=3,width=100/cols,left=col*width,note=t.notes?`<div class="enote">${esc(t.notes)}</div>`:'';
-    const ongoing=!!t.ongoing&&!t.completed,key=esc(t._key||instanceKey(t));
-    const ongoingMark=ongoing?`<button type="button" class="ongoing-mark calendar-ongoing-toggle is-ongoing" aria-label="取消 Ongoing" title="取消 Ongoing" data-ongoing-key="${key}" onclick="event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();toggleCalendarOngoing('${key}')">◐</button>`:'';
-    return `<div class="event bulkable priority-${priority(t)} ${t.completed?'done':''} ${ongoing?'ongoing-event':''} ${selected.has(t._key||t.id)?'selected':''}" data-id="${esc(t._masterId||t.id)}" data-occ="${esc(t._occurrenceDate||t.date||'')}" data-key="${key}" style="top:${top}px;height:${height}px;left:calc(${left}% + 3px);width:calc(${width}% - 6px);right:auto"><b>${ongoingMark}${esc(t.title)}</b><div class="etime">${t.start}${t.end?'–'+t.end:''}</div>${note}</div>`;
-  };
-
-  /* Completed Todo: newest completion first.  For recurring instances without
-     a per-occurrence completion timestamp, fall back to the occurrence date. */
-  const previousRenderTodo=window.renderTodo;
-  window.renderTodo=function(){
-    previousRenderTodo.apply(this,arguments);
-    if(typeof todoTab==='undefined'||todoTab!=='done')return;
-    const main=$('#main');if(!main)return;
-    const items=todoInstances('done').slice().sort((a,b)=>{
-      const ad=String(a.date||''),bd=String(b.date||'');
-      if(!ad&&!bd)return priority(a)-priority(b)||(a.start||'').localeCompare(b.start||'')||String(a.title||'').localeCompare(String(b.title||''));
-      if(!ad)return 1;
-      if(!bd)return -1;
-      return bd.localeCompare(ad)||priority(a)-priority(b)||(a.start||'').localeCompare(b.start||'')||String(a.title||'').localeCompare(String(b.title||''));
+  function statusOf(t){ return t?.completed ? 'done' : (t?.ongoing ? 'ongoing' : 'pending'); }
+  function setStatus(t,status){
+    if(!t)return;
+    t.completed=status==='done';
+    t.ongoing=status==='ongoing';
+    if(t.completed)t.completedAt=t.completedAt||new Date().toISOString();
+    else t.completedAt=null;
+  }
+  function reviewDefs(){return [
+    {key:'both',label:'重要且紧急',test:t=>!!t.important&&!!t.urgent},
+    {key:'urgent',label:'仅紧急',test:t=>!t.important&&!!t.urgent},
+    {key:'important',label:'仅重要',test:t=>!!t.important&&!t.urgent},
+    {key:'normal',label:'普通',test:t=>!t.important&&!t.urgent}
+  ];}
+  function reviewPriority3(done,ongoing,pending){
+    const all=[...done,...ongoing,...pending];
+    return reviewDefs().map(d=>{
+      const dc=done.filter(d.test).length, oc=ongoing.filter(d.test).length, pc=pending.filter(d.test).length;
+      const total=dc+oc+pc;
+      return {key:d.key,label:d.label,done:dc,ongoing:oc,pending:pc,total,rate:total?Math.round(dc/total*100):0};
     });
-    const dateLabel=ds=>{
-      if(ds==='__none__')return '无日期';
-      const d=parseDate(ds),base=today(),diff=Math.round((d-parseDate(base))/86400000),wd=['日','一','二','三','四','五','六'][d.getDay()];
-      if(ds===base)return `今天 · ${ds} · 周${wd}`;
-      if(diff===-1)return `昨天 · ${ds} · 周${wd}`;
-      if(diff===1)return `明天 · ${ds} · 周${wd}`;
-      return `${ds} · 周${wd}`;
-    };
-    const groups=new Map();
-    items.forEach(t=>{const k=t.date||'__none__';if(!groups.has(k))groups.set(k,[]);groups.get(k).push(t)});
-    let html='';
-    for(const [ds,group] of groups){html+=`<section class="group"><h3>${esc(dateLabel(ds))}<span style="float:right;font-weight:600;color:#8290a2">${group.length}</span></h3>${group.map(taskRow).join('')}</section>`;}
-    main.innerHTML=html||'<div class="empty">暂无已完成事项</div>';
-    attachTaskGestures();renderBulk();
+  }
+  function rate(done,ongoing,pending){const total=done.length+ongoing.length+pending.length;return total?Math.round(done.length/total*100):0;}
+  function countsHtml(done,ongoing,pending){return `<div class="review-status-counts"><div class="review-status-count"><b>${done.length}</b>✓ 已完成</div><div class="review-status-count"><b>${ongoing.length}</b>◐ Ongoing</div><div class="review-status-count"><b>${pending.length}</b>☐ 未完成</div></div>`;}
+  function priorityHtml(stats){return `<div class="review-priority-rates">${stats.map(x=>`<div class="review-stat"><span>${esc(x.label)}</span><b>${x.total?x.rate+'%':'—'}${x.total?` <small style="font-weight:400;color:#8792a2">(${x.done}/${x.total})</small>`:''}</b></div>`).join('')}</div>`;}
+  function previousMonthKey(){const d=new Date();d.setDate(1);d.setMonth(d.getMonth()-1);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;}
+  function pendingForMonth(mk){return monthTasks(mk).filter(t=>t&&t.id&&!recurring(t)&&!t.completed);}
+  function doneForMonth(mk){return completedInMonth(mk).filter(t=>t&&t.id&&t.title&&!recurring(t));}
+  function splitLive(list){return {ongoing:list.filter(t=>t.ongoing),pending:list.filter(t=>!t.ongoing)};}
+  function pendingForYear(yr){const now=today();return tasks.filter(t=>t&&t.id&&t.title&&t.date&&String(t.date).slice(0,4)===yr&&!t.completed&&!recurring(t)&&String(t.date)<=now);}
+  function doneForYear(yr){return tasks.filter(t=>t&&t.id&&t.title&&t.completed&&!recurring(t)&&String(t.completedAt||'').slice(0,4)===yr);}
+  function snapSplit(s){
+    const done=s?.done||[], ongoing=s?.ongoing||[], pending=s?.pending||[];
+    return {done,ongoing,pending};
+  }
+
+  window.renderTodo=function(){
+    const list=todoInstances(todoTab);
+    const counts={all:todoInstances('all').length,today:todoInstances('today').length,overdue:todoInstances('overdue').length,inbox:todoInstances('inbox').length,done:todoInstances('done').length};
+    $('#subtabs').innerHTML=['all:全部','today:今天','overdue:逾期','inbox:无日期','done:已完成'].map(x=>{const[a,b]=x.split(':');return `<button class="${todoTab===a?'active':''}" onclick="todoTab='${a}';selectMode=false;selected.clear();render()">${b}${counts[a]?` ${counts[a]}`:''}</button>`}).join('');
+    const top=`<button class="chip" onclick="toggleSelectAllTodo()">${list.length&&list.every(t=>selected.has(instanceKey(t)))?'取消全选':'全选'}</button>`;
+    $('#headActions').innerHTML=top;$('#heading').textContent='Todo';$('#fab').classList.remove('hidden');
+    const dateLabel=ds=>{if(ds==='__none__')return'无日期';const base=today(),d=parseDate(ds),diff=Math.round((d-parseDate(base))/86400000);if(ds===base)return`今天 · ${ds}`;if(diff===-1)return`昨天 · ${ds}`;if(diff===1)return`明天 · ${ds}`;return ds;};
+    const groups=new Map();[...list].sort((a,b)=>(a.date||'9999').localeCompare(b.date||'9999')||priority(a)-priority(b)||(a.start||'').localeCompare(b.start||'')||a.title.localeCompare(b.title)).forEach(t=>{const k=t.date||'__none__';if(!groups.has(k))groups.set(k,[]);groups.get(k).push(t)});
+    let html='';for(const[ds,items]of groups)html+=`<section class="group"><h3>${esc(dateLabel(ds))}<span style="float:right;font-weight:600;color:#8290a2">${items.length}</span></h3>${items.map(taskRow).join('')}</section>`;
+    $('#main').innerHTML=html||'<div class="empty">暂无事项</div>';attachTaskGestures();renderBulk();
   };
+  window.taskRow=function(t){const k=instanceKey(t);return `<div class="task ${t.completed?'done':''} ${t.ongoing&&!t.completed?'ongoing-row':''} ${selected.has(k)?'selected':''}" data-id="${esc(k)}" onclick="taskClick(event,'${esc(k)}')" oncontextmenu="event.preventDefault();toggleSelect('${esc(k)}')"><span class="${selected.size?'selectbox':'check'}"></span><div class="taskmain"><div class="title">${esc(t.title)}${recurrenceLabel(t)}</div><div class="meta">${t.date||'无日期'} ${t.start||''}${t.end?'–'+t.end:''}</div></div><button type="button" class="ongoing-btn ${t.ongoing&&!t.completed?'active':''}" aria-label="${t.ongoing&&!t.completed?'取消 Ongoing':'标记 Ongoing'}" onclick="event.preventDefault();event.stopPropagation();toggleOngoing('${esc(k)}')">◐</button><span class="badge">${t.important?'⭐':''}${t.urgent?'⚡':''}</span></div>`};
+  window.toggleOngoing=function(key){const f=findInstance(key);if(!f)return;if(recurring(f.master)){const ds=f.instance._occurrenceDate;if(ds){const ex=ensureRec(f.master);const ov=ex.overrides[ds]||{};const on=f.instance.ongoing&&!f.instance.completed;ex.overrides[ds]={...ov,ongoing:!on,completed:false};}}else{setStatus(f.master,f.master.ongoing?'pending':'ongoing');}save();render();};
+  window.taskClick=function(e,key){if(taskGesture.suppressClick||taskGesture.moved||taskGesture.long){e.preventDefault();return}const f=findInstance(key);if(!f)return;const check=e.target.closest('.check');if(check){e.preventDefault();e.stopPropagation();toggleInstanceComplete(f.master,f.instance);return}if(selectMode){toggleSelect(key);return}openOccurrenceEditor(f.master,f.instance._occurrenceDate);};
+  window.toggleInstanceComplete=function(master,instance){if(!master||!instance)return;if(recurring(master)){const ds=instance._occurrenceDate||instance.date;if(!ds)return;const ex=ensureRec(master),idx=ex.completed.indexOf(ds);if(instance.completed){if(idx>=0)ex.completed.splice(idx,1);}else{if(idx<0)ex.completed.push(ds);ex.overrides[ds]={...(ex.overrides[ds]||{}),ongoing:false};}}else{if(master.completed){setStatus(master,'pending');}else{setStatus(master,'done');}}save();render();};
+  window.renderBulk=function(){let b=$('#bulk');if(!selectMode){b.classList.add('hidden');return}b.classList.remove('hidden');b.innerHTML=`<span style="padding:8px;font-weight:700;position:sticky;left:0;background:#111">已选 ${selected.size}</span><button onclick="bulk('done')">✓完成</button><button onclick="bulk('ongoing')">◐进行中</button><button onclick="bulk('undone')">↩未完成</button><button onclick="bulk('today')">今天</button><button onclick="bulk('tomorrow')">明天</button><button onclick="bulkDate()">📅日期</button><button onclick="bulkShiftTime()">🕐时间</button><button onclick="bulk('important')">⭐重要</button><button onclick="bulk('urgent')">⚡紧急</button><button onclick="bulk('copy')">📋复制</button><button onclick="bulk('delete')">🗑删除</button><button onclick="selectMode=false;selected.clear();render()">取消</button>`};
+  window.bulk=function(a){const keys=[...selected];if(a==='delete'&&!confirm(`删除 ${keys.length} 个事项？`))return;if(a==='copy'){clipboard=keys.map(k=>findInstance(k)?.instance).filter(Boolean).map(x=>({...cloneObj(x),id:id(),_key:undefined,_masterId:undefined,_occurrenceDate:undefined,_series:undefined,completed:false,completedAt:null,ongoing:false}));selectMode=false;selected.clear();save();render();return}keys.forEach(k=>mutateInstance(k,(m,x)=>{if(a==='done'){if(recurring(m)){const ex=ensureRec(m);if(!ex.completed.includes(x._occurrenceDate))ex.completed.push(x._occurrenceDate);ex.overrides[x._occurrenceDate]={...(ex.overrides[x._occurrenceDate]||{}),ongoing:false};}else setStatus(m,'done')}if(a==='ongoing'){if(recurring(m)){const ex=ensureRec(m);ex.overrides[x._occurrenceDate]={...(ex.overrides[x._occurrenceDate]||{}),ongoing:true,completed:false};}else setStatus(m,'ongoing')}if(a==='undone'){if(recurring(m)){const ex=ensureRec(m);if(ex.completed.includes(x._occurrenceDate))ex.completed=ex.completed.filter(d=>d!==x._occurrenceDate);ex.overrides[x._occurrenceDate]={...(ex.overrides[x._occurrenceDate]||{}),ongoing:false,completed:false};}else setStatus(m,'pending')}if(a==='today'){if(recurring(m)){const ex=ensureRec(m);ex.overrides[x._occurrenceDate]={...(ex.overrides[x._occurrenceDate]||{}),date:today()};}else m.date=today()}if(a==='tomorrow'){if(recurring(m)){const ex=ensureRec(m);ex.overrides[x._occurrenceDate]={...(ex.overrides[x._occurrenceDate]||{}),date:addDays(today(),1)};}else m.date=addDays(today(),1)}if(a==='important'){if(recurring(m)){const ex=ensureRec(m);ex.overrides[x._occurrenceDate]={...(ex.overrides[x._occurrenceDate]||{}),important:!x.important};}else m.important=!m.important}if(a==='urgent'){if(recurring(m)){const ex=ensureRec(m);ex.overrides[x._occurrenceDate]={...(ex.overrides[x._occurrenceDate]||{}),urgent:!x.urgent};}else m.urgent=!m.urgent}if(a==='delete'){if(recurring(m)){const ex=ensureRec(m);if(!ex.deleted.includes(x._occurrenceDate))ex.deleted.push(x._occurrenceDate);}else tasks=tasks.filter(z=>z.id!==m.id)}}));selectMode=false;selected.clear();save();render()};
+
+  const oldOccurrenceData=window.occurrenceData;
+  if(oldOccurrenceData){window.occurrenceData=function(master,occDate){const x=oldOccurrenceData(master,occDate);if(!x)return x;const ex=ensureRec(master),ov=ex.overrides?.[occDate]||{};if(ov.ongoing!=null)x.ongoing=!!ov.ongoing;else x.ongoing=!!master.ongoing;if(x.completed)x.ongoing=false;return x;};}
+  const oldEventHtml=window.eventHtml;
+  if(oldEventHtml){window.eventHtml=function(t,startHour,rowH){let out=oldEventHtml(t,startHour,rowH);if(t.ongoing&&!t.completed)out=out.replace('class="event ','class="event ongoing ');return out;};}
+
+  function liveMonth(mk){const done=doneForMonth(mk),sp=splitLive(pendingForMonth(mk));return {done,ongoing:sp.ongoing,pending:sp.pending};}
+  function liveYear(yr){const done=doneForYear(yr),sp=splitLive(pendingForYear(yr));return {done,ongoing:sp.ongoing,pending:sp.pending};}
+  window.renderMonthlyReview=function(mk=previousMonthKey(),readonly=false){
+    window.__reviewMonth=mk;const r=getReviews()[mk]||{},s=readonly&&r.snapshot?r.snapshot:null,st=s?snapSplit(s):liveMonth(mk);const ya=goals.year,ma=monthGoals(mk),yp=s?s.yearGoalPct:pct3(ya),mp=s?s.monthGoalPct:pct3(ma),rr=s?s.completionRate:rate(st.done,st.ongoing,st.pending),pr=s?.priorityRates||reviewPriority3(st.done,st.ongoing,st.pending),delayed=(s?.delayed||st.pending.filter(t=>Number(t.deferCount||0)>0).sort((a,b)=>(b.deferCount||0)-(a.deferCount||0)).slice(0,5));const fy=s?s.focusYear:(goals.year.find(g=>!g.done)?.title||'全部完成 🎉'),fm=s?s.focusMonth:(ma.find(g=>!g.done)?.title||'全部完成 🎉');
+    $('#heading').textContent='月度回顾';$('#subtabs').innerHTML='';$('#headActions').innerHTML='';$('#fab').classList.add('hidden');
+    const actions=readonly?`<div class="review-actions"><button type="button" class="btn" onclick="renderReviewHistory()">← 返回历史回顾</button></div>`:`<div class="review-actions"><button type="button" class="btn" onclick="openGoalsCurrentMonth()">← 返回目标</button><button type="button" class="btn primary" onclick="completeMonthlyReview()">✓ 完成回顾</button></div>`;
+    const pendingHtml=st.pending.slice(0,10).map(t=>readonly?`<div class="review-stat"><span>☐ ${esc(t.title)}</span></div>`:`<div class="review-stat"><span>☐ ${esc(t.title)}</span><button class="btn small" onclick="shiftTaskToNextMonth('${t.id}')">移到下月</button></div>`).join('');
+    $('#main').innerHTML=`<div class="goals-page"><div class="goals-hero"><h2>📝 ${mk} 月度回顾 <small class="review-status ${r.completed?'review-done':'review-pending'}">${r.completed?'✓ 已完成':'○ 尚未完成'}</small></h2><p>${readonly?'此回顾保存时的信息不会随着后续任务或目标变化而改变。':'默认回顾上个月；你也可以从历史回顾查看已保存月份。'}</p></div><div class="goal-review-card"><h3>🎯 目标</h3><div class="review-stat"><span>年度目标</span><b>${yp}</b></div><div class="review-stat"><span>月度目标</span><b>${mp}</b></div></div><div class="goal-review-card"><h3>📊 本月任务</h3><div class="review-completion-rate"><span>任务完成率</span><b>${rr}%</b></div>${countsHtml(st.done,st.ongoing,st.pending)}<div class="review-priority-block"><div class="review-priority-title">按重要性完成率</div>${priorityHtml(pr)}</div></div><div class="goal-review-card"><h3>✓ 已完成</h3><div class="review-stat"><span>完成 Todo</span><b>${st.done.length}</b></div>${st.done.slice(0,10).map(t=>`<div class="review-stat"><span>✓ ${esc(t.title)}</span><span>${esc(String(t.completedAt||'').slice(0,10))}</span></div>`).join('')||'<div class="empty">本月还没有完成记录</div>'}</div><div class="goal-review-card"><h3>◐ Ongoing</h3><div class="review-stat"><span>进行中</span><b>${st.ongoing.length}</b></div>${st.ongoing.slice(0,10).map(t=>`<div class="review-stat"><span>◐ ${esc(t.title)}</span></div>`).join('')||'<div class="empty">暂无 Ongoing 事项</div>'}</div><div class="goal-review-card"><h3>☐ 未完成</h3><div class="review-stat"><span>本月计划但未完成</span><b>${st.pending.length}</b></div>${pendingHtml||'<div class="empty">全部完成 🎉</div>'}</div><div class="goal-review-card"><h3>🔄 反复延期</h3>${delayed.map(t=>`<div class="review-stat"><span>${esc(t.title)}</span><b>${t.deferCount} 次</b></div>`).join('')||'<div class="empty">暂无反复延期</div>'}</div><div class="goal-review-card"><h3>🔥 本月 Focus</h3><div class="review-stat"><span>年度</span><b>${esc(fy)}</b></div><div class="review-stat"><span>本月</span><b>${esc(fm)}</b></div></div><div class="goal-review-card"><h3>📝 给这个月留一句话</h3><textarea id="monthlyReviewNote" class="review-note" placeholder="这个月最值得肯定自己的事情是……" ${readonly?'readonly':''}>${esc(r.note||'')}</textarea>${actions}</div></div>`;
+  };
+  window.completeMonthlyReview=function(){const mk=window.__reviewMonth||previousMonthKey(),r=getReviews(),st=liveMonth(mk),ya=goals.year,ma=monthGoals(mk);r[mk]={...(r[mk]||{}),note:$('#monthlyReviewNote')?.value||'',completed:true,completedAt:new Date().toISOString(),snapshot:{pending:cloneObj(st.pending.slice(0,10)),ongoing:cloneObj(st.ongoing.slice(0,10)),done:cloneObj(st.done.slice(0,10)),delayed:cloneObj(st.pending.filter(t=>Number(t.deferCount||0)>0).sort((a,b)=>(b.deferCount||0)-(a.deferCount||0)).slice(0,5)),yearGoalPct:pct3(ya),monthGoalPct:pct3(ma),completionRate:rate(st.done,st.ongoing,st.pending),priorityRates:reviewPriority3(st.done,st.ongoing,st.pending),focusYear:goals.year.find(g=>!g.done)?.title||'全部完成 🎉',focusMonth:ma.find(g=>!g.done)?.title||'全部完成 🎉',savedAt:new Date().toISOString()}};saveReviews(r);openGoalsCurrentMonth();};
+
+  window.renderAnnualReview=function(yr=annualKey(),readonly=false){
+    window.__annualReviewYear=yr;const r=getAnnualReviews()[yr]||{},s=readonly&&r.snapshot?r.snapshot:null,st=s?snapSplit(s):liveYear(yr),ys=goals.year,goalPct=s?s.goalPct:pct3(ys),rr=s?s.completionRate:rate(st.done,st.ongoing,st.pending),pr=s?.priorityRates||reviewPriority3(st.done,st.ongoing,st.pending);
+    $('#heading').textContent='年度回顾';$('#subtabs').innerHTML='';$('#headActions').innerHTML='';$('#fab').classList.add('hidden');const actions=readonly?`<div class="review-actions"><button type="button" class="btn" onclick="renderReviewHistory()">← 返回历史回顾</button></div>`:`<div class="review-actions"><button type="button" class="btn" onclick="openGoalsCurrentMonth()">← 返回目标</button><button type="button" class="btn primary" onclick="completeAnnualReview()">✓ 完成回顾</button></div>`;
+    $('#main').innerHTML=`<div class="goals-page"><div class="goals-hero"><h2>📊 ${yr} 年度回顾 <small class="review-status ${r.completed?'review-done':'review-pending'}">${r.completed?'✓ 已完成':'○ 尚未完成'}</small></h2><p>${readonly?'此回顾保存时的信息不会随着后续任务或目标变化而改变。':'年度回顾默认显示今年，也可以回顾其他年份。'}</p></div><div class="goal-review-card"><h3>🎯 年度目标</h3><div class="review-stat"><span>年度目标</span><b>${goalPct}</b></div></div><div class="goal-review-card"><h3>📊 年度任务</h3><div class="review-completion-rate"><span>任务完成率</span><b>${rr}%</b></div>${countsHtml(st.done,st.ongoing,st.pending)}<div class="review-priority-block"><div class="review-priority-title">按重要性完成率</div>${priorityHtml(pr)}</div></div><div class="goal-review-card"><h3>✓ 已完成</h3><div class="review-stat"><span>完成 Todo</span><b>${st.done.length}</b></div>${st.done.slice(0,20).map(t=>`<div class="review-stat"><span>✓ ${esc(t.title)}</span><span>${esc(String(t.completedAt||'').slice(0,10))}</span></div>`).join('')||'<div class="empty">本年度还没有完成记录</div>'}</div><div class="goal-review-card"><h3>◐ Ongoing</h3><div class="review-stat"><span>进行中</span><b>${st.ongoing.length}</b></div>${st.ongoing.slice(0,20).map(t=>`<div class="review-stat"><span>◐ ${esc(t.title)}</span></div>`).join('')||'<div class="empty">暂无 Ongoing 事项</div>'}</div><div class="goal-review-card"><h3>☐ 未完成</h3><div class="review-stat"><span>年度计划但未完成</span><b>${st.pending.length}</b></div>${st.pending.slice(0,20).map(t=>`<div class="review-stat"><span>☐ ${esc(t.title)}</span></div>`).join('')||'<div class="empty">全部完成 🎉</div>'}</div><div class="goal-review-card"><h3>📝 给这一年留一句话</h3><textarea id="annualReviewNote" class="review-note" placeholder="这一年最值得记录的事情是……" ${readonly?'readonly':''}>${esc(r.note||'')}</textarea>${actions}</div></div>`;
+  };
+  window.completeAnnualReview=function(){const yr=window.__annualReviewYear||annualKey(),r=getAnnualReviews(),st=liveYear(yr),ys=goals.year;r[yr]={...(r[yr]||{}),note:$('#annualReviewNote')?.value||'',completed:true,completedAt:new Date().toISOString(),snapshot:{done:cloneObj(st.done.slice(0,20)),ongoing:cloneObj(st.ongoing.slice(0,20)),pending:cloneObj(st.pending.slice(0,20)),goalPct:pct3(ys),completionRate:rate(st.done,st.ongoing,st.pending),priorityRates:reviewPriority3(st.done,st.ongoing,st.pending),savedAt:new Date().toISOString()}};saveAnnualReviews(r);openGoalsCurrentMonth();};
+
+  const oldGoalsRender=window.renderGoals;
+  window.renderGoals=function(resetMonth=false){oldGoalsRender(resetMonth);const e=document.querySelector('.goal-review-entry');if(e){const buttons=e.querySelectorAll('button');if(buttons[0])buttons[0].setAttribute('onclick',`renderMonthlyReview('${previousMonthKey()}')`);if(buttons[1])buttons[1].setAttribute('onclick',`renderAnnualReview('${annualKey()}')`);}};
+
+  /* Make sure existing tasks loaded from older versions get an explicit default. */
+  tasks.forEach(t=>{if(t&&typeof t.ongoing!=='boolean')t.ongoing=false});
+  save();
 })();
 </script>
 
