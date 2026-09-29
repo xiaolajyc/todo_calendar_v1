@@ -4020,7 +4020,7 @@ html.focus-boot-pending .app>.focus-fixed-root{
     ];
     let html='';
     for(const g of groups){
-      const items=list.filter(t=>priority(t)===g.p).sort((a,b)=>(a.start||'').localeCompare(b.start||'')||a.title.localeCompare(b.title));
+      const items=list.filter(t=>priority(t)===g.p).sort((a,b)=>(a.date||'').localeCompare(b.date||'')||(a.start||'').localeCompare(b.start||'')||a.title.localeCompare(b.title));
       if(!items.length)continue;
       html+=`<section class="today-priority-group p${g.p}"><h3 class="today-priority-title">${g.label}<span class="count">${items.length}</span></h3>${items.map(taskRow).join('')}</section>`;
     }
