@@ -4335,4 +4335,169 @@ stAnimationFrame(()=>requestAnimationFrame(fitDesktopCalendarViewport));}
   };
 })();
 </script>
+
+<script id="v164-multi-drag-cross-week-copy-fix">
+(function(){
+  if(window.__v164MultiDragCopyFix)return;
+  window.__v164MultiDragCopyFix=true;
+
+  function dateDelta(a,b){
+    return Math.round((parseDate(b)-parseDate(a))/86400000);
+  }
+  function shiftTaskInstance(key,dayDelta,minuteDelta){
+    const f=findInstance(key);
+    if(!f)return;
+    const m=f.master,x=f.instance;
+    const oldDate=x.date||x._occurrenceDate;
+    if(!oldDate)return;
+    const ns=x.start?Math.max(0,Math.min(1439-(x.end?Math.max(15,timeMin(x.end)-timeMin(x.start)):60),timeMin(x.start)+minuteDelta)):null;
+    const ne=x.end&&ns!=null?Math.min(1439,ns+(timeMin(x.end)-timeMin(x.start))):null;
+    const nd=addDays(oldDate,dayDelta);
+    if(recurring(m)){
+      const ex=ensureRec(m);
+      const patch={...(ex.overrides[oldDate]||{}),date:nd};
+      if(ns!=null){patch.start=timeStr(ns);if(ne!=null)patch.end=timeStr(ne);}
+      ex.overrides[oldDate]=patch;
+    }else{
+      m.date=nd;
+      if(ns!=null){m.start=timeStr(ns);if(ne!=null)m.end=timeStr(ne);}
+    }
+  }
+
+  function installMultiDrag(){
+    if(typeof attachTimelineGestures!=='function')return;
+    const oldAttach=attachTimelineGestures;
+    window.attachTimelineGestures=function(dates,startHour,rowH){
+      oldAttach(dates,startHour,rowH);
+      const cols=[...document.querySelectorAll('.daycol')];
+      if(!cols.length)return;
+      const wrap=document.querySelector('.timeline-wrap');
+      const grid=document.querySelector('.week-grid,.day-grid');
+      const snap=m=>Math.round(m/15)*15;
+      let active=null;
+
+      function colDateAtX(x){
+        if(!grid||!dates.length)return null;
+        const r=grid.getBoundingClientRect();
+        const first=parseDate(fmt(dates[0]));
+        const last=parseDate(fmt(dates[dates.length-1]));
+        if(x<r.left){return fmt(addDays(first,-7));}
+        if(x>r.right){return fmt(addDays(last,7));}
+        const c=cols.find(c=>{const q=c.getBoundingClientRect();return x>=q.left&&x<=q.right});
+        return c?.dataset.date||null;
+      }
+      function minuteAtY(y){
+        const c=cols[0];if(!c)return 0;
+        const r=c.getBoundingClientRect();
+        return Math.max(startHour*60,Math.min(1439,snap((y-r.top)/rowH*60+startHour*60)));
+      }
+      function endMulti(commit,x,y){
+        if(!active)return;
+        const a=active;active=null;
+        document.removeEventListener('pointermove',moveMulti,true);
+        document.removeEventListener('pointerup',upMulti,true);
+        document.removeEventListener('pointercancel',cancelMulti,true);
+        a.ghosts.forEach(g=>g.remove());
+        if(!commit)return;
+        const targetDate=colDateAtX(x);
+        if(!targetDate)return;
+        const anchor=findInstance(a.anchorKey);
+        if(!anchor)return;
+        const dayDelta=dateDelta(anchor.instance.date||anchor.instance._occurrenceDate,targetDate);
+        const targetMinute=minuteAtY(y)-a.grabOffsetMin;
+        const minuteDelta=targetMinute-timeMin(anchor.instance.start);
+        const keys=a.keys;
+        keys.forEach(k=>shiftTaskInstance(k,dayDelta,minuteDelta));
+        save();selectMode=false;selected.clear();render();
+      }
+      function moveMulti(e){
+        if(!active||e.pointerId!==active.pointerId)return;
+        const targetDate=colDateAtX(e.clientX);
+        const anchor=findInstance(active.anchorKey);
+        if(!targetDate||!anchor)return;
+        const dayDelta=dateDelta(anchor.instance.date||anchor.instance._occurrenceDate,targetDate);
+        const targetMinute=minuteAtY(e.clientY)-active.grabOffsetMin;
+        const minuteDelta=targetMinute-timeMin(anchor.instance.start);
+        active.ghosts.forEach(g=>{
+          const k=g.dataset.key,src=active.snapshots.find(x=>x.key===k);if(!src)return;
+          const nd=addDays(src.date,dayDelta),nm=src.start+minuteDelta;
+          const d=dates.findIndex(d=>fmt(d)===nd);
+          if(d>=0){
+            const col=cols[d],top=(nm-startHour*60)/60*rowH;
+            if(g.parentElement!==col)col.appendChild(g);
+            g.style.top=top+'px';
+          }else{
+            g.style.opacity='.35';
+          }
+        });
+        e.preventDefault();
+      }
+      function upMulti(e){if(active&&e.pointerId===active.pointerId)endMulti(true,e.clientX,e.clientY)}
+      function cancelMulti(e){if(active&&e.pointerId===active.pointerId)endMulti(false,e.clientX,e.clientY)}
+
+      document.querySelectorAll('.event').forEach(ev=>{
+        ev.addEventListener('pointerdown',e=>{
+          if(!selectMode||e.pointerType==='mouse'&&e.button!==0)return;
+          const key=ev.dataset.key||ev.dataset.id;
+          if(!selected.has(key))return;
+          const anchor=findInstance(key);if(!anchor||!anchor.instance.start)return;
+          e.stopPropagation();e.preventDefault();
+          const r=ev.getBoundingClientRect();
+          const keys=[...selected];
+          const snapshots=keys.map(k=>{const f=findInstance(k);return f?.instance?.start?{key:k,date:f.instance.date||f.instance._occurrenceDate,start:timeMin(f.instance.start),end:timeMin(f.instance.end)||timeMin(f.instance.start)+60}:null}).filter(Boolean);
+          const ghosts=[];
+          snapshots.forEach(src=>{
+            const node=document.querySelector(`.event[data-key="${CSS.escape(src.key)}"]`);
+            if(!node)return;
+            const g=node.cloneNode(true);g.classList.add('dragging');g.dataset.key=src.key;g.style.pointerEvents='none';
+            const c=node.closest('.daycol');if(c)c.appendChild(g);ghosts.push(g);
+          });
+          active={pointerId:e.pointerId,anchorKey:key,grabOffsetMin:(e.clientY-r.top)/rowH*60,snapshots,ghosts,keys};
+          document.addEventListener('pointermove',moveMulti,true);
+          document.addEventListener('pointerup',upMulti,true);
+          document.addEventListener('pointercancel',cancelMulti,true);
+        },{passive:false});
+      });
+    };
+  }
+  installMultiDrag();
+
+  /* Copy/paste semantics: copy a single/current selection to its corresponding
+     date; copying an entire week preserves the week-relative dates when pasted
+     into another week. */
+  const oldPaste=window.pasteCalendar;
+  window.pasteCalendar=function(){
+    if(!clipboard.length){alert('复制板为空，请先复制事项。');return;}
+    const target=calMode==='week'?fmt(weekDates()[0]):fmt(calDate);
+    const hasWeekOffsets=clipboard.some(x=>x&&x._copyOffsetDays!=null);
+    const copies=clipboard.map(x=>{
+      const n=cloneObj(x);n.id=id();n.completed=false;n.completedAt=null;n.ongoing=false;
+      delete n._key;delete n._masterId;delete n._occurrenceDate;delete n._series;
+      if(x.date){
+        if(hasWeekOffsets){n.date=addDays(target,Number(x._copyOffsetDays)||0);}
+        else n.date=target;
+      }else n.date=target;
+      delete n._copyOffsetDays;
+      return n;
+    });
+    tasks.push(...copies);selectMode=false;selected.clear();save();render();
+  };
+
+  /* Single/multi selection copy records whether the source is a whole week. */
+  const oldBulk=window.bulk;
+  window.bulk=function(a){
+    if(a!=='copy')return oldBulk(a);
+    const list=[...selected].map(k=>findInstance(k)?.instance).filter(Boolean);
+    if(!list.length)return;
+    /* Multi-select copy means: paste these items on the corresponding target date.
+       Only the explicit “复制本周/复制当天” actions use _copyOffsetDays. */
+    clipboard=list.map(x=>{
+      const n=cloneObj(x);n.id=id();n.completed=false;n.completedAt=null;n.ongoing=false;
+      delete n._key;delete n._masterId;delete n._occurrenceDate;delete n._series;delete n._copyOffsetDays;
+      return n;
+    });
+    selectMode=false;selected.clear();save();render();
+  };
+})();
+</script>
 </body></html>
