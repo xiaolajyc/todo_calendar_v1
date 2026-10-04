@@ -3011,7 +3011,7 @@ render=function(){
 
 <script>
 if('serviceWorker' in navigator){
-  window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=2.166',{updateViaCache:'none'}).catch(()=>{}));
+  window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=2.167',{updateViaCache:'none'}).catch(()=>{}));
 }
 </script>
 
@@ -4608,4 +4608,55 @@ stAnimationFrame(()=>requestAnimationFrame(fitDesktopCalendarViewport));}
   saveGoals();
 })();
 </script>
+
+<style id="v2-167-goal-web-layout-fix">
+/* v2.167: Goal page web/tablet layout fix. The older <=799px rules could switch
+   the goal cards into the mobile stacked layout on desktop browsers using high zoom.
+   Restore the normal horizontal goal row whenever the available CSS viewport is wide enough. */
+@media(min-width:700px){
+  .goals-page{width:min(980px,calc(100% - 32px));max-width:980px;margin:0 auto}
+  .goal-section{width:100%;box-sizing:border-box}
+  .goal-row{
+    position:relative!important;
+    display:grid!important;
+    grid-template-columns:34px 28px minmax(0,1fr) auto!important;
+    grid-template-rows:auto!important;
+    align-items:start!important;
+    column-gap:10px!important;
+    row-gap:0!important;
+    padding:12px 13px!important;
+    box-sizing:border-box!important;
+  }
+  .goal-main{
+    display:block!important;
+    grid-column:3!important;
+    grid-row:1!important;
+    min-width:0!important;
+    width:auto!important;
+  }
+  .goal-check{grid-column:1!important;grid-row:1!important;margin-top:1px!important}
+  .goal-rank{grid-column:2!important;grid-row:1!important}
+  .goal-text{
+    grid-column:auto!important;grid-row:auto!important;
+    display:block!important;width:auto!important;min-width:0!important;
+    padding-right:0!important;white-space:normal!important;
+    overflow:visible!important;text-overflow:clip!important;
+    line-height:1.4!important;
+  }
+  .goal-okr{
+    grid-column:auto!important;grid-row:auto!important;
+    width:100%!important;min-width:0!important;margin-top:7px!important;
+    box-sizing:border-box!important;
+  }
+  .goal-actions{
+    position:static!important;
+    grid-column:4!important;grid-row:1!important;
+    align-self:start!important;
+    display:flex!important;gap:5px!important;z-index:auto!important;
+  }
+  .goal-actions button{width:34px!important;min-width:34px!important;height:34px!important;min-height:34px!important}
+  .goal-kr-grid{width:100%!important}
+}
+</style>
+
 </body></html>
