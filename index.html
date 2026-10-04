@@ -8,7 +8,7 @@
 <link rel="manifest" href="./manifest.json">
 <link rel="apple-touch-icon" href="./icon-180.png">
 <link rel="icon" href="./icon-192.png" type="image/png">
-<title>v2.167 · Todo Calendar</title>
+<title>v2.166 · Todo Calendar</title>
 <style>
 :root{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#171717;background:#f5f5f7;--line:#e7e7eb;--muted:#777;--accent:#111}*{box-sizing:border-box}body{margin:0;background:#f5f5f7;overscroll-behavior:none}.app{max-width:1100px;margin:auto;min-height:100vh;background:#fff;padding-bottom:68px}.head{position:sticky;top:0;background:rgba(255,255,255,.96);backdrop-filter:blur(12px);padding:12px 14px;border-bottom:1px solid var(--line);z-index:30}.headtop{display:flex;align-items:center;justify-content:space-between;gap:8px}.head h1{margin:0;font-size:21px}.tabs,.seg{display:flex;gap:6px;margin-top:10px;overflow:auto}.tabs button,.seg button,.chip{border:0;border-radius:10px;padding:8px 11px;background:#eee;white-space:nowrap}.active{background:#111!important;color:#fff}.content{padding:12px}.group{margin:18px 0}.group h3{font-size:14px;margin:0 0 6px}.task{display:flex;align-items:center;gap:10px;padding:13px 7px;border-bottom:1px solid #eee;touch-action:pan-y}.check{width:23px;height:23px;cursor:pointer;border:2px solid #aaa;border-radius:50%;flex:none}.done .check{background:#111}.done .title{text-decoration:line-through;opacity:.45}.taskmain{flex:1;min-width:0}.title{font-weight:600}.meta{font-size:12px;color:#777;margin-top:3px}.badge{font-size:12px}.fab{position:fixed;right:18px;bottom:88px;width:56px;height:56px;border-radius:50%;border:0;background:#111;color:#fff;font-size:30px;z-index:20;box-shadow:0 5px 20px #0002}.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(1100px,100%);height:70px;background:#fff;border-top:1px solid #ddd;display:flex;z-index:40;padding-bottom:env(safe-area-inset-bottom)}.nav button{flex:1;border:0;background:white;font-size:13px}.nav .active{color:#fff!important;background:var(--primary,#3478f6)!important}.card{background:#f5f5f7;border-radius:16px;padding:14px;margin-bottom:12px}.row{display:flex;gap:10px;align-items:center}.row>*{flex:1}.field{margin:12px 0}.field label{display:block;font-size:12px;color:#666;margin-bottom:5px}.field input,.field textarea,.field select{width:100%;padding:12px;border:1px solid #ddd;border-radius:12px;background:#fff}.primary,.danger{border:0;border-radius:12px;padding:12px 16px}.primary{background:#111;color:#fff}.danger{background:#eee}.hidden{display:none!important}.empty{text-align:center;color:#888;padding:35px 10px}
 /* Google Calendar-like week/day timeline */
@@ -1592,8 +1592,8 @@ function copyOne(i){let t=tasks.find(x=>x.id===i);if(t){clipboard=[{...t,id:id()
 function removeTask(i){if(confirm('删除此事项？')){tasks=tasks.filter(t=>t.id!==i);save();render()}}
 function renderSettings(){
   /* v2.95: version information belongs in Settings, not beside the page title. */
-  const VERSION_INFO_HTML = '<div class="settings-card version-info-card"><div class="settings-title">版本信息</div><div class="settings-row"><span>Todo 日历</span><b>v2.167</b></div></div>';
-$('#subtabs').innerHTML='';$('#headActions').innerHTML='';$('#main').innerHTML=`<div class="card"><b>版本信息</b><p>Todo 日历 v2.167</p></div><div class="card"><b>每日开始时间</b><p>06:30（今天/逾期和每日刷新边界）</p></div><div class="card"><b>默认事件时长</b><p>60 分钟</p></div><div class="card"><div class="settings-data-actions"><button class="primary" onclick="exportData()">导出 JSON</button><button class="danger" onclick="clipboard=[];render()">清空复制板</button><label class="danger">导入 JSON<input type="file" accept="application/json" hidden onchange="importData(this)"></label></div></div><div class="card drive-sync-card"><b>Google Drive 云同步</b><p id="driveStatus" style="margin:7px 0;color:#718096">正在检查 Google Drive…</p><div class="row"><button class="primary" id="driveConnectBtn" onclick="driveConnect()">连接 Google Drive</button><button class="danger" id="driveDisconnectBtn" onclick="driveDisconnect()">断开</button></div><div class="row" style="margin-top:8px"><button class="primary" id="driveUploadBtn" onclick="driveUpload()">☁️ 上传/同步</button><button class="danger" id="driveDownloadBtn" onclick="driveDownload()">⬇️ 从云端恢复</button></div><label style="display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13px"><input id="driveAutoSync" type="checkbox" onchange="driveSetAutoSync(this.checked)"> 数据修改后自动同步</label><div id="driveDetail" style="font-size:11px;color:#8a94a6;margin-top:8px;line-height:1.45"></div></div><div class="card"><b>本地数据</b><p>${tasks.length} 个事项。当前数据保存在浏览器本地。</p><button class="danger" style="margin-top:8px;width:100%;color:#c62828" onclick="clearAllData()">⚠️ 清除全部数据</button></div>`}
+  const VERSION_INFO_HTML = '<div class="settings-card version-info-card"><div class="settings-title">版本信息</div><div class="settings-row"><span>Todo 日历</span><b>v2.166</b></div></div>';
+$('#subtabs').innerHTML='';$('#headActions').innerHTML='';$('#main').innerHTML=`<div class="card"><b>版本信息</b><p>Todo 日历 v2.166</p></div><div class="card"><b>每日开始时间</b><p>06:30（今天/逾期和每日刷新边界）</p></div><div class="card"><b>默认事件时长</b><p>60 分钟</p></div><div class="card"><div class="settings-data-actions"><button class="primary" onclick="exportData()">导出 JSON</button><button class="danger" onclick="clipboard=[];render()">清空复制板</button><label class="danger">导入 JSON<input type="file" accept="application/json" hidden onchange="importData(this)"></label></div></div><div class="card drive-sync-card"><b>Google Drive 云同步</b><p id="driveStatus" style="margin:7px 0;color:#718096">正在检查 Google Drive…</p><div class="row"><button class="primary" id="driveConnectBtn" onclick="driveConnect()">连接 Google Drive</button><button class="danger" id="driveDisconnectBtn" onclick="driveDisconnect()">断开</button></div><div class="row" style="margin-top:8px"><button class="primary" id="driveUploadBtn" onclick="driveUpload()">☁️ 上传/同步</button><button class="danger" id="driveDownloadBtn" onclick="driveDownload()">⬇️ 从云端恢复</button></div><label style="display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13px"><input id="driveAutoSync" type="checkbox" onchange="driveSetAutoSync(this.checked)"> 数据修改后自动同步</label><div id="driveDetail" style="font-size:11px;color:#8a94a6;margin-top:8px;line-height:1.45"></div></div><div class="card"><b>本地数据</b><p>${tasks.length} 个事项。当前数据保存在浏览器本地。</p><button class="danger" style="margin-top:8px;width:100%;color:#c62828" onclick="clearAllData()">⚠️ 清除全部数据</button></div>`}
 function clearAllData(){
   if(!confirm('第一次确认：确定要清除全部 Todo、日历事项和本地数据吗？此操作不可撤销。'))return;
   if(!confirm('第二次确认：再次确认要永久删除全部数据吗？'))return;
@@ -1603,7 +1603,7 @@ function clearAllData(){
 }
 function exportData(){
   const backup={
-    version:'2.165',
+    version:'2.166',
     tasks:cloneObj(tasks),
     goals:cloneObj(goals||{year:[],monthByKey:{}}),
     monthlyReviews:cloneObj(getReviews()),
@@ -1612,7 +1612,7 @@ function exportData(){
   };
   let a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([JSON.stringify(backup,null,2)],{type:'application/json'}));
-  a.download='todo-calendar-backup-v2.167.json';
+  a.download='todo-calendar-backup-v2.166.json';
   a.click();
   setTimeout(()=>URL.revokeObjectURL(a.href),1500)
 }
@@ -2214,7 +2214,7 @@ function attachTimelineGestures(dates,startHour,rowH){
     const clamp=(m,dur=0)=>Math.max(startHour*60,Math.min(1439-dur,snap(m)));
     const minAt=(y,col)=>{const r=col.getBoundingClientRect();return (y-r.top)/rowH*60+startHour*60};
     const colAtX=x=>cols.find(c=>{const r=c.getBoundingClientRect();return x>=r.left&&x<=r.right})||cols.reduce((best,c)=>{const r=c.getBoundingClientRect(),d=x<r.left?r.left-x:x>r.right?x-r.right:0,br=best.getBoundingClientRect(),bd=x<br.left?br.left-x:x>br.right?x-br.right:0;return d<bd?c:best},cols[0]);
-    /* v2.167: week drag may leave the visible 7-day grid.  Resolve the pointer
+    /* v2.166: week drag may leave the visible 7-day grid.  Resolve the pointer
        position to the actual adjacent date instead of clamping it to Sunday/Monday. */
     const weekDragTarget=x=>{
       if(calMode!=='week'||!dates.length)return null;
@@ -2794,7 +2794,7 @@ function renderGoals(resetMonth=false){
   $('#heading').textContent='目标'; $('#subtabs').innerHTML=''; $('#headActions').innerHTML=''; $('#fab').classList.add('hidden');
   const y=goals.year,m=monthGoals(viewMonth());
   const section=(type,label,icon,arr)=>{return `<section class="goal-section"><div class="goal-section-head"><h3>${icon} ${label}</h3><span class="goal-limit">${pct3(arr)}</span></div><div class="goal-list">${arr.map((g,i)=>renderGoalRow(type,g,i,arr)).join('')}</div>${arr.length<3?`<button class="goal-add" type="button" onclick="addGoal('${type}')">＋ 添加${label}</button>`:''}</section>`};
-  $('#main').innerHTML=`<div class="goals-page"><div class="goals-hero"><h2>🎯 少一点计划，多一点行动</h2><p>年度最多 3 个目标；月度 OKR 按月份独立保存。</p></div>${section('year','年度目标','🎯',y)}<section class="goal-section"><div class="goal-section-head"><h3>📅 月度目标</h3><span class="goal-limit">${pct3(m)}</span></div><div class="goal-month-toolbar"><button type="button" onclick="changeGoalMonth(-1)">‹</button><input id="goalMonthPicker" type="month" value="${viewMonth()}" onchange="setGoalViewMonth(this.value)"><button type="button" onclick="changeGoalMonth(1)">›</button></div><div class="goal-list">${m.map((g,i)=>renderGoalRowSelectable('month',g,i,m)).join('')}</div>${m.length<3?`<button class="goal-add" type="button" onclick="addGoal('month')">＋ 添加 ${viewMonth()} 月度目标</button>`:''}</section><div class="goal-review-entry"><button class="goal-add" type="button" onclick="renderMonthlyReview(monthKey())">📝 月度回顾</button><button class="goal-add" type="button" onclick="renderAnnualReview()">📊 年度回顾</button><button class="goal-add" type="button" onclick="renderReviewHistory()">📚 历史回顾</button></div></div>`;
+  $('#main').innerHTML=`<div class="goals-page"><div class="goals-hero"><h2>🎯 少一点计划，多一点行动</h2><p>年度最多 3 个目标；月度 OKR 按月份独立保存。</p></div>${section('year','年度目标','🎯',y)}<section class="goal-section"><div class="goal-section-head"><h3>📅 月度目标</h3><span class="goal-limit">${pct3(m)}</span></div><div class="goal-month-toolbar"><button type="button" onclick="changeGoalMonth(-1)">‹</button><input id="goalMonthPicker" type="month" value="${viewMonth()}" onchange="setGoalViewMonth(this.value)"><button type="button" onclick="changeGoalMonth(1)">›</button></div><div class="goal-list">${m.map((g,i)=>renderGoalRow('month',g,i,m)).join('')}</div>${m.length<3?`<button class="goal-add" type="button" onclick="addGoal('month')">＋ 添加 ${viewMonth()} 月度目标</button>`:''}</section><div class="goal-review-entry"><button class="goal-add" type="button" onclick="renderMonthlyReview(monthKey())">📝 月度回顾</button><button class="goal-add" type="button" onclick="renderAnnualReview()">📊 年度回顾</button><button class="goal-add" type="button" onclick="renderReviewHistory()">📚 历史回顾</button></div></div>`;
 }
 function setGoalViewMonth(v){if(!/^\d{4}-\d{2}$/.test(v)||Number(v.slice(5))<1||Number(v.slice(5))>12)return alert('请选择有效月份');goalViewMonth=v;renderGoals()}
 function changeGoalMonth(d){const [y,m]=viewMonth().split('-').map(Number);const x=new Date(y,m-1+d,1);goalViewMonth=`${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,'0')}`;renderGoals()}
@@ -3011,7 +3011,7 @@ render=function(){
 
 <script>
 if('serviceWorker' in navigator){
-  window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=2.165',{updateViaCache:'none'}).catch(()=>{}));
+  window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=2.166',{updateViaCache:'none'}).catch(()=>{}));
 }
 </script>
 
@@ -3652,7 +3652,7 @@ body:has(.nav button[data-page="settings"].active) #main.content.focus-fixed-off
     return data.files?.sort((a,b)=>String(b.modifiedTime).localeCompare(String(a.modifiedTime)))[0]||null;
   }
   function buildBackup(){
-    return {format:'todo-calendar-drive-v1',appVersion:'2.167',tasks:cloneObj(tasks),goals:cloneObj(goals||{year:[],monthByKey:{}}),monthlyReviews:cloneObj(getReviews()),annualReviews:cloneObj(getAnnualReviews()),exportedAt:new Date().toISOString()};
+    return {format:'todo-calendar-drive-v1',appVersion:'2.166',tasks:cloneObj(tasks),goals:cloneObj(goals||{year:[],monthByKey:{}}),monthlyReviews:cloneObj(getReviews()),annualReviews:cloneObj(getAnnualReviews()),exportedAt:new Date().toISOString()};
   }
   function applyBackup(x){
     if(!x||!Array.isArray(x.tasks))throw new Error('云端文件格式不正确');
@@ -4239,7 +4239,7 @@ stAnimationFrame(()=>requestAnimationFrame(fitDesktopCalendarViewport));}
    time-range overlap. Keeping the old observer would overwrite N-column layout. */
 </script>
 <style id="v164-final-overlap-style">
-/* v2.167: week-view drag can commit to dates immediately outside the visible week. */
+/* v2.166: week-view drag can commit to dates immediately outside the visible week. */
 /* v2.164 final: timed events use the calculated N-column layout. All-day items keep priority colors. */
 .event{box-sizing:border-box;overflow:hidden}
 .allday-chip{box-sizing:border-box;}
@@ -4528,127 +4528,84 @@ stAnimationFrame(()=>requestAnimationFrame(fitDesktopCalendarViewport));}
 })();
 </script>
 
-<script id="v2-166-goal-period-shift">
+<style id="v2-166-goal-shift">
+.goal-shift-toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:8px 0 10px;padding:7px;background:#f7f9fc;border:1px solid #e4eaf2;border-radius:10px}
+.goal-shift-toolbar button{border:0;border-radius:8px;padding:7px 10px;background:#e9eff7;color:#344b68;font-weight:700}
+.goal-shift-toolbar button.primary{background:#111;color:#fff}
+.goal-shift-toolbar .goal-shift-count{font-size:12px;color:#68788e;margin-right:auto}
+.goal-select{width:20px;height:20px;flex:none;accent-color:#111}
+.goal-row.goal-picked{outline:2px solid #111;outline-offset:-2px;background:#f7f9ff}
+.goal-year-toolbar{display:flex;align-items:center;gap:7px;margin:8px 0 10px}
+.goal-year-toolbar button{border:0;border-radius:8px;padding:7px 11px;background:#eef3f8;font-weight:700}
+.goal-year-toolbar input{width:90px;text-align:center;border:1px solid #d6deea;border-radius:8px;padding:7px}
+</style>
+<script id="v2-166-goal-shift">
 (function(){
-  /* v2.167: annual/monthly goals can be moved as a whole to the adjacent period. */
-  const CURRENT_YEAR=()=>String(new Date().getFullYear());
-  let goalViewYear=CURRENT_YEAR();
-  const selectedYearGoals=new Set();
-  const selectedMonthGoals=new Set();
-
-  function normalizeYearMap(raw){
-    const out={};
-    if(raw&&typeof raw==='object'&&!Array.isArray(raw)){
-      Object.entries(raw).forEach(([k,v])=>{ if(/^\d{4}$/.test(k)) out[k]=normalizeGoalArray(v); });
+  /* v2.166: move one or multiple monthly/yearly goals as a group. */
+  if(!goals.yearByKey||typeof goals.yearByKey!=='object'||Array.isArray(goals.yearByKey)){
+    goals.yearByKey={};
+    goals.yearByKey[goalYear()]=Array.isArray(goals.year)?goals.year:[];
+  }else if(!goals.yearByKey[goalYear()]){
+    goals.yearByKey[goalYear()]=Array.isArray(goals.year)?goals.year:[];
+  }
+  goals.year=goals.yearByKey[goalYear()]||[];
+  let goalViewYear=goalYear();
+  const goalPicked={year:new Set(),month:new Set()};
+  const yearGoals=(yr=goalYear())=>goals.yearByKey[yr]||[];
+  const setYearGoals=(yr,arr)=>{if(arr.length)goals.yearByKey[yr]=arr;else delete goals.yearByKey[yr];if(yr===goalYear())goals.year=arr};
+  const clearGoalPicked=()=>{goalPicked.year.clear();goalPicked.month.clear()};
+  window.toggleGoalPick=function(type,i){const s=goalPicked[type];s.has(i)?s.delete(i):s.add(i);renderGoals()};
+  window.clearGoalPicked=clearGoalPicked;
+  window.changeGoalYear=function(d){const n=Number(goalViewYear)+d;if(!Number.isFinite(n)||n<1970||n>2100)return;goalViewYear=String(n);goalPicked.year.clear();renderGoals()};
+  window.setGoalViewYear=function(v){if(!/^\\d{4}$/.test(v))return;goalViewYear=v;goalPicked.year.clear();renderGoals()};
+  window.shiftSelectedGoals=function(type,d){
+    const picked=[...goalPicked[type]].sort((a,b)=>b-a);
+    if(!picked.length)return alert('请先勾选一个或多个目标');
+    if(type==='month'){
+      const from=viewMonth(),dt=new Date(Number(from.slice(0,4)),Number(from.slice(5))-1+d,1),to=`${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}`;
+      if(to===from)return;
+      const src=monthGoals(from).slice();const dest=monthGoals(to).slice();
+      if(dest.length+picked.length>3)return alert(`${to} 已有 ${dest.length} 个目标，最多 3 个，无法整体移动 ${picked.length} 个目标。`);
+      const moving=picked.map(i=>src[i]).filter(Boolean);
+      picked.forEach(i=>{if(i>=0&&i<src.length)src.splice(i,1)});
+      dest.push(...moving);setMonthGoals(from,src);setMonthGoals(to,dest);goalViewMonth=to;goalPicked.month.clear();saveGoals();renderGoals();
+    }else{
+      const from=goalViewYear,to=String(Number(from)+d);if(Number(to)<1970||Number(to)>2100)return;
+      const src=yearGoals(from).slice(),dest=yearGoals(to).slice();
+      if(dest.length+picked.length>3)return alert(`${to} 年已有 ${dest.length} 个目标，最多 3 个，无法整体移动 ${picked.length} 个目标。`);
+      const moving=picked.map(i=>src[i]).filter(Boolean);
+      picked.forEach(i=>{if(i>=0&&i<src.length)src.splice(i,1)});
+      dest.push(...moving);setYearGoals(from,src);setYearGoals(to,dest);goalViewYear=to;goalPicked.year.clear();saveGoals();renderGoals();
     }
-    if(!Object.keys(out).length && Array.isArray(goals?.year)) out[CURRENT_YEAR()]=normalizeGoalArray(goals.year);
-    return out;
-  }
-  goals.yearByKey=normalizeYearMap(goals.yearByKey);
-  if(!goals.yearByKey[CURRENT_YEAR()]) goals.yearByKey[CURRENT_YEAR()]=normalizeGoalArray(goals.year||[]);
-  goals.year=goals.yearByKey[CURRENT_YEAR()];
-
-  function persistGoals166(){
-    goals.year=goals.yearByKey[CURRENT_YEAR()]||[];
-    localStorage.setItem(GOAL_DB,JSON.stringify(goals));
-    window.__driveScheduleSync?.();
-  }
-  function yearGoals(y=goalViewYear){return goals.yearByKey[y]||[]}
-  function setYearGoals(y,arr){ if(arr.length) goals.yearByKey[y]=arr; else delete goals.yearByKey[y]; }
-  function shiftMonthKey166(k,d){const [y,m]=k.split('-').map(Number);const x=new Date(y,m-1+d,1);return `${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,'0')}`}
-  function shiftYearKey166(y,d){return String(Number(y)+d)}
-
-  window.goalFocusBar=function(){
-    const y=yearGoals(CURRENT_YEAR()).find(g=>!g.done),m=monthGoals(goalMonth()).find(g=>!g.done);
-    return `<div class="goals-focus" aria-label="Focus"><div class="goal-focus-card"><div class="goal-focus-label">🎯 ${CURRENT_YEAR()} 年 Focus</div><div class="goal-focus-title ${y?'':'goal-focus-empty'}" title="${escGoal(y?.title||'')}">${escGoal(y?.title||'年度目标已全部完成')}</div></div><div class="goal-focus-card month"><div class="goal-focus-label">📅 本月 Focus</div><div class="goal-focus-title ${m?'':'goal-focus-empty'}" title="${escGoal(m?.title||'')}">${escGoal(m?.title||'本月目标已全部完成')}</div></div></div>`;
   };
-
+  const baseSave=saveGoals;
+  window.saveGoals=function(){goals.year=yearGoals(goalYear());baseSave()};
+  /* Use the existing row content, but prepend a multi-select checkbox. */
+  const baseRow=renderGoalRow;
+  window.renderGoalRow=function(type,g,i,arr){
+    const html=baseRow(type,g,i,arr);
+    return html.replace('<div class="goal-row ',`<div class="goal-row ${goalPicked[type].has(i)?'goal-picked ':''}`).replace('<button class="goal-check"',`<input class="goal-select" type="checkbox" ${goalPicked[type].has(i)?'checked':''} aria-label="选择目标" onclick="event.stopPropagation();toggleGoalPick('${type}',${i})"><button class="goal-check"`);
+  };
+  const oldRenderGoals=renderGoals;
   window.renderGoals=function(resetMonth=false){
-    document.querySelectorAll('.goals-focus').forEach(el=>el.remove());
-    document.querySelectorAll('.app>.focus-fixed-root').forEach(el=>el.remove());
-    document.getElementById('main')?.classList.remove('focus-fixed-offset');
-    document.getElementById('main')?.style.removeProperty('padding-top');
-    if(resetMonth){goalViewMonth=goalMonth();goalViewYear=CURRENT_YEAR();}
+    if(resetMonth){goalViewMonth=goalMonth();goalViewYear=goalYear()}
+    document.querySelectorAll('.goals-focus').forEach(el=>el.remove());document.querySelectorAll('.app>.focus-fixed-root').forEach(el=>el.remove());document.getElementById('main')?.classList.remove('focus-fixed-offset');document.getElementById('main')?.style.removeProperty('padding-top');
     document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.page==='goals'));
-    $('#heading').textContent='目标'; $('#subtabs').innerHTML=''; $('#headActions').innerHTML=''; $('#fab').classList.add('hidden');
     const y=yearGoals(goalViewYear),m=monthGoals(viewMonth());
-    const section=(type,label,icon,arr)=>`<section class="goal-section"><div class="goal-section-head"><h3>${icon} ${label}</h3><span class="goal-limit">${pct3(arr)}</span></div><div class="goal-list">${arr.map((g,i)=>renderGoalRow(type,g,i,arr)).join('')}</div>${arr.length<3?`<button class="goal-add" type="button" onclick="addGoal('${type}')">＋ 添加${label}</button>`:''}</section>`;
-    $('#main').innerHTML=`<div class="goals-page"><div class="goals-hero"><h2>🎯 少一点计划，多一点行动</h2><p>年度最多 3 个目标；月度 OKR 按月份独立保存。可选择一个或多个目标，整体提前或推迟。</p></div>
-      <section class="goal-section"><div class="goal-section-head"><h3>🎯 ${goalViewYear} 年度目标</h3><span class="goal-limit">${pct3(y)}</span></div>
-        <div class="goal-period-toolbar"><button type="button" class="btn small" onclick="shiftYearGoals(-1)">← 提前 1 年</button><button type="button" class="btn small" onclick="shiftYearGoals(1)">推迟 1 年 →</button><button type="button" class="btn small" onclick="toggleAllGoalSelection('year')">全选/取消全选</button></div>
-        <div class="goal-year-picker"><button type="button" class="btn small" onclick="changeGoalYear(-1)">‹</button><input type="number" min="2000" max="2100" value="${goalViewYear}" onchange="setGoalViewYear(this.value)"><button type="button" class="btn small" onclick="changeGoalYear(1)">›</button></div>
-        <div class="goal-list">${y.map((g,i)=>renderGoalRowSelectable('year',g,i,y)).join('')}</div>${y.length<3?`<button class="goal-add" type="button" onclick="addGoal('year')">＋ 添加年度目标</button>`:''}
-      </section>
-      <section class="goal-section"><div class="goal-section-head"><h3>📅 ${viewMonth()} 月度目标</h3><span class="goal-limit">${pct3(m)}</span></div>
-        <div class="goal-month-toolbar"><button type="button" onclick="changeGoalMonth(-1)">‹</button><input id="goalMonthPicker" type="month" value="${viewMonth()}" onchange="setGoalViewMonth(this.value)"><button type="button" onclick="changeGoalMonth(1)">›</button></div>
-        <div class="goal-period-toolbar"><button type="button" class="btn small" onclick="shiftMonthGoals(-1)">← 提前 1 个月</button><button type="button" class="btn small" onclick="shiftMonthGoals(1)">推迟 1 个月 →</button><button type="button" class="btn small" onclick="toggleAllGoalSelection('month')">全选/取消全选</button></div>
-        <div class="goal-list">${m.map((g,i)=>renderGoalRowSelectable('month',g,i,m)).join('')}</div>${m.length<3?`<button class="goal-add" type="button" onclick="addGoal('month')">＋ 添加 ${viewMonth()} 月度目标</button>`:''}
-      </section><div class="goal-review-entry"><button class="goal-add" type="button" onclick="renderMonthlyReview(monthKey())">📝 月度回顾</button><button class="goal-add" type="button" onclick="renderAnnualReview()">📊 年度回顾</button><button class="goal-add" type="button" onclick="renderReviewHistory()">📚 历史回顾</button></div></div>`;
+    const section=(type,label,icon,arr)=>`<section class="goal-section"><div class="goal-section-head"><h3>${icon} ${label}</h3><span class="goal-limit">${pct3(arr)}</span></div>${type==='year'?`<div class="goal-year-toolbar"><button type="button" onclick="changeGoalYear(-1)">‹</button><input type="number" min="1970" max="2100" value="${goalViewYear}" onchange="setGoalViewYear(this.value)"><button type="button" onclick="changeGoalYear(1)">›</button></div>`:''}<div class="goal-shift-toolbar"><span class="goal-shift-count">已选 ${goalPicked[type].size} 个</span><button type="button" onclick="shiftSelectedGoals('${type}',-1)">← 提前${type==='year'?'1 年':'1 个月'}</button><button type="button" onclick="shiftSelectedGoals('${type}',1)">推迟${type==='year'?'1 年':'1 个月'} →</button>${goalPicked[type].size?`<button type="button" onclick="clearGoalPicked();renderGoals()">取消选择</button>`:''}</div><div class="goal-list">${arr.map((g,i)=>renderGoalRow(type,g,i,arr)).join('')}</div>${arr.length<3?`<button class="goal-add" type="button" onclick="addGoal('${type}')">＋ 添加${label}</button>`:''}</section>`;
+    $('#heading').textContent='目标';$('#subtabs').innerHTML='';$('#headActions').innerHTML='';$('#fab').classList.add('hidden');
+    $('#main').innerHTML=`<div class="goals-page"><div class="goals-hero"><h2>🎯 少一点计划，多一点行动</h2><p>年度最多 3 个目标；月度 OKR 按月份独立保存。勾选一个或多个目标后，可以整体提前或推迟。</p></div>${section('year','年度目标','🎯',y)}<section class="goal-section"><div class="goal-section-head"><h3>📅 月度目标</h3><span class="goal-limit">${pct3(m)}</span></div><div class="goal-month-toolbar"><button type="button" onclick="changeGoalMonth(-1)">‹</button><input id="goalMonthPicker" type="month" value="${viewMonth()}" onchange="setGoalViewMonth(this.value)"><button type="button" onclick="changeGoalMonth(1)">›</button></div><div class="goal-shift-toolbar"><span class="goal-shift-count">已选 ${goalPicked.month.size} 个</span><button type="button" onclick="shiftSelectedGoals('month',-1)">← 提前1个月</button><button type="button" onclick="shiftSelectedGoals('month',1)">推迟1个月 →</button>${goalPicked.month.size?`<button type="button" onclick="clearGoalPicked();renderGoals()">取消选择</button>`:''}</div><div class="goal-list">${m.map((g,i)=>renderGoalRow('month',g,i,m)).join('')}</div>${m.length<3?`<button class="goal-add" type="button" onclick="addGoal('month')">＋ 添加 ${viewMonth()} 月度目标</button>`:''}</section><div class="goal-review-entry"><button class="goal-add" type="button" onclick="renderMonthlyReview(monthKey())">📝 月度回顾</button><button class="goal-add" type="button" onclick="renderAnnualReview()">📊 年度回顾</button><button class="goal-add" type="button" onclick="renderReviewHistory()">📚 历史回顾</button></div></div>`;
   };
-
-  window.setGoalViewYear=function(v){v=String(v).trim();if(!/^\d{4}$/.test(v)||Number(v)<2000||Number(v)>2100)return alert('请选择有效年份');goalViewYear=v;renderGoals()};
-  window.changeGoalYear=function(d){goalViewYear=shiftYearKey166(goalViewYear,d);renderGoals()};
-
-  function goalSelectionSet(type){return type==='year'?selectedYearGoals:selectedMonthGoals}
-  function goalSelectionKey(type,g,i){return `${type}-${i}`}
-
-  function ensureGoalIds(arr){arr.forEach((g,i)=>{if(!g._gid)g._gid=`goal-${Date.now()}-${Math.random().toString(36).slice(2,8)}-${i}`})}
-  function renderGoalRowSelectable(type,g,i,arr){
-    ensureGoalIds(arr);
-    const set=goalSelectionSet(type), key=goalSelectionKey(type,g,i), checked=set.has(key);
-    const base=renderGoalRow(type,g,i,arr);
-    return `<div class="goal-select-wrap"><input class="goal-select-box" type="checkbox" ${checked?'checked':''} aria-label="选择目标" onclick="toggleGoalSelection('${type}',${i},this.checked);event.stopPropagation()">${base}</div>`;
-  }
-  window.toggleGoalSelection=function(type,i,checked){
-    const arr=arr166(type),g=arr[i];if(!g)return;ensureGoalIds(arr);const set=goalSelectionSet(type),key=goalSelectionKey(type,g,i);
-    if(checked)set.add(key);else set.delete(key);renderGoals();
+  const oldAddGoal=addGoal;
+  window.addGoal=function(type){
+    if(type==='year'){
+      const arr=yearGoals(goalViewYear);if(arr.length>=3)return alert(`${goalViewYear} 年度最多只能设置 3 个目标`);const v=prompt(`添加${goalViewYear}年度目标\n\n直接写一句话即可：`,'');if(v===null||!v.trim())return;arr.push({title:v.trim(),done:false,krs:[]});setYearGoals(goalViewYear,arr);saveGoals();renderGoals();return;
+    }
+    oldAddGoal(type);
   };
-  window.toggleAllGoalSelection=function(type){
-    const arr=arr166(type);ensureGoalIds(arr);const set=goalSelectionSet(type),keys=arr.map((g,i)=>goalSelectionKey(type,g,i));
-    const all=keys.length&&keys.every(k=>set.has(k)); if(all)keys.forEach(k=>set.delete(k)); else keys.forEach(k=>set.add(k)); renderGoals();
-  };
-  function selectedGoalIndexes(type,arr){ensureGoalIds(arr);const set=goalSelectionSet(type);return arr.map((g,i)=>set.has(goalSelectionKey(type,g,i))?i:-1).filter(i=>i>=0)}
-
-  window.shiftYearGoals=function(d){
-    const from=goalViewYear,to=shiftYearKey166(from,d),src=yearGoals(from),dst=yearGoals(to),idxs=selectedGoalIndexes('year',src);
-    if(!idxs.length)return alert('请先选择要移动的年度目标。');
-    if(dst.length+idxs.length>3)return alert(`${to} 年已有 ${dst.length} 个年度目标，无法再移动 ${idxs.length} 个目标过去（最多 3 个）。`);
-    const moving=idxs.map(i=>src[i]); const remain=src.filter((_,i)=>!idxs.includes(i));
-    setYearGoals(from,remain);setYearGoals(to,dst.concat(cloneObj(moving)));selectedYearGoals.clear();goalViewYear=to;persistGoals166();renderGoals();
-  };
-  window.shiftMonthGoals=function(d){
-    const from=viewMonth(),to=shiftMonthKey166(from,d),src=monthGoals(from),dst=monthGoals(to),idxs=selectedGoalIndexes('month',src);
-    if(!idxs.length)return alert('请先选择要移动的月度目标。');
-    if(dst.length+idxs.length>3)return alert(`${to} 已有 ${dst.length} 个月度目标，无法再移动 ${idxs.length} 个目标过去（每月最多 3 个）。`);
-    const moving=idxs.map(i=>src[i]); const remain=src.filter((_,i)=>!idxs.includes(i));
-    setMonthGoals(from,remain);setMonthGoals(to,dst.concat(cloneObj(moving)));selectedMonthGoals.clear();goalViewMonth=to;persistGoals166();renderGoals();
-  };
-
-  function arr166(type){return type==='month'?monthGoals(viewMonth()):yearGoals(goalViewYear)}
-  function save166(type,arr){if(type==='month')setMonthGoals(viewMonth(),arr);else setYearGoals(goalViewYear,arr);persistGoals166()}
-  window.addGoal=function(type){const arr=arr166(type);if(arr.length>=3)return alert(type==='month'?`${viewMonth()} 已经有 3 个月度目标`:`${goalViewYear} 年已经有 3 个年度目标`);const label=type==='year'?`${goalViewYear} 年度目标`:`${viewMonth()} 月度目标`;const v=prompt(`添加${label}\n\n直接写一句话即可：`,'');if(v===null||!v.trim())return;arr.push({title:v.trim(),done:false,krs:[]});save166(type,arr);renderGoals()};
-  window.editGoal=function(type,i){const arr=arr166(type),g=arr[i];if(!g)return;const v=prompt('修改目标：',g.title);if(v===null)return;if(!v.trim())return alert('目标不能为空');g.title=v.trim();save166(type,arr);renderGoals()};
-  window.deleteGoal=function(type,i){if(!confirm('删除这个目标？'))return;const arr=arr166(type);arr.splice(i,1);save166(type,arr);renderGoals()};
-  window.moveGoal=function(type,i,d){const arr=arr166(type),j=i+d;if(j<0||j>=arr.length)return;[arr[i],arr[j]]=[arr[j],arr[i]];save166(type,arr);renderGoals()};
-  window.toggleGoalDone=function(type,i){const arr=arr166(type),g=arr[i];if(!g)return;g.done=!g.done;save166(type,arr);renderGoals()};
-  window.addKR=function(type,i){const arr=arr166(type),g=arr[i];if(!g)return;g.krs=g.krs||[];if(g.krs.length>=3)return alert('每个目标最多 3 个 KR');const v=prompt('添加关键结果 KR：','');if(v===null||!v.trim())return;g.krs.push({title:v.trim(),done:false});save166(type,arr);renderGoals()};
-  window.editKR=function(type,i,j){const arr=arr166(type),k=arr[i]?.krs?.[j];if(!k)return;const v=prompt('修改 KR：',k.title);if(v===null)return;if(!v.trim())return alert('KR 不能为空');k.title=v.trim();save166(type,arr);renderGoals()};
-  window.deleteKR=function(type,i,j){if(!confirm('删除这个 KR？'))return;const arr=arr166(type);arr[i].krs.splice(j,1);save166(type,arr);renderGoals()};
-  window.moveKR=function(type,i,j,d){const arr=arr166(type),g=arr[i];if(!g||!Array.isArray(g.krs))return;const n=j+d;if(n<0||n>=g.krs.length)return;[g.krs[j],g.krs[n]]=[g.krs[n],g.krs[j]];save166(type,arr);renderGoals()};
-  window.toggleKR=function(type,i,j){const arr=arr166(type),k=arr[i]?.krs?.[j];if(!k)return;k.done=!k.done;save166(type,arr);renderGoals()};
-
-  /* Keep the existing navigation reset behavior, now also resetting the annual view. */
-  const nav=document.querySelector('.nav button[data-page="goals"]');
-  if(nav)nav.onclick=()=>{captureCalendarView();goalViewMonth=goalMonth();goalViewYear=CURRENT_YEAR();page='goals';selectMode=false;selected.clear();render()};
-
-  /* Add styles without changing the existing goal layout. */
-  const st=document.createElement('style');st.id='v2-166-goal-period-style';st.textContent=`
-    .goal-period-toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 10px}.goal-select-wrap{display:flex;align-items:flex-start;gap:8px}.goal-select-box{margin-top:14px;width:18px;height:18px;flex:0 0 auto}.goal-select-wrap>.goal-row{flex:1;min-width:0}
-    .goal-year-picker{display:flex;align-items:center;justify-content:center;gap:8px;margin:0 0 10px}
-    .goal-year-picker input{width:100px;text-align:center;padding:8px;border:1px solid var(--line);border-radius:9px;font-weight:700}
-  `;document.head.appendChild(st);
-
-  persistGoals166();
+  const oldFirstOpen=firstOpen;
+  window.firstOpen=function(type){return type==='year'?yearGoals(goalYear()).find(g=>!g.done):monthGoals(viewMonth()).find(g=>!g.done)};
+  saveGoals();
 })();
 </script>
 </body></html>
