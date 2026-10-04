@@ -3929,6 +3929,8 @@ html.focus-boot-pending .app>.focus-fixed-root{
     if(t.completed)t.completedAt=t.completedAt||new Date().toISOString();
     else t.completedAt=null;
   }
+  /* v2.164 fix: later multi-select handlers call setStatus from outside this IIFE. */
+  window.setStatus=setStatus;
   function reviewDefs(){return [
     {key:'both',label:'重要且紧急',test:t=>!!t.important&&!!t.urgent},
     {key:'urgent',label:'仅紧急',test:t=>!t.important&&!!t.urgent},
