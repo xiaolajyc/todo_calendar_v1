@@ -4210,4 +4210,127 @@ stAnimationFrame(()=>requestAnimationFrame(fitDesktopCalendarViewport));}
    The active calendar renderer already calculates N equal columns from real
    time-range overlap. Keeping the old observer would overwrite N-column layout. */
 </script>
+<style id="v164-final-overlap-style">
+/* v2.164 final: timed events use the calculated N-column layout. All-day items keep priority colors. */
+.event{box-sizing:border-box;overflow:hidden}
+.allday-chip{box-sizing:border-box;}
+.allday-chip.priority-0{border-left:4px solid #ff4d5d;background:linear-gradient(135deg,#fff0f2,#ffdfe4)!important}
+.allday-chip.priority-1{border-left:4px solid #8b6de8;background:linear-gradient(135deg,#f5f1ff,#e9e2ff)!important}
+.allday-chip.priority-2{border-left:4px solid #ff7a45;background:linear-gradient(135deg,#fff2ed,#ffe4d8)!important}
+.allday-chip.priority-3{border-left:4px solid #4b9cff;background:linear-gradient(135deg,#edf6ff,#dceeff)!important}
+</style>
+<script id="v164-final-overlap-n-column-fix">
+(function(){
+  if(window.__v164FinalOverlapFix)return;
+  window.__v164FinalOverlapFix=true;
+
+  function makeEventHtml(t,startHour,rowH,col,cols){
+    const s=timeMin(t.start), e=timeMin(t.end)||Math.min(s+60,1439);
+    const top=(s-startHour*60)/60*rowH;
+    const height=Math.max(28,(e-s)/60*rowH);
+    const gap=3;
+    const safeCols=Math.max(1,Number(cols)||1);
+    const safeCol=Math.max(0,Math.min(Number(col)||0,safeCols-1));
+    const width=(100-(safeCols-1)*gap)/safeCols;
+    const left=safeCol*(width+gap);
+    const k=t._key||instanceKey(t);
+    const note=t.notes?`<div class="enote">${esc(t.notes)}</div>`:'';
+    return `<div class="event bulkable priority-${priority(t)} ${t.completed?'done':''} ${t.ongoing&&!t.completed?'ongoing ':''}${selected.has(k)?'selected':''}" data-id="${esc(t._masterId||t.id)}" data-occ="${esc(t._occurrenceDate||t.date||'')}" data-key="${esc(k)}" style="top:${top}px;height:${height}px;left:calc(${left}% + 3px);width:calc(${width}% - 6px);right:auto"><b>${esc(t.title)}${recurring(t)?' 🔁':''}</b><div class="etime">${t.start}${t.end?'–'+t.end:''}</div>${note}</div>`;
+  }
+
+  function getColumns(events){
+    const items=events.map(t=>({
+      t,
+      s:timeMin(t.start),
+      e:timeMin(t.end)||Math.min(timeMin(t.start)+60,1439),
+      col:0,
+      cols:1
+    })).filter(x=>Number.isFinite(x.s)&&Number.isFinite(x.e)&&x.e>x.s);
+
+    const components=[];
+    for(const x of items){
+      let comp=components.length?components[components.length-1]:null;
+      if(!comp || comp.end<=x.s){
+        comp={items:[],end:x.e};
+        components.push(comp);
+      }else{
+        comp.end=Math.max(comp.end,x.e);
+      }
+      comp.items.push(x);
+    }
+
+    for(const comp of components){
+      const laneEnds=[];
+      for(const x of comp.items){
+        let c=0;
+        while(c<laneEnds.length && laneEnds[c]>x.s)c++;
+        x.col=c;
+        laneEnds[c]=x.e;
+      }
+
+      /* Maximum simultaneous events in this component. End points are processed
+         before start points, so 08:30–09:00 and 09:00–09:30 are NOT overlapping. */
+      const points=[];
+      for(const x of comp.items){
+        points.push([x.s,1]);
+        points.push([x.e,-1]);
+      }
+      points.sort((a,b)=>a[0]-b[0] || a[1]-b[1]);
+      let active=0,maxActive=1;
+      for(const p of points){
+        active+=p[1];
+        if(active>maxActive)maxActive=active;
+      }
+      comp.items.forEach(x=>x.cols=maxActive);
+    }
+    return items;
+  }
+
+  function finalDayColumn(d,total,startHour,rowH){
+    const ds=fmt(d);
+    const events=calendarEventsForDate(ds)
+      .filter(t=>t && t.start)
+      .sort((a,b)=>timeMin(a.start)-timeMin(b.start) || timeMin(a.end||'23:59')-timeMin(b.end||'23:59'));
+    const items=getColumns(events);
+    const html=items.map(x=>makeEventHtml(x.t,startHour,rowH,x.col,x.cols)).join('');
+    return `<div class="daycol ${selected.size?'select-mode':''}" data-date="${ds}" style="height:${total}px">${html}${ds===fmt(new Date())?nowLine(startHour,rowH):''}</div>`;
+  }
+
+  /* Keep the existing calendar structure/gestures; only replace the renderer
+     path so no later legacy function can overwrite the N-column calculation. */
+  window.eventHtml=makeEventHtml;
+  window.dayColumn=finalDayColumn;
+
+  window.renderTimeline=function(){
+    const dates=calMode==='week'?weekDates():[new Date(calDate)];
+    const startHour=0,endHour=24;
+    const rowH=64*(calMode==='week'?weekZoom:dayZoom)/100;
+    const total=(endHour-startHour)*rowH;
+    const title=calMode==='week'
+      ? `${dates[0].getMonth()+1}月${dates[0].getDate()}日 – ${dates[6].getMonth()+1}月${dates[6].getDate()}日`
+      : `${dates[0].getFullYear()}年${dates[0].getMonth()+1}月${dates[0].getDate()}日`;
+    const gridClass=calMode==='day'?'day-grid':'week-grid';
+    const dayHeads=dates.map(d=>{
+      const ds=fmt(d),wd=['一','二','三','四','五','六','日'][(d.getDay()+6)%7];
+      const allDay=expandRange(ds,ds).filter(t=>!t.start);
+      const chips=allDay.map(t=>{
+        const key=instanceKey(t),masterId=t._masterId||t.id,occ=t._occurrenceDate||t.date||ds;
+        return `<div class="allday-chip priority-${priority(t)} ${t.completed?'done ':''}${t.ongoing&&!t.completed?'ongoing ':''}" data-key="${esc(key)}" onclick="event.stopPropagation();openOccurrenceEditor(tasks.find(x=>x.id==='${esc(masterId)}'),'${esc(occ)}')">${t.ongoing&&!t.completed?'◐ ':''}${t.completed?'✓ ':''}${esc(t.title)}</div>`;
+      }).join('');
+      return `<div class="dayhead ${fmt(d)===fmt(new Date())?'today':''}${allDay.length?' has-allday':''}" data-date="${ds}">${wd}<strong>${d.getDate()}</strong>${chips?`<div class="allday-list">${chips}</div>`:''}</div>`;
+    }).join('');
+    const timeColumn=`<div class="timecol time-axis">${Array.from({length:24},(_,i)=>`<div class="timecell" style="height:${rowH}px">${String(i+startHour).padStart(2,'0')}:00</div>`).join('')}</div>`;
+    const cols=dates.map(d=>finalDayColumn(d,total,startHour,rowH)).join('');
+    const header=`<div class="dayhead"></div>${dayHeads}`;
+    const copyLabel=calMode==='week'?'复制本周':'复制当天';
+    const hint=selectMode
+      ? `选择模式 · 已选择 ${selected.size} 项 · 点击事项继续选择 · 底部批量操作`
+      : (calMode==='week'
+        ? `左右滑动查看完整一周（可横向拖动）；长按空白处创建；短按编辑；长按静止选择；长按后移动拖动`
+        : `长按空白处并上下滑动＝创建；短按＝编辑；长按静止＝批量选择；长按后移动＝拖动`);
+    $('#main').innerHTML=`<div class="calbar"><button class="navbtn" onclick="copyDay()">${copyLabel}</button><div class="caltitle">${title}</div><button class="navbtn" onclick="pasteCalendar()" ${clipboard.length?'':'disabled'}>📌 粘贴${clipboard.length?` ${clipboard.length}`:''}</button></div><div class="hint">${hint}</div><div class="timeline-wrap calendar-scroll"><div class="${gridClass}" style="--timeline-row-height:${rowH}px">${header}${timeColumn}${cols}</div></div>`;
+    attachTimelineGestures(dates,startHour,rowH);
+  };
+})();
+</script>
 </body></html>

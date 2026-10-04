@@ -1,4 +1,4 @@
-const CACHE='todo-calendar-v2.164-overlap2';
+const CACHE='todo-calendar-v2.164-overlap3';
 const ASSETS=['./','./index.html','./manifest.json','./icon-180.png','./icon-192.png','./icon-512.png'];
 self.addEventListener('install',event=>event.waitUntil(
   caches.open(CACHE).then(cache=>cache.addAll(ASSETS)).then(()=>self.skipWaiting())
