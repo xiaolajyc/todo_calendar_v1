@@ -1166,11 +1166,6 @@ html,body{height:100%!important;overflow:hidden!important;overscroll-behavior:no
   }
 }
 </style>
-
-<style id="v2-163-overlap-layout">
-/* v2.163: preserve side-by-side calendar events for overlapping time ranges. */
-.timeline-wrap .event{box-sizing:border-box!important;min-width:0!important;max-width:none!important;overflow:hidden!important;}
-</style>
 </head><body><div class="app"><header class="head"><div class="headtop"><h1 id="heading"><span id="headingText">Todo</span></h1><div id="headActions"></div></div><div id="subtabs" class="tabs"></div></header><main id="main" class="content"></main><button id="fab" class="fab">+</button><div id="bulk" class="bulk hidden"></div><nav class="nav">
 <button data-page="todo" class="active"><span class="navicon todoicon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 8l1.5 1.5L12 7"/><path d="M13.5 8H17"/><path d="M8 13l1.5 1.5L12 12"/><path d="M13.5 13H17"/></svg></span><span>Todo</span></button>
 <button data-page="calendar"><span class="navicon calendaricon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="16" rx="2.5"/><path d="M7 3v4M17 3v4M3.5 9.5h17"/><path d="M7.5 13h.01M12 13h.01M16.5 13h.01M7.5 17h.01M12 17h.01M16.5 17h.01"/></svg></span><span>日历</span></button>
@@ -1851,8 +1846,8 @@ function calendarEventsForDate(ds){
   }
   return a.sort((a,b)=>timeMin(a.start)-timeMin(b.start));
 }
-function eventHtml(t,startHour,rowH){let s=timeMin(t.start),e=timeMin(t.end)||Math.min(s+60,1439),top=(s-startHour*60)/60*rowH,height=Math.max(28,(e-s)/60*rowH),k=instanceKey(t);return `<div class="event bulkable priority-${priority(t)} ${t.completed?'done':''} ${selected.has(k)?'selected':''}" data-id="${esc(t._masterId||t.id)}" data-occ="${esc(t._occurrenceDate||t.date||'')}" data-key="${esc(k)}" style="top:${top}px;height:${height}px"><b>${esc(t.title)}${recurring(t)?' 🔁':''}</b><div class="etime">${t.start}${t.end?'–'+t.end:''}</div></div>`}
-function dayColumn(d,total,startHour,rowH){let ds=fmt(d),events=calendarEventsForDate(ds);return `<div class="daycol ${selected.size?'select-mode':''}" data-date="${ds}" style="height:${total}px">${events.map(t=>eventHtml(t,startHour,rowH)).join('')}${ds===fmt(new Date())?nowLine(startHour,rowH):''}</div>`}
+function eventHtml(t,startHour,rowH,col=0,cols=1){let s=timeMin(t.start),e=timeMin(t.end)||Math.min(s+60,1439),top=(s-startHour*60)/60*rowH,height=Math.max(28,(e-s)/60*rowH),k=instanceKey(t);const gap=3,width=(100-(cols-1)*gap)/cols,left=col*(width+gap);return `<div class="event bulkable priority-${priority(t)} ${t.completed?'done':''} ${selected.has(k)?'selected':''}" data-id="${esc(t._masterId||t.id)}" data-occ="${esc(t._occurrenceDate||t.date||'')}" data-key="${esc(k)}" style="top:${top}px;height:${height}px;left:calc(${left}% + 3px);width:calc(${width}% - 6px);right:auto"><b>${esc(t.title)}${recurring(t)?' 🔁':''}</b><div class="etime">${t.start}${t.end?'–'+t.end:''}</div></div>`}
+function dayColumn(d,total,startHour,rowH){let ds=fmt(d),events=calendarEventsForDate(ds).filter(t=>t.start).sort((a,b)=>timeMin(a.start)-timeMin(b.start)||timeMin(a.end||'23:59')-timeMin(b.end||'23:59'));const groups=[];events.forEach(t=>{const s=timeMin(t.start),e=timeMin(t.end)||Math.min(s+60,1439);let g=groups.find(g=>g.end>s);if(!g){g={items:[],end:e};groups.push(g)}else g.end=Math.max(g.end,e);let col=0;while(g.items.some(x=>x.col===col&&x.e>s))col++;g.items.push({t,s,e,col});});groups.forEach(g=>{let points=[];g.items.forEach(x=>{points.push([x.s,1]);points.push([x.e,-1])});points.sort((a,b)=>a[0]-b[0]||a[1]-b[1]);let n=0,max=0;points.forEach(p=>{n+=p[1];max=Math.max(max,n)});g.items.forEach(x=>x.cols=max)});const html=groups.flatMap(g=>g.items).map(x=>eventHtml(x.t,startHour,rowH,x.col,x.cols)).join('');return `<div class="daycol ${selected.size?'select-mode':''}" data-date="${ds}" style="height:${total}px">${html}${ds===fmt(new Date())?nowLine(startHour,rowH):''}</div>`}
 
 function openOccurrenceEditor(master,occDate){if(!recurring(master))return editTask(master.id);const choice=prompt('这是重复事项，请选择操作：\n1 = 仅此事项\n2 = 此事项及以后\n3 = 整个系列','1');if(choice==='1'||choice==='2'||choice==='3'){editingOccurrence={masterId:master.id,date:occDate,mode:Number(choice)};editTask(master.id);} }
 function openOccurrenceDelete(master,occDate){if(!recurring(master)){if(confirm('删除此事项？')){tasks=tasks.filter(x=>x.id!==master.id);save();render()}return}const c=prompt('删除重复事项：\n1 = 仅此事项\n2 = 此事项及以后\n3 = 整个系列','1');if(!['1','2','3'].includes(c))return;if(c==='1'){const ex=ensureRec(master);if(!ex.deleted.includes(occDate))ex.deleted.push(occDate);}else if(c==='2'){truncateSeries(master,occDate);}else tasks=tasks.filter(x=>x.id!==master.id);save();render();}
@@ -2577,45 +2572,31 @@ body.todo-priority-today .today-priority-group.p2 .check{border-color:#f0a07a}
   document.head.appendChild(style);
 })();
 
-/* v2.74: robust calendar overlap layout + note display. */
+/* v2.163: restore robust side-by-side layout for overlapping calendar events. */
 function eventHtml(t,startHour,rowH,col=0,cols=1){
   const s=timeMin(t.start), e=timeMin(t.end)||Math.min(s+60,1439);
   const top=(s-startHour*60)/60*rowH, height=Math.max(28,(e-s)/60*rowH);
-  const gap=4, width=(100-(cols-1)*gap)/cols, left=col*(width+gap);
+  const gap=3, width=(100-(cols-1)*gap)/cols, left=col*(width+gap);
   const note=t.notes?`<div class="enote">${esc(t.notes)}</div>`:'';
-  return `<div class="event bulkable priority-${priority(t)} ${t.completed?'done':''} ${selected.has(t._key||t.id)?'selected':''}" data-id="${esc(t._masterId||t.id)}" data-occ="${esc(t._occurrenceDate||t.date||'')}" data-key="${esc(t._key||instanceKey(t))}" style="top:${top}px;height:${height}px;left:calc(${left}% + 3px);width:calc(${width}% - 6px);right:auto;box-sizing:border-box;min-width:0"><b>${esc(t.title)}${recurring(t)?' 🔁':''}</b><div class="etime">${t.start}${t.end?'–'+t.end:''}</div>${note}</div>`;
+  const k=t._key||instanceKey(t);
+  return `<div class="event bulkable priority-${priority(t)} ${t.completed?'done':''} ${selected.has(k)?'selected':''}" data-id="${esc(t._masterId||t.id)}" data-occ="${esc(t._occurrenceDate||t.date||'')}" data-key="${esc(k)}" style="top:${top}px;height:${height}px;left:calc(${left}% + 3px);width:calc(${width}% - 6px);right:auto"><b>${esc(t.title)}${recurring(t)?' 🔁':''}</b><div class="etime">${t.start}${t.end?'–'+t.end:''}</div>${note}</div>`;
 }
 function dayColumn(d,total,startHour,rowH){
-  const ds=fmt(d), events=calendarEventsForDate(ds).filter(t=>t.start);
-  events.sort((a,b)=>timeMin(a.start)-timeMin(b.start)||(timeMin(a.end||'23:59')-timeMin(b.end||'23:59'))||String(a.title||'').localeCompare(String(b.title||'')));
-  const items=events.map(t=>({t,s:timeMin(t.start),e:timeMin(t.end)||Math.min(timeMin(t.start)+60,1439),col:0,cols:1}));
-
-  // Assign lanes from left to right. Events that overlap in time are always
-  // placed in different lanes, including events with exactly the same start/end.
+  const ds=fmt(d), events=calendarEventsForDate(ds).filter(t=>t.start).sort((a,b)=>timeMin(a.start)-timeMin(b.start)||(timeMin(a.end||'23:59')-timeMin(b.end||'23:59')));
   const lanes=[];
+  const items=events.map(t=>({t,s:timeMin(t.start),e:timeMin(t.end)||Math.min(timeMin(t.start)+60,1439),col:0,cols:1}));
   for(const x of items){
-    let lane=0;
-    while(lanes[lane]!==undefined && lanes[lane]>x.s) lane++;
-    x.col=lane;
-    lanes[lane]=x.e;
+    let col=0;
+    while(lanes[col]!==undefined && lanes[col]>x.s) col++;
+    x.col=col;
+    lanes[col]=x.e;
+    x.cols=1;
   }
-
-  // For each event, calculate the maximum number of simultaneously visible
-  // lanes during its own interval. This keeps parallel events visible even
-  // when a third event only overlaps part of the interval.
-  for(const x of items){
-    let max=1;
-    for(const y of items){
-      if(y===x) continue;
-      if(y.s < x.e && y.e > x.s) max=Math.max(max, Math.max(x.col,y.col)+1);
-    }
-    x.cols=max;
-  }
-
+  const maxCols=lanes.length||1;
+  items.forEach(x=>x.cols=maxCols);
   const html=items.map(x=>eventHtml(x.t,startHour,rowH,x.col,x.cols)).join('');
   return `<div class="daycol ${selected.size?'select-mode':''}" data-date="${ds}" style="height:${total}px">${html}${ds===fmt(new Date())?nowLine(startHour,rowH):''}</div>`;
-}
-</script>
+}</script>
 
 <script>
 /* V2.76 desktop usability layer */
