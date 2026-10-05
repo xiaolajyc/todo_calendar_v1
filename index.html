@@ -1592,8 +1592,8 @@ function copyOne(i){let t=tasks.find(x=>x.id===i);if(t){clipboard=[{...t,id:id()
 function removeTask(i){if(confirm('删除此事项？')){tasks=tasks.filter(t=>t.id!==i);save();render()}}
 function renderSettings(){
   /* v2.95: version information belongs in Settings, not beside the page title. */
-  const VERSION_INFO_HTML = '<div class="settings-card version-info-card"><div class="settings-title">版本信息</div><div class="settings-row"><span>Todo 日历</span><b>v2.171</b></div></div>';
-$('#subtabs').innerHTML='';$('#headActions').innerHTML='';$('#main').innerHTML=`<div class="card"><b>版本信息</b><p>Todo 日历 v2.171</p></div><div class="card"><b>每日开始时间</b><p>06:30（今天/逾期和每日刷新边界）</p></div><div class="card"><b>默认事件时长</b><p>60 分钟</p></div><div class="card"><div class="settings-data-actions"><button class="primary" onclick="exportData()">导出 JSON</button><button class="danger" onclick="clipboard=[];render()">清空复制板</button><label class="danger">导入 JSON<input type="file" accept="application/json" hidden onchange="importData(this)"></label></div></div><div class="card drive-sync-card"><b>Google Drive 云同步</b><p id="driveStatus" style="margin:7px 0;color:#718096">正在检查 Google Drive…</p><div class="row"><button class="primary" id="driveConnectBtn" onclick="driveConnect()">连接 Google Drive</button><button class="danger" id="driveDisconnectBtn" onclick="driveDisconnect()">断开</button></div><div class="row" style="margin-top:8px"><button class="primary" id="driveUploadBtn" onclick="driveUpload()">☁️ 上传/同步</button><button class="danger" id="driveDownloadBtn" onclick="driveDownload()">⬇️ 从云端恢复</button></div><label style="display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13px"><input id="driveAutoSync" type="checkbox" onchange="driveSetAutoSync(this.checked)"> 数据修改后自动同步</label><div id="driveDetail" style="font-size:11px;color:#8a94a6;margin-top:8px;line-height:1.45"></div></div><div class="card"><b>本地数据</b><p>${tasks.length} 个事项。当前数据保存在浏览器本地。</p><button class="danger" style="margin-top:8px;width:100%;color:#c62828" onclick="clearAllData()">⚠️ 清除全部数据</button></div>`}
+  const VERSION_INFO_HTML = '<div class="settings-card version-info-card"><div class="settings-title">版本信息</div><div class="settings-row"><span>Todo 日历</span><b>v2.172</b></div></div>';
+$('#subtabs').innerHTML='';$('#headActions').innerHTML='';$('#main').innerHTML=`<div class="card"><b>版本信息</b><p>Todo 日历 v2.172</p></div><div class="card"><b>每日开始时间</b><p>06:30（今天/逾期和每日刷新边界）</p></div><div class="card"><b>默认事件时长</b><p>60 分钟</p></div><div class="card"><div class="settings-data-actions"><button class="primary" onclick="exportData()">导出 JSON</button><button class="danger" onclick="clipboard=[];render()">清空复制板</button><label class="danger">导入 JSON<input type="file" accept="application/json" hidden onchange="importData(this)"></label></div></div><div class="card drive-sync-card"><b>Google Drive 云同步</b><p id="driveStatus" style="margin:7px 0;color:#718096">正在检查 Google Drive…</p><div class="row"><button class="primary" id="driveConnectBtn" onclick="driveConnect()">连接 Google Drive</button><button class="danger" id="driveDisconnectBtn" onclick="driveDisconnect()">断开</button></div><div class="row" style="margin-top:8px"><button class="primary" id="driveUploadBtn" onclick="driveUpload()">☁️ 上传/同步</button><button class="danger" id="driveDownloadBtn" onclick="driveDownload()">⬇️ 从云端恢复</button></div><label style="display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13px"><input id="driveAutoSync" type="checkbox" onchange="driveSetAutoSync(this.checked)"> 数据修改后自动同步</label><div id="driveDetail" style="font-size:11px;color:#8a94a6;margin-top:8px;line-height:1.45"></div></div><div class="card"><b>本地数据</b><p>${tasks.length} 个事项。当前数据保存在浏览器本地。</p><button class="danger" style="margin-top:8px;width:100%;color:#c62828" onclick="clearAllData()">⚠️ 清除全部数据</button></div>`}
 function clearAllData(){
   if(!confirm('第一次确认：确定要清除全部 Todo、日历事项和本地数据吗？此操作不可撤销。'))return;
   if(!confirm('第二次确认：再次确认要永久删除全部数据吗？'))return;
@@ -1603,7 +1603,7 @@ function clearAllData(){
 }
 function exportData(){
   const backup={
-    version:'2.171',
+    version:'2.172',
     tasks:cloneObj(tasks),
     goals:cloneObj(goals||{year:[],monthByKey:{}}),
     monthlyReviews:cloneObj(getReviews()),
@@ -1612,7 +1612,7 @@ function exportData(){
   };
   let a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([JSON.stringify(backup,null,2)],{type:'application/json'}));
-  a.download='todo-calendar-backup-v2.171.json';
+  a.download='todo-calendar-backup-v2.172.json';
   a.click();
   setTimeout(()=>URL.revokeObjectURL(a.href),1500)
 }
@@ -3011,7 +3011,7 @@ render=function(){
 
 <script>
 if('serviceWorker' in navigator){
-  window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=2.171',{updateViaCache:'none'}).catch(()=>{}));
+  window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=2.172',{updateViaCache:'none'}).catch(()=>{}));
 }
 </script>
 
@@ -3652,7 +3652,7 @@ body:has(.nav button[data-page="settings"].active) #main.content.focus-fixed-off
     return data.files?.sort((a,b)=>String(b.modifiedTime).localeCompare(String(a.modifiedTime)))[0]||null;
   }
   function buildBackup(){
-    return {format:'todo-calendar-drive-v1',appVersion:'2.171',tasks:cloneObj(tasks),goals:cloneObj(goals||{year:[],monthByKey:{}}),monthlyReviews:cloneObj(getReviews()),annualReviews:cloneObj(getAnnualReviews()),exportedAt:new Date().toISOString()};
+    return {format:'todo-calendar-drive-v1',appVersion:'2.172',tasks:cloneObj(tasks),goals:cloneObj(goals||{year:[],monthByKey:{}}),monthlyReviews:cloneObj(getReviews()),annualReviews:cloneObj(getAnnualReviews()),exportedAt:new Date().toISOString()};
   }
   function applyBackup(x){
     if(!x||!Array.isArray(x.tasks))throw new Error('云端文件格式不正确');
@@ -5030,4 +5030,165 @@ stAnimationFrame(()=>requestAnimationFrame(fitDesktopCalendarViewport));}
 })();
 </script>
 
+
+<script id="v2-172-recurrence-authoritative-fix">
+/* v2.172: authoritative recurrence move/delete + calendar-selection dedupe.
+   This layer fixes two accumulated regressions without changing unrelated features:
+   1) whole-series move is anchored to the OCCURRENCE the user dragged, not the series master;
+   2) this-and-future delete truncates only the selected occurrence onward;
+   3) duplicate legacy click/pointer handlers can no longer toggle selection twice. */
+(function(){
+  if(window.__v2172RecurrenceAuthoritativeFix)return;
+  window.__v2172RecurrenceAuthoritativeFix=true;
+
+  const clone=s=>s==null?s:cloneObj(s);
+  const dDelta=(a,b)=>Math.round((parseDate(b)-parseDate(a))/86400000);
+  const normRepeat=r=>{
+    const x=typeof r==='string'?{type:r}:clone(r||{type:'none'});
+    x.type=x.type||'none';
+    if(x.type==='none')return {type:'none'};
+    if(x.type!=='custom')return {type:x.type,endType:x.endType||'forever',endValue:x.endValue==null?null:x.endValue};
+    return {type:'custom',interval:Number(x.interval)||1,unit:x.unit||'day',weekdays:Array.isArray(x.weekdays)?x.weekdays.map(Number).sort((a,b)=>a-b):[],endType:x.endType||'forever',endValue:x.endValue==null?null:x.endValue};
+  };
+  const shiftClock=(v,delta)=>v?timeStr(Math.max(0,Math.min(1439,timeMin(v)+delta))):v;
+  const shiftExceptions=(ex,dayShift,minuteShift)=>{
+    const r=ensureRec({exceptions:clone(ex||{})});
+    const out={deleted:[],completed:[],overrides:{}};
+    out.deleted=(r.deleted||[]).map(d=>addDays(d,dayShift));
+    out.completed=(r.completed||[]).map(d=>addDays(d,dayShift));
+    Object.keys(r.overrides||{}).forEach(k=>{
+      const ov=clone(r.overrides[k]||{}),nk=addDays(k,dayShift);
+      if(ov.date)ov.date=addDays(ov.date,dayShift);
+      if(ov.start)ov.start=shiftClock(ov.start,minuteShift);
+      if(ov.end)ov.end=shiftClock(ov.end,minuteShift);
+      out.overrides[nk]=ov;
+    });
+    return out;
+  };
+  const stripPosition=(ov)=>{
+    if(!ov)return null;
+    const x=clone(ov);delete x.date;delete x.start;delete x.end;
+    return Object.keys(x).length?x:null;
+  };
+  const remainingCount=(master,fromDate)=>{
+    const r=normRepeat(master.repeat);
+    if(r.endType!=='count')return null;
+    const total=Math.max(0,Number(r.endValue)||0);
+    const ord=recurrenceOrdinal(master,fromDate);
+    return Math.max(0,total-ord+1);
+  };
+  const futureExceptions=(master,fromKey,dayShift,minuteShift)=>{
+    const src=ensureRec(master),before={deleted:[],completed:[],overrides:{}},future={deleted:[],completed:[],overrides:{}};
+    (src.deleted||[]).forEach(d=>(d<fromKey?before:future).deleted.push(d));
+    (src.completed||[]).forEach(d=>(d<fromKey?before:future).completed.push(d));
+    Object.keys(src.overrides||{}).forEach(k=>{
+      const ov=clone(src.overrides[k]||{});
+      if(k<fromKey){before.overrides[k]=ov;return;}
+      const nk=addDays(k,dayShift);
+      if(ov.date)ov.date=addDays(ov.date,dayShift);
+      if(ov.start)ov.start=shiftClock(ov.start,minuteShift);
+      if(ov.end)ov.end=shiftClock(ov.end,minuteShift);
+      future.overrides[nk]=ov;
+    });
+    return {before,future};
+  };
+  const truncateBefore= (master,fromKey)=>{
+    const r=normRepeat(master.repeat);
+    if(r.type==='none')return;
+    if(r.endType==='count')r.endValue=String(Math.max(0,recurrenceOrdinal(master,addDays(fromKey,-1))));
+    else r.endType='date',r.endValue=addDays(fromKey,-1);
+    master.repeat=r;
+    const ex=ensureRec(master);
+    ex.deleted=(ex.deleted||[]).filter(d=>d<fromKey);
+    ex.completed=(ex.completed||[]).filter(d=>d<fromKey);
+    const keep={};Object.keys(ex.overrides||{}).forEach(k=>{if(k<fromKey)keep[k]=ex.overrides[k]});
+    ex.overrides=keep;
+  };
+
+  /* 1) The whole-series move uses the dragged occurrence as the anchor.
+        A middle occurrence is never allowed to snap the series back to its first occurrence. */
+  window.moveOccurrence=function(master,occDate,newDate,newStart,newEnd){
+    if(!master)return;
+    if(!recurring(master)){
+      master.date=newDate;master.start=newStart;master.end=newEnd;save();return;
+    }
+    const anchor=occurrenceData(master,occDate);
+    if(!anchor)return;
+    const choice=prompt('这是重复事项，请选择拖动范围：\n1 = 仅此事项\n2 = 此事项及以后\n3 = 整个系列','1');
+    if(!['1','2','3'].includes(String(choice||'')))return;
+
+    const actualOldDate=anchor.date||occDate;
+    const actualOldStart=anchor.start||master.start||'';
+    const dayShift=dDelta(actualOldDate,newDate);
+    const minuteShift=actualOldStart&&newStart?timeMin(newStart)-timeMin(actualOldStart):0;
+
+    if(choice==='1'){
+      const ex=ensureRec(master),old=clone(ex.overrides[occDate]||{});
+      const patch={...old,date:newDate,start:newStart,end:newEnd};
+      ex.overrides[occDate]=patch;
+    }else if(choice==='2'){
+      const originalRepeat=clone(master.repeat);
+      const parts=futureExceptions(master,occDate,dayShift,minuteShift);
+      const rem=remainingCount(master,occDate);
+      truncateBefore(master,occDate);
+      const n=clone(master);n.id=id();n.date=newDate;n.start=newStart;n.end=newEnd;
+      const nr=normRepeat(originalRepeat);
+      if(nr.endType==='count'&&rem!=null)nr.endValue=String(rem);
+      else if(nr.endType==='date'&&nr.endValue)nr.endValue=addDays(nr.endValue,dayShift);
+      n.repeat=nr;n.completed=false;n.completedAt=null;n.ongoing=false;n.exceptions=parts.future;
+      const newKey=addDays(occDate,dayShift);
+      if(n.exceptions.overrides[newKey]){
+        const keep=stripPosition(n.exceptions.overrides[newKey]);
+        if(keep)n.exceptions.overrides[newKey]=keep;else delete n.exceptions.overrides[newKey];
+      }
+      tasks.push(n);
+    }else{
+      let ex=shiftExceptions(ensureRec(master),dayShift,minuteShift);
+      const newKey=addDays(occDate,dayShift);
+      if(ex.overrides[newKey]){
+        const keep=stripPosition(ex.overrides[newKey]);
+        if(keep)ex.overrides[newKey]=keep;else delete ex.overrides[newKey];
+      }
+      const mDate=master.date?addDays(master.date,dayShift):master.date;
+      const mStart=master.start?shiftClock(master.start,minuteShift):master.start;
+      const mEnd=master.end?shiftClock(master.end,minuteShift):master.end;
+      master.date=mDate;master.start=mStart;master.end=mEnd;master.exceptions=ex;
+      if(typeof master.repeat==='object'&&master.repeat.endType==='date'&&master.repeat.endValue){master.repeat.endValue=addDays(master.repeat.endValue,dayShift);}
+    }
+    save();render();
+  };
+
+  /* 2) Delete-from-this-event-forward: truncate against the recurrence occurrence key,
+        preserving every occurrence strictly before the selected one. */
+  window.openOccurrenceDelete=function(master,occDate){
+    if(!master)return;
+    if(!recurring(master)){
+      if(confirm('删除此事项？')){tasks=tasks.filter(x=>x.id!==master.id);save();render();}
+      return;
+    }
+    const c=prompt('删除重复事项：\n1 = 仅此事项\n2 = 此事项及以后\n3 = 整个系列','1');
+    if(!['1','2','3'].includes(String(c||'')))return;
+    if(c==='1'){
+      const ex=ensureRec(master);if(!ex.deleted.includes(occDate))ex.deleted.push(occDate);
+    }else if(c==='2'){
+      truncateBefore(master,occDate);
+    }else{
+      tasks=tasks.filter(x=>x.id!==master.id);
+    }
+    save();render();
+  };
+
+  /* 3) One calendar tap = one selection toggle. Legacy versions installed both
+        pointer-up and click/capture handlers; suppress only the duplicate invocation
+        of the same key inside the same gesture window. */
+  const baseToggle=window.toggleCalendarSelect;
+  let lastKey=null,lastAt=0;
+  window.toggleCalendarSelect=function(key){
+    const k=String(key||''),now=Date.now();
+    if(k&&k===lastKey&&now-lastAt<320)return;
+    lastKey=k;lastAt=now;
+    return baseToggle(k);
+  };
+})();
+</script>
 </body></html>
