@@ -1592,8 +1592,8 @@ function copyOne(i){let t=tasks.find(x=>x.id===i);if(t){clipboard=[{...t,id:id()
 function removeTask(i){if(confirm('删除此事项？')){tasks=tasks.filter(t=>t.id!==i);save();render()}}
 function renderSettings(){
   /* v2.95: version information belongs in Settings, not beside the page title. */
-  const VERSION_INFO_HTML = '<div class="settings-card version-info-card"><div class="settings-title">版本信息</div><div class="settings-row"><span>Todo 日历</span><b>v2.173</b></div></div>';
-$('#subtabs').innerHTML='';$('#headActions').innerHTML='';$('#main').innerHTML=`<div class="card"><b>版本信息</b><p>Todo 日历 v2.173</p></div><div class="card"><b>每日开始时间</b><p>06:30（今天/逾期和每日刷新边界）</p></div><div class="card"><b>默认事件时长</b><p>60 分钟</p></div><div class="card"><div class="settings-data-actions"><button class="primary" onclick="exportData()">导出 JSON</button><button class="danger" onclick="clipboard=[];render()">清空复制板</button><label class="danger">导入 JSON<input type="file" accept="application/json" hidden onchange="importData(this)"></label></div></div><div class="card drive-sync-card"><b>Google Drive 云同步</b><p id="driveStatus" style="margin:7px 0;color:#718096">正在检查 Google Drive…</p><div class="row"><button class="primary" id="driveConnectBtn" onclick="driveConnect()">连接 Google Drive</button><button class="danger" id="driveDisconnectBtn" onclick="driveDisconnect()">断开</button></div><div class="row" style="margin-top:8px"><button class="primary" id="driveUploadBtn" onclick="driveUpload()">☁️ 上传/同步</button><button class="danger" id="driveDownloadBtn" onclick="driveDownload()">⬇️ 从云端恢复</button></div><label style="display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13px"><input id="driveAutoSync" type="checkbox" onchange="driveSetAutoSync(this.checked)"> 数据修改后自动同步</label><div id="driveDetail" style="font-size:11px;color:#8a94a6;margin-top:8px;line-height:1.45"></div></div><div class="card"><b>本地数据</b><p>${tasks.length} 个事项。当前数据保存在浏览器本地。</p><button class="danger" style="margin-top:8px;width:100%;color:#c62828" onclick="clearAllData()">⚠️ 清除全部数据</button></div>`}
+  const VERSION_INFO_HTML = '<div class="settings-card version-info-card"><div class="settings-title">版本信息</div><div class="settings-row"><span>Todo 日历</span><b>v2.174</b></div></div>';
+$('#subtabs').innerHTML='';$('#headActions').innerHTML='';$('#main').innerHTML=`<div class="card"><b>版本信息</b><p>Todo 日历 v2.174</p></div><div class="card"><b>每日开始时间</b><p>06:30（今天/逾期和每日刷新边界）</p></div><div class="card"><b>默认事件时长</b><p>60 分钟</p></div><div class="card"><div class="settings-data-actions"><button class="primary" onclick="exportData()">导出 JSON</button><button class="danger" onclick="clipboard=[];render()">清空复制板</button><label class="danger">导入 JSON<input type="file" accept="application/json" hidden onchange="importData(this)"></label></div></div><div class="card drive-sync-card"><b>Google Drive 云同步</b><p id="driveStatus" style="margin:7px 0;color:#718096">正在检查 Google Drive…</p><div class="row"><button class="primary" id="driveConnectBtn" onclick="driveConnect()">连接 Google Drive</button><button class="danger" id="driveDisconnectBtn" onclick="driveDisconnect()">断开</button></div><div class="row" style="margin-top:8px"><button class="primary" id="driveUploadBtn" onclick="driveUpload()">☁️ 上传/同步</button><button class="danger" id="driveDownloadBtn" onclick="driveDownload()">⬇️ 从云端恢复</button></div><label style="display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13px"><input id="driveAutoSync" type="checkbox" onchange="driveSetAutoSync(this.checked)"> 数据修改后自动同步</label><div id="driveDetail" style="font-size:11px;color:#8a94a6;margin-top:8px;line-height:1.45"></div></div><div class="card"><b>本地数据</b><p>${tasks.length} 个事项。当前数据保存在浏览器本地。</p><button class="danger" style="margin-top:8px;width:100%;color:#c62828" onclick="clearAllData()">⚠️ 清除全部数据</button></div>`}
 function clearAllData(){
   if(!confirm('第一次确认：确定要清除全部 Todo、日历事项和本地数据吗？此操作不可撤销。'))return;
   if(!confirm('第二次确认：再次确认要永久删除全部数据吗？'))return;
@@ -1603,7 +1603,7 @@ function clearAllData(){
 }
 function exportData(){
   const backup={
-    version:'2.173',
+    version:'2.174',
     tasks:cloneObj(tasks),
     goals:cloneObj(goals||{year:[],monthByKey:{}}),
     monthlyReviews:cloneObj(getReviews()),
@@ -1612,7 +1612,7 @@ function exportData(){
   };
   let a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([JSON.stringify(backup,null,2)],{type:'application/json'}));
-  a.download='todo-calendar-backup-v2.173.json';
+  a.download='todo-calendar-backup-v2.174.json';
   a.click();
   setTimeout(()=>URL.revokeObjectURL(a.href),1500)
 }
@@ -3011,7 +3011,7 @@ render=function(){
 
 <script>
 if('serviceWorker' in navigator){
-  window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=2.173',{updateViaCache:'none'}).catch(()=>{}));
+  window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=2.174',{updateViaCache:'none'}).catch(()=>{}));
 }
 </script>
 
@@ -3652,7 +3652,7 @@ body:has(.nav button[data-page="settings"].active) #main.content.focus-fixed-off
     return data.files?.sort((a,b)=>String(b.modifiedTime).localeCompare(String(a.modifiedTime)))[0]||null;
   }
   function buildBackup(){
-    return {format:'todo-calendar-drive-v1',appVersion:'2.173',tasks:cloneObj(tasks),goals:cloneObj(goals||{year:[],monthByKey:{}}),monthlyReviews:cloneObj(getReviews()),annualReviews:cloneObj(getAnnualReviews()),exportedAt:new Date().toISOString()};
+    return {format:'todo-calendar-drive-v1',appVersion:'2.174',tasks:cloneObj(tasks),goals:cloneObj(goals||{year:[],monthByKey:{}}),monthlyReviews:cloneObj(getReviews()),annualReviews:cloneObj(getAnnualReviews()),exportedAt:new Date().toISOString()};
   }
   function applyBackup(x){
     if(!x||!Array.isArray(x.tasks))throw new Error('云端文件格式不正确');
@@ -5032,7 +5032,7 @@ stAnimationFrame(()=>requestAnimationFrame(fitDesktopCalendarViewport));}
 
 
 <script id="v2-172-recurrence-authoritative-fix">
-/* v2.173: authoritative recurrence move/delete + calendar-selection dedupe.
+/* v2.174: authoritative recurrence move/delete + calendar-selection dedupe.
    This layer fixes two accumulated regressions without changing unrelated features:
    1) whole-series move is anchored to the OCCURRENCE the user dragged, not the series master;
    2) this-and-future delete truncates only the selected occurrence onward;
@@ -5192,7 +5192,7 @@ stAnimationFrame(()=>requestAnimationFrame(fitDesktopCalendarViewport));}
 })();
 </script>
 <script id="v2-173-recurrence-delete-final">
-/* v2.173: final recurrence deletion flow.
+/* v2.174: final recurrence deletion flow.
    - A recurrence scope chosen when opening the editor is reused by Delete,
      so the user never has to choose 1/2/3 twice.
    - Delete from an occurrence uses that occurrence's original recurrence key,
@@ -5291,6 +5291,178 @@ stAnimationFrame(()=>requestAnimationFrame(fitDesktopCalendarViewport));}
     }
     runDeletePrompt(master,master.date);
   };
+})();
+</script>
+
+<script id="v2-174-recurrence-editor-scroll-final">
+/* v2.174: final recurrence delete/editor + calendar viewport preservation.
+   This layer is intentionally the last recurrence/editor authority so legacy
+   handlers cannot re-prompt or reset the calendar after a save/delete. */
+(function(){
+  if(window.__v2174Final)return;
+  window.__v2174Final=true;
+
+  let opBusyUntil=0;
+
+  function now(){return Date.now()}
+  function cloneState(st){return st?{page:st.page,mode:st.mode,date:st.date?new Date(st.date):null,left:Number(st.left)||0,top:Number(st.top)||0}:null}
+  function rememberEditorViewport(){
+    const w=document.querySelector('.timeline-wrap');
+    if(w){
+      calScroll={left:w.scrollLeft,top:w.scrollTop};
+    }
+    return cloneState(typeof editorReturnState!=='undefined'?editorReturnState:null);
+  }
+  function restoreViewport(st){
+    if(!st||st.page!=='calendar')return;
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{
+      const w=document.querySelector('.timeline-wrap');
+      if(!w)return;
+      w.scrollLeft=st.left||0;
+      w.scrollTop=st.top||0;
+      calScroll={left:w.scrollLeft,top:w.scrollTop};
+      /* A few older render wrappers apply their own viewport pass; re-apply once
+         after layout settles, but never center the calendar unless requested. */
+      setTimeout(()=>{
+        const w2=document.querySelector('.timeline-wrap');
+        if(!w2)return;
+        w2.scrollLeft=st.left||0;
+        w2.scrollTop=st.top||0;
+        calScroll={left:w2.scrollLeft,top:w2.scrollTop};
+      },60);
+    }));
+  }
+
+  function getOccCtx(){
+    try{if(typeof editingOccurrence!=='undefined'&&editingOccurrence)return editingOccurrence}catch(e){}
+    return window.__v174EditingOccurrence||null;
+  }
+  function setOccCtx(ctx){
+    window.__v174EditingOccurrence=ctx||null;
+    try{editingOccurrence=ctx||null}catch(e){}
+  }
+  function clearOccCtx(){window.__v174EditingOccurrence=null;try{editingOccurrence=null}catch(e){}}
+
+  function deleteScope(master,occDate,scope){
+    if(!master)return false;
+    if(!recurring(master)){
+      tasks=tasks.filter(x=>x.id!==master.id);
+      return true;
+    }
+    const d=occDate||master.date;
+    if(!d)return false;
+    const c=String(scope||'1');
+    if(c==='1'){
+      const ex=ensureRec(master);
+      if(!ex.deleted.includes(d))ex.deleted.push(d);
+    }else if(c==='2'){
+      if(typeof truncateSeriesClean==='function')truncateSeriesClean(master,d);
+      else if(typeof truncateBefore==='function')truncateBefore(master,d);
+      else if(typeof truncateSeries==='function')truncateSeries(master,d);
+      else return false;
+    }else if(c==='3'){
+      tasks=tasks.filter(x=>x.id!==master.id);
+    }else return false;
+    return true;
+  }
+
+  function finishRenderWithViewport(st){
+    save();
+    render();
+    restoreViewport(st);
+  }
+
+  /* One prompt when opening a recurring occurrence for editing. */
+  window.openOccurrenceEditor=function(master,occDate){
+    if(!master)return;
+    if(!recurring(master))return editTask(master.id);
+    const t=now();
+    if(t<opBusyUntil)return;
+    opBusyUntil=t+700;
+    const choice=prompt('这是重复事项，请选择操作：\n1 = 仅此事项\n2 = 此事项及以后\n3 = 整个系列','1');
+    if(!['1','2','3'].includes(String(choice||''))){opBusyUntil=0;return;}
+    const ctx={masterId:master.id,date:occDate,mode:Number(choice)};
+    setOccCtx(ctx);
+    editTask(master.id);
+  };
+
+  /* One prompt when deleting directly from a calendar/task-row occurrence. */
+  window.openOccurrenceDelete=function(master,occDate){
+    if(!master)return;
+    const view=rememberEditorViewport();
+    if(!recurring(master)){
+      if(confirm('删除此事项？')){deleteScope(master,occDate,'3');clearOccCtx();finishRenderWithViewport(view)}
+      return;
+    }
+    const t=now();
+    if(t<opBusyUntil)return;
+    opBusyUntil=t+700;
+    const choice=prompt('删除重复事项：\n1 = 仅此事项\n2 = 此事项及以后\n3 = 整个系列','1');
+    if(!['1','2','3'].includes(String(choice||''))){opBusyUntil=0;return;}
+    deleteScope(master,occDate,choice);
+    clearOccCtx();
+    finishRenderWithViewport(view);
+  };
+
+  /* Delete from the editor MUST reuse the 1/2/3 decision already made when the
+     occurrence editor opened. It must never prompt a second time. */
+  window.removeTask=function(idValue){
+    const view=rememberEditorViewport();
+    const ctx=getOccCtx();
+    let master=tasks.find(x=>x.id===idValue)||null;
+    if(ctx){
+      master=tasks.find(x=>String(x.id)===String(ctx.masterId))||master;
+      if(master&&String(master.id)===String(ctx.masterId)){
+        const ok=deleteScope(master,ctx.date,ctx.mode);
+        clearOccCtx();
+        if(ok)finishRenderWithViewport(view);
+        return;
+      }
+    }
+    if(!master){
+      const f=typeof findInstance==='function'?findInstance(idValue):null;
+      if(f){
+        if(recurring(f.master))window.openOccurrenceDelete(f.master,f.instance._occurrenceDate);
+        else if(confirm('删除此事项？')){tasks=tasks.filter(x=>x.id!==f.master.id);finishRenderWithViewport(view)}
+        return;
+      }
+      return;
+    }
+    if(recurring(master))window.openOccurrenceDelete(master,master.date);
+    else if(confirm('删除此事项？')){tasks=tasks.filter(x=>x.id!==master.id);finishRenderWithViewport(view)}
+  };
+
+  /* Keep the existing, already-correct recurrence edit/move implementation;
+     only wrap its commit so the calendar viewport survives the render(). */
+  const previousCommit=window.commit;
+  if(typeof previousCommit==='function'&&!window.__v2174CommitWrap){
+    window.__v2174CommitWrap=true;
+    window.commit=function(old,newid){
+      const view=rememberEditorViewport();
+      try{
+        return previousCommit.apply(this,arguments);
+      }finally{
+        const ctx=getOccCtx();
+        if(!document.getElementById('fTitle')){
+          /* previousCommit normally clears the occurrence context itself */
+          restoreViewport(view);
+          if(ctx)clearOccCtx();
+          setTimeout(()=>{restoreViewport(view)},100);
+        }
+      }
+    };
+  }
+
+  /* Cancel uses the historic v2.140 restoration path, with one final delayed pass. */
+  const previousCancel=window.cancelEventEditor;
+  if(typeof previousCancel==='function'&&!window.__v2174CancelWrap){
+    window.__v2174CancelWrap=true;
+    window.cancelEventEditor=function(){
+      const view=rememberEditorViewport();
+      try{return previousCancel.apply(this,arguments)}
+      finally{restoreViewport(view);setTimeout(()=>restoreViewport(view),100)}
+    };
+  }
 })();
 </script>
 </body></html>
